@@ -1,0 +1,21 @@
+[
+  { "char": "ㄱ", "name": "기역", "id": "giyeok", "ipa": "[k]", "audioFile": "giyeok.wav", "audioKind": "human-consonant-onset", "sourceWord": "귀", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-귀.wav" },
+  { "char": "ㄲ", "name": "쌍기역", "id": "ssang-giyeok", "ipa": "[k͈]", "audioFile": "ssang-giyeok.wav", "audioKind": "human-consonant-onset", "sourceWord": "꽃", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-꽃.wav" },
+  { "char": "ㄴ", "name": "니은", "id": "nieun", "ipa": "[n]", "audioFile": "nieun.wav", "audioKind": "human-consonant-onset", "sourceWord": "너", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-너.wav" },
+  { "char": "ㄷ", "name": "디귿", "id": "digeut", "ipa": "[t]", "audioFile": "digeut.wav", "audioKind": "human-consonant-onset", "sourceWord": "둘", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-둘.wav" },
+  { "char": "ㄸ", "name": "쌍디귿", "id": "ssang-digeut", "ipa": "[t͈]", "audioFile": "ssang-digeut.wav", "audioKind": "human-consonant-onset", "sourceWord": "뜨다", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-뜨다.wav" },
+  { "char": "ㄹ", "name": "리을", "id": "rieul", "ipa": "[ɾ]", "audioFile": "rieul.wav", "audioKind": "human-consonant-onset", "sourceWord": "러시아", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-러시아.wav" },
+  { "char": "ㅁ", "name": "미음", "id": "mieum", "ipa": "[m]", "audioFile": "mieum.wav", "audioKind": "human-consonant-onset", "sourceWord": "문", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-문.wav" },
+  { "char": "ㅂ", "name": "비읍", "id": "bieup", "ipa": "[p]", "audioFile": "bieup.wav", "audioKind": "human-consonant-onset", "sourceWord": "봄", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-봄.wav" },
+  { "char": "ㅃ", "name": "쌍비읍", "id": "ssang-bieup", "ipa": "[p͈]", "audioFile": "ssang-bieup.wav", "audioKind": "human-consonant-onset", "sourceWord": "뼈", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-뼈.wav" },
+  { "char": "ㅅ", "name": "시옷", "id": "siot", "ipa": "[s]", "audioFile": "siot.wav", "audioKind": "human-consonant-onset", "sourceWord": "숲", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-숲.wav" },
+  { "char": "ㅆ", "name": "쌍시옷", "id": "ssang-siot", "ipa": "[s͈]", "audioFile": "ssang-siot.wav", "audioKind": "human-consonant-onset", "sourceWord": "씨", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-씨.wav" },
+  { "char": "ㅇ", "name": "이응", "id": "ieung", "ipa": "∅ / [ŋ]", "audioFile": null, "audioKind": "silent-initial", "initialSilent": true },
+  { "char": "ㅈ", "name": "지읒", "id": "jieut", "ipa": "[tɕ]", "audioFile": "jieut.wav", "audioKind": "human-consonant-onset", "sourceWord": "쥐", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-쥐.wav" },
+  { "char": "ㅉ", "name": "쌍지읒", "id": "ssang-jieut", "ipa": "[tɕ͈]", "audioFile": "ssang-jieut.wav", "audioKind": "human-consonant-onset", "sourceWord": "찌르다", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-찌르다.wav" },
+  { "char": "ㅊ", "name": "치읓", "id": "chieut", "ipa": "[tɕʰ]", "audioFile": "chieut.wav", "audioKind": "human-consonant-onset", "sourceWord": "치즈", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-치즈.wav" },
+  { "char": "ㅋ", "name": "키읔", "id": "kieuk", "ipa": "[kʰ]", "audioFile": "kieuk.wav", "audioKind": "human-consonant-onset", "sourceWord": "코", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-코.wav" },
+  { "char": "ㅌ", "name": "티읕", "id": "tieut", "ipa": "[tʰ]", "audioFile": "tieut.wav", "audioKind": "human-consonant-onset", "sourceWord": "털", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-털.wav" },
+  { "char": "ㅍ", "name": "피읖", "id": "pieup", "ipa": "[pʰ]", "audioFile": "pieup.wav", "audioKind": "human-consonant-onset", "sourceWord": "풀", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-풀.wav" },
+  { "char": "ㅎ", "name": "히읗", "id": "hieut", "ipa": "[h]", "audioFile": "hieut.wav", "audioKind": "human-consonant-onset", "sourceWord": "해", "sourcePage": "https://commons.wikimedia.org/wiki/File:LL-Q9176_(kor)-호로조-해.wav" }
+]
