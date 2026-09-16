@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/32290240/README.md)
 # Hangul 40 · Chinese Edition
 
 Learn the 40 Hangul letters (한글 40음) as a Chinese speaker — with native-speaker
