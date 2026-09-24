@@ -1,0 +1,70 @@
+[
+  {
+    "id": "survival",
+    "name": "即刻回应线",
+    "korean": "응답선",
+    "description": "从简单回应到正式道歉，把最常开口的 8 个词打顺。",
+    "theme": "coral",
+    "wordIds": [
+      "word-yes",
+      "word-no",
+      "word-okay",
+      "word-good",
+      "word-sorry",
+      "word-thanks",
+      "word-hello",
+      "word-sorry-formal"
+    ]
+  },
+  {
+    "id": "people-places",
+    "name": "人物地点线",
+    "korean": "장소선",
+    "description": "从家人朋友到学校、公司和药店，练熟身边的人与地点。",
+    "theme": "purple",
+    "wordIds": [
+      "word-home",
+      "word-person",
+      "word-friend",
+      "word-family",
+      "word-school",
+      "word-company",
+      "word-pharmacy",
+      "word-toilet"
+    ]
+  },
+  {
+    "id": "time-travel",
+    "name": "时间出行线",
+    "korean": "이동선",
+    "description": "什么、哪里、多少，再接今天明天与公交地铁。",
+    "theme": "blue",
+    "wordIds": [
+      "word-what",
+      "word-where",
+      "word-howmuch",
+      "word-now",
+      "word-today",
+      "word-tomorrow",
+      "word-bus",
+      "word-subway"
+    ]
+  },
+  {
+    "id": "food-payment",
+    "name": "点餐支付线",
+    "korean": "주문선",
+    "description": "水、饭、咖啡、菜单和付款，一趟练完餐厅高频词。",
+    "theme": "lime",
+    "wordIds": [
+      "word-water",
+      "word-meal",
+      "word-coffee",
+      "word-menu",
+      "word-please",
+      "word-card",
+      "word-cash",
+      "word-receipt"
+    ]
+  }
+]
