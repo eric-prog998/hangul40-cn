@@ -1,12 +1,27 @@
-请先完整阅读 README.md、app/page.tsx、app/globals.css、data/ 下的 JSON，以及 tests/rendered-html.test.mjs，再修改这个项目。
+这是“韩语 40 音｜中文闯关版 v37”的可编辑源码。请先阅读 README.md、README.zh-CN.md、LEARNING_ROADMAP_ZH.md，再阅读与本次任务相关的源码和 tests/ 中的回归测试；以实际源码为准，不要按旧版说明重建项目。
 
-这是一个面向中文母语者的韩语 40 音学习网站。请保留：
-1. 19 个辅音和 21 个元音；
-2. 韩国真人辅音起音、ㅇ 初声静音和现有音频来源说明；
-3. 一次点击只播放一次声音；
-4. 答题后自动且只进入一次下一题；
-5. 1/2/3/4、A/S/D/F、空格、R、Enter、方向键等键盘操作；
-6. 单词句子背诵、五种小游戏和 localStorage 学习进度；
-7. 中文界面、手机适配和无障碍标签。
+主要模块：
+- app/page.tsx、app/globals.css：主页面与六种训练（听音、跟读、配对、拼读、极速、地铁打字）。
+- app/keyboard-logic.ts、app/korean-keyboard.tsx：韩国标准双拼键位和复合元音输入。
+- app/learning-logic.ts、app/typing-logic.ts、app/progress-ledger.ts：字块、打字与学习进度保护。
+- app/pronunciation-data.ts、app/vowel-practice.tsx、app/local-voice-recorder.tsx、app/recording-logic.ts：发音对比与本地录音。
+- app/review-logic.ts、app/review-storage.ts、app/use-daily-review.ts、app/daily-review.tsx、app/date-logic.ts：今日复习、排期、存储与跨日更新。
+- app/batchim-data.ts、app/batchim-lesson.tsx、app/batchim-lesson.css：v37 收音入门第一课。
+- data/、public/audio/、HUMAN_CONSONANT_AUDIO.md：题库、音频、来源与许可。
 
-修改前请先说明你理解的现有结构；修改后运行 npm test，并列出改动文件、测试结果和任何仍需人工检查的发音问题。不要把 API 密钥或私人信息写进源码。如果要更新现有 OpenAI Sites 网站，请保留 .openai/hosting.json 的 project_id，不要创建重复站点。
+维护约束：
+1. 保留 19 个辅音、21 个元音、中文界面、移动端适配和无障碍操作。
+2. 保留真人辅音起音、ㅇ 初声静音及收音 [ŋ] 的区别。真人起音是录音裁剪，不是完整独立发音；不要改成振荡器或用“辅音 + ㅏ”冒充。来源和 CC0 说明必须保留。
+3. 完整音节与词句包含固定 AI 示范音频，未全部经过母语教师逐条复核。保留官方资料来源，不把听辨得分、跟读完成或复习自评称为发音准确度，不添加未经授权的自动发音评分。
+4. 保持音频互斥：一次操作不能产生重叠播放。对支持自动推进的练习，确保只推进一次，并在切换区域、取消或页面隐藏时清理过期播放与定时器；今日复习不自动播放下一题。
+5. 听音和拼读默认使用韩国标准双拼物理键位；例如 R 是 ㄱ，H 后接 K 是 ㅘ。保留复合元音待选确认、数字选项与传统 ASDF 模式。韩文键位模式下重播用空格/F8，不能把 R 全局绑定成重播。
+6. 保留 Enter、F2、[ / ] 等导航及各区域显示的快捷键。尊重按钮的原生 Enter/Space 和输入框的系统韩语输入法组合；地铁打字需要韩语输入法，发音对比、复习和收音课有各自按键，不应互相触发。
+7. 学习进度和复习记录保存在当前浏览器，不上传、不跨设备同步。不要随意改名、覆盖或清空既有存储键；测试使用独立本地端口，避免修改用户线上进度。
+8. 录音仅在主动点击后申请麦克风，最长 15 秒，仅存本页内存，不上传、不持久保存。保留停止、删除、切换区域和后台清理；自动测试使用模拟设备，不开启真实麦克风。
+9. v37 收音课只覆盖词尾 ㄹ、ㅁ、ㅇ 与五个现有词例，不代表七类收音、连读或复杂变音已完成，也不自动授予背熟标记或发音分数。
+10. 不将 API 密钥、访问令牌、账号隐私或本机环境文件提交到仓库。保留 LICENSE 与音频来源文档。
+
+运行环境为 Node.js >=22.13.0。修改后运行 npm run lint 与 npm test，报告改动文件、测试结果和仍需人工检查的发音问题。
+
+现有网站：https://hangul40-cn-eric0716.ericlll1.chatgpt.site/
+更新 GitHub 源码不等于部署网站。只执行用户明确要求的操作；若要求部署，沿用 .openai/hosting.json 的现有 project_id，不创建重复站点。

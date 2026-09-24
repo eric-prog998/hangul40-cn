@@ -12,11 +12,17 @@ of Korean pronunciation recordings by the native Korean speaker **호로조
 
 Each original is a 48 kHz, mono, 16-bit PCM WAV. The published clip keeps the
 real release burst, friction, aspiration, nasal murmur, or tongue tap. The full
-vowel and the rest of the source word are removed. A maximum of 35 ms of the
-voice-onset transition is retained and faded out so the result keeps the
-speaker's real articulation without playing a complete vowel or syllable.
-The crop has a 4 ms raised-cosine fade-in, an 18 ms fade-out, an 8 ms silent
-tail, and peak normalization only; no synthetic sound is mixed in.
+vowel and the rest of the source word are removed. Crop boundaries, fades,
+silent tails, and peak targets are tuned per clip where needed so the speaker's
+real articulation remains audible without playing a complete vowel or
+syllable. Defaults are a 4 ms raised-cosine fade-in, an 18 ms fade-out, an 8 ms
+silent tail, and 90% peak normalization; no synthetic sound is mixed in.
+
+In v14, `ㄹ`, `ㄸ`, and `ㄲ` use new excerpts from `라오스`, `따르다`, and
+`까다` by the same speaker. Their longer 75/87/87 ms clips retain more of the
+real tongue-tap or pre-release closure, apply a gentler 25/24/24 ms fade-out,
+and use a 26000 peak target. The extra time is not a repeated sound or a hidden
+`ㅏ` syllable.
 
 These clips are best described as **human consonant onsets**, not as complete
 independent utterances. Korean stops and the initial tap `ㄹ` cannot be
