@@ -80,6 +80,12 @@ npm test
 
 只覆盖三类词尾认读，不代表七类收音、连读或复杂变音课程已完成。现有 AI 音频尚未新增母语教师逐条复核。
 
-## 许可
+## 许可与版权
 
-项目代码沿用 [MIT License](LICENSE)。真人辅音起音的源录音采用 CC0 1.0，来源、裁剪方式和限制见 [HUMAN_CONSONANT_AUDIO.md](HUMAN_CONSONANT_AUDIO.md) 与 `data/consonant-human-clips.json`；不要把这些真人起音与项目中的 AI 完整音节、词句示范混为一谈。
+Copyright © 2026 **Eric D**. All rights reserved.
+
+本项目当前版本采用 [Eric D Personal Use License](LICENSE)：你可以下载、运行，并为**个人、非商业用途**在本地修改；未经 Eric D 书面许可，不得重新发布、镜像、共享源码或构建产物，不得分发修改版，不得改名/换品牌后发布或出售，也不得用于商业用途。本项目属于**源码公开（source-available）**，不是 OSI 意义上的开源软件。
+
+真人辅音起音的源录音采用 **CC0 1.0**，不受上述个人使用许可限制；来源、裁剪方式和限制见 [HUMAN_CONSONANT_AUDIO.md](HUMAN_CONSONANT_AUDIO.md) 与 `data/consonant-human-clips.json`。其他第三方材料仍遵循各自的许可条款。
+
+> 历史版本曾以 MIT License 发布；已经在旧许可证下取得的旧版本，其既有许可权利不会因当前许可证变更而被追溯撤销。

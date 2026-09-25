@@ -1,28 +1,69 @@
-MIT License
+ERIC D PERSONAL USE LICENSE v1.0
 
-Copyright (c) 2026 DOU WEI
+Copyright (c) 2026 Eric D. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Effective date: 2026-09-25
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Personal-use permission
+
+Subject to the terms below, Eric D grants an individual a limited, non-exclusive,
+non-transferable, non-sublicensable permission to:
+
+- download and retain a copy of the Software;
+- install and run the Software on devices owned or controlled by that individual;
+- inspect the source code; and
+- make private modifications solely for that individual's own personal,
+  non-commercial use.
+
+2. Restrictions
+
+Without prior written permission from Eric D, you may not:
+
+- redistribute, publish, mirror, upload, sublicense, share, or otherwise provide
+  the Software, its source code, compiled binaries, or modified versions to
+  third parties;
+- sell, rent, license, charge for access to, bundle with a paid product or
+  service, use on behalf of a for-profit organization, or otherwise use the
+  Software for commercial advantage or monetary compensation;
+- distribute a renamed, rebranded, repackaged, or modified version of the
+  Software;
+- remove, obscure, or alter copyright, attribution, or license notices; or
+- represent the Software or a derivative work as your own original product.
+
+3. GitHub platform rights
+
+This license does not limit rights that GitHub's Terms of Service necessarily
+grant for viewing or using GitHub's built-in repository and fork functionality.
+Those platform rights do not grant any additional permission to redistribute,
+commercialize, rebrand, or otherwise use the Software outside the permissions
+stated in this license.
+
+4. Third-party material
+
+This license applies only to material for which Eric D owns or controls the
+relevant rights. Third-party material included in or referenced by the project
+remains subject to its own license or terms.
+
+In particular, the native-speaker consonant-onset recordings under
+`public/audio/consonant-human-onset/` are derived from CC0 1.0 sources and are
+not covered by this Personal Use License. See `HUMAN_CONSONANT_AUDIO.md` and
+`data/consonant-human-clips.json` for provenance and per-file details.
+
+5. Historical versions
+
+Any version or copy that was previously distributed under a different license
+remains subject to the license terms that applied to that version or copy.
+Changing the license for current and future versions does not revoke rights
+already granted under an earlier license.
+
+6. No warranty
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. TO THE MAXIMUM EXTENT
+PERMITTED BY LAW, ERIC D SHALL NOT BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+LIABILITY ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR ITS USE.
 
----
+7. Reservation of rights
 
-Note on bundled audio: the 18 native-speaker consonant onset recordings in
-public/audio/consonant-human-onset/ are derived from CC0 1.0 sources and are not
-covered by the MIT license above. See HUMAN_CONSONANT_AUDIO.md and
-data/consonant-human-clips.json for per-file provenance.
+All rights not expressly granted by this license are reserved by Eric D.
