@@ -25,9 +25,11 @@ def read_pcm16_mono(path: Path) -> tuple[int, list[int]]:
     return rate, list(struct.unpack(f"<{len(frames) // 2}h", frames))
 
 
-def raised_cosine_fades(samples: list[float], rate: int) -> None:
-    fade_in = min(len(samples), round(rate * 0.004))
-    fade_out = min(len(samples), round(rate * 0.018))
+def raised_cosine_fades(
+    samples: list[float], rate: int, fade_in_ms: float, fade_out_ms: float
+) -> None:
+    fade_in = min(len(samples), round(rate * fade_in_ms / 1000))
+    fade_out = min(len(samples), round(rate * fade_out_ms / 1000))
     for index in range(fade_in):
         samples[index] *= 0.5 - 0.5 * math.cos(math.pi * index / max(1, fade_in - 1))
     for offset in range(fade_out):
@@ -50,11 +52,15 @@ def write_clip(source: Path, output: Path, item: dict[str, object]) -> dict[str,
 
     dc_offset = sum(clip) / len(clip)
     clip = [sample - dc_offset for sample in clip]
-    raised_cosine_fades(clip, rate)
+    fade_in_ms = float(item.get("fadeInMs", 4))
+    fade_out_ms = float(item.get("fadeOutMs", 18))
+    silence_tail_ms = float(item.get("silenceTailMs", 8))
+    target_peak = float(item.get("targetPeak", 32767 * 0.90))
+    raised_cosine_fades(clip, rate, fade_in_ms, fade_out_ms)
     peak = max(abs(sample) for sample in clip)
-    gain = min(12.0, (32767 * 0.90) / max(1.0, peak))
+    gain = min(12.0, target_peak / max(1.0, peak))
     encoded = [int(max(-32768, min(32767, round(sample * gain)))) for sample in clip]
-    encoded.extend([0] * round(rate * 0.008))
+    encoded.extend([0] * round(rate * silence_tail_ms / 1000))
 
     output.parent.mkdir(parents=True, exist_ok=True)
     with wave.open(str(output), "wb") as target:

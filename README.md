@@ -1,104 +1,85 @@
-# Hangul 40 · Chinese Edition
+# 韩语 40 音｜中文闯关版 v37
 
-Learn the 40 Hangul letters (한글 40음) as a Chinese speaker — with native-speaker
-consonant audio, syllable-assembly drills, and five mini-games.
+面向中文学习者的韩语 40 音网页。包含真人辅音起音、元音与音节示范、听音/跟读/配对/拼读/极速游戏、生活词句闯关、键盘快捷键和本机学习进度。
 
-- **Live site:** https://hangul40-cn-eric0716.ericlll1.chatgpt.site/
-- **中文说明:** [README.zh-CN.md](README.zh-CN.md)
+现有线上网站：[韩语 40 音](https://hangul40-cn-eric0716.ericlll1.chatgpt.site/)。v37 包含地铁打字、发音对比与本地录音、今日复习和收音入门第一课；简明维护指南见 [README.zh-CN.md](README.zh-CN.md)。
 
-## Why this exists
+## 本地运行
 
-Korean-learning material for Chinese speakers is almost entirely locked inside paid,
-closed apps. There is no open dataset that pairs the 40 Hangul jamo with pronunciation
-rules, native-speaker audio, and Simplified Chinese explanations. This project is an
-attempt at that missing layer, and the data files are structured so other apps can
-reuse them.
-
-The learner it is built for is a young K-pop fan who wants to read Hangul in a week —
-not a linguistics student.
-
-## Features
-
-- Learning cards for all 19 consonants and 21 vowels.
-- **Real native-speaker consonant onsets.** 18 consonants play WAV clips recorded by a
-  Korean native speaker. `ㅇ` stays silent in onset position, as it should, and is only
-  voiced as `[ŋ]` in the coda.
-- **Syllable-assembly workshop.** Pick an onset and a vowel, hear the actual combined
-  syllable rather than a synthesised approximation.
-- Word and sentence decks with audio, plus a ten-question memory run.
-- Five mini-games: listening discrimination, shadowing, matching, syllable assembly,
-  and a 30-second speed read.
-- Weighted review of missed items, daily XP, streaks, mastery state, and a seven-day
-  history.
-- Full keyboard control — `1`–`4` / `ASDF` to answer, `Space` or `R` to replay,
-  `←` / `→` to switch games, `?` for the shortcut sheet.
-- No account and no server-side database. Progress lives in `localStorage`.
-
-## Tech stack
-
-Next.js 16 and React 19 on Vite (`vinext`), Tailwind CSS 4, Drizzle ORM, deployed to
-Cloudflare Workers. Requires Node.js `>=22.13.0`.
-
-## Layout
-
-```text
-app/
-  page.tsx                    page content, learning data, pronunciation logic, games
-  globals.css                 styling and responsive layout
-  layout.tsx                  title, description, favicon
-data/
-  consonant-names.json        consonant names, IPA, audio mapping, ㅇ silence rule
-  consonant-human-clips.json  source recordings and cut metadata for the WAV onsets
-  phrases.json                word and sentence bank
-public/audio/
-  consonant-human-onset/      18 native-speaker consonant onsets (WAV)
-  hangul-natural/             vowel and syllable audio (MP3)
-  phrases/                    word and sentence audio (MP3)
-tests/
-  rendered-html.test.mjs      regression tests for content, audio assets, advancement
-scripts/
-  extract-human-consonants.py reproducible onset extraction from the CC0 sources
-```
-
-## Local development
+需要 Node.js `>=22.13.0`。
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Tests
+## 验证
 
 ```bash
+npm run lint
 npm test
 ```
 
-`npm test` runs a production build and then checks page content, the 19 consonant
-names, the 18 native-speaker WAV files, key audio assets, auto-advancement, and the
-keyboard logic. `npm run lint` is available separately.
+`npm test` 会先完成正式 vinext 构建，再检查页面内容、题目公平性、音频资产和关键交互守卫。
 
-## Pronunciation rules that must not break
+## 项目结构
 
-These are load-bearing; a change that violates one is a regression even if tests pass:
+- `app/`：页面、样式与学习逻辑
+- `data/`：词句和辅音名称数据
+- `public/audio/`：真人辅音、音节及词句音频
+- `tests/`：构建产物、数据与回归测试
+- `.openai/hosting.json`：现有 Sites 项目配置
 
-1. One click plays exactly one sound. A shared `activeAudio` handle stops the previous
-   clip.
-2. One answer advances exactly one question.
-3. Consonant onsets come from the WAV files, never from oscillator synthesis, and never
-   from faking a bare consonant with "consonant + ㅏ".
-4. Mouse, touch, and keyboard all stay usable.
+学习进度只保存在浏览器本机，不需要注册。部署时必须沿用 `.openai/hosting.json` 指向的现有 Sites 项目，避免创建重复站点。
 
-## Audio licensing
+## v33 电脑键盘联动
 
-The 18 native-speaker consonant onsets are cut from pronunciation recordings by the
-Korean native speaker 호로조 (Jeebeen), published on Wikimedia Commons / Lingua Libre
-under **CC0 1.0**. Per-file source URLs, SHA-256 hashes, and exact cut ranges are
-recorded in `data/consonant-human-clips.json`; `HUMAN_CONSONANT_AUDIO.md` documents the
-full provenance and `scripts/extract-human-consonants.py` reproduces the extraction.
+在页面顶部按 Enter 进入训练场，再按 Enter 开始。F2 返回训练场；`[` / `]` 切换六种游戏。聚焦训练场时也可用左右箭头，Tab 仍能访问所有按钮。
 
-Code is MIT licensed (see [LICENSE](LICENSE)). The CC0 audio keeps its own terms.
+听音与拼读默认使用韩国标准双拼（두벌식）键位：R → ㄱ、K → ㅏ、Shift+R → ㄲ、H 后接 K → ㅘ。字母按键按物理位置识别，因此英文或韩文输入法都可使用。遇到 ㅗ 和 ㅘ 同时在选项中，先按 H 会等待第二键；按 Enter 可确认 ㅗ，避免把复合元音的首键误判为答案。数字选项始终可用，也能切回传统 ASDF 选项模式。
 
-## Status
+韩文键位模式下 R 是 ㄱ，重播使用 Space 或 F8。地铁打字在开始前用 1–4 选线路、Enter 发车；输入框内保留正常韩语输入法组合，F8 重播，Esc 暂停。打字输入框需要系统韩语输入法。
 
-Early, and honest about it. The source published here is v13; the live site runs a
-later iteration, and there is one maintainer. Issues and pull requests are welcome.
+键盘映射和复合元音判断位于 `app/keyboard-logic.ts`，屏幕键位表位于 `app/korean-keyboard.tsx`，对应回归测试位于 `tests/keyboard.test.mjs`。
+
+## v34 回归修复
+
+- 键位表聚焦时，Enter / Space 保留原生展开与收起行为，不误启动或重播游戏。
+- 新开专项、换题、切换学习区域及鼠标/数字选择时，同步清理待选韩文前缀，避免跨题拼出旧字母。
+- 词句闯关使用数字或 ASDF 作答后，焦点留在闯关容器；Enter 真正进入下一题，Tab 到按钮时仍保留按钮自身行为。
+- 元音卡使用“基础字母 / 组合字母 / 易错音”学习标签，避免把字母构形误称为单元音或双元音；补充国立国语院依据。
+- 键位偏好沿用 v33 本机存储，不清空学习进度。移除键盘状态同步引起的 lint 错误。
+
+后续功能分析见 [中文学习路线建议](LEARNING_ROADMAP_ZH.md)。各项最新实施状态见该文档。
+
+## v35 发音对比与本地录音
+
+导航中的“发音对比”打开两组中文母语者常用练习：ㅓ/ㅗ、ㅡ/ㅜ。可在元音本音（어/오、으/우）与固定 ㄱ 的完整音节（거/고、그/구）之间切换，支持标准/慢放、A/B 试听和顺序播放。聚焦本区时，A/B 播放对应示范、空格顺序听、Esc 停止；不会触发其他游戏答题。
+
+录音仅在点击“开始录音”后申请麦克风，最长15秒。音频只存在本页内存，不上传、不写入本机存储；可回放、删除，切换对比组/形式或离开页面会清理。若浏览器不支持录音或未授权，仍可使用示范音。切到后台或开始其他学习活动时停止麦克风与回放。录音模块的自动测试采用模拟设备，不会开启真实麦克风。
+
+示范沿用现有固定 AI 完整音节音频，未新增真人录音或母语教师逐条复核；口型提示依据国立国语院官方说明。此功能不提供自动发音打分，不把听辨表现当成口音准确的证明。
+
+主要文件：`app/pronunciation-data.ts`、`app/vowel-practice.tsx`、`app/local-voice-recorder.tsx`、`app/recording-logic.ts`。跨天复习见 v36；收音入门见 v37。
+
+## v36 今日复习
+
+新增“今日复习”：使用已有 52 个词句和完整音频，先看中文回忆，再显示韩语答案。Enter 翻面，1 表示忘了，2 表示想起来了；揭晓后空格/F8 听示范，Esc 停止，F2 可返回游戏。不自动播放下一题，也不启用麦克风。
+
+每天最多完成 10 项，先到期、后新卡；同一天已评过的项目不重复计数。记住后按 1、3、7 天递进排期，忘了则明天再来。排期只是产品规则，自评不代表发音准确，也不会修改已有“背熟”标记或 XP。界面会显示下一次到期日期。
+
+复习记录按卡片分别保存在 `hangul-daily-review-v1:` 本机存储中，不上传、不跨设备同步。页面刷新、跨午夜和标签页更新会重新读取。存储不可用时允许临时练习并明确提示“仅本页有效”；坏记录不会仅因访问而被覆盖。用新的本地端口测试，避免修改用户现有网址上的进度。
+
+主要文件：`app/review-logic.ts`（排期）、`app/review-storage.ts`（保存）、`app/use-daily-review.ts`（生命周期）、`app/daily-review.tsx`（界面）。使用 `allowImportingTsExtensions` 让纯逻辑模块也能由 Node 原生 TypeScript 测试运行。
+
+## v37 收音入门第一课
+
+字块第一课与词卡拆字区现在能进入收音课。首版只覆盖词尾 ㄹ、ㅁ、ㅇ，以 물、지하철、사람、지금、영수증 五个现有完整词音频展示末尾字块、收音位置和发音提示。来源链接指向国立国语院与韩国语基础词典；保留 사람 的词典长音标记 [사ː람]，本课不考长短音。
+
+例词模式按 1–5 切换，练习模式按 1/2/3 选收音；空格或 F8 听整词，Enter 开始/下一题，Esc 停止播放和自动推进。答题后显示解释，2.4 秒后自动下一题；切换其他学习区域或页面进入后台会取消自动推进，回来可手动继续。不新增音频，不自动标记背熟，不授予发音分数。
+
+只覆盖三类词尾认读，不代表七类收音、连读或复杂变音课程已完成。现有 AI 音频尚未新增母语教师逐条复核。
+
+## 许可
+
+项目代码沿用 [MIT License](LICENSE)。真人辅音起音的源录音采用 CC0 1.0，来源、裁剪方式和限制见 [HUMAN_CONSONANT_AUDIO.md](HUMAN_CONSONANT_AUDIO.md) 与 `data/consonant-human-clips.json`；不要把这些真人起音与项目中的 AI 完整音节、词句示范混为一谈。

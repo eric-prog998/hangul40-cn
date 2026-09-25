@@ -1,0 +1,24 @@
+.batchim-lesson{width:min(1180px,calc(100% - 40px));margin:0 auto 100px;display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.6fr);gap:48px;scroll-margin-top:24px;color:var(--ink)}
+.batchim-lesson:focus-visible{outline:3px solid var(--ink);outline-offset:7px;border-radius:14px}
+.batchim-heading h2{font-size:clamp(34px,4vw,52px);line-height:1.2;letter-spacing:-.03em;margin:20px 0}
+.batchim-heading p,.batchim-explanation p,.batchim-finished p{font-size:16px;line-height:1.85;color:var(--ink-soft)}
+.batchim-heading .section-kicker{background:var(--ink);color:var(--lime)}
+.batchim-heading>a,.batchim-dictionary a,.batchim-sources a{font-size:14px;text-decoration:underline;text-underline-offset:4px}
+.batchim-workspace{min-width:0;background:var(--cream);border:1px solid var(--line);border-radius:24px;padding:24px}
+.batchim-lesson button{min-height:44px;font:inherit;font-size:14px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink);cursor:pointer}
+.batchim-lesson button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.batchim-mode-controls,.batchim-examples{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.batchim-mode-controls>span{font-size:14px;color:var(--ink-soft);margin-left:auto}
+.batchim-mode-controls button[aria-pressed=true]{background:var(--ink);color:white}
+.batchim-examples{margin:20px 0}.batchim-examples button{display:flex;align-items:center;gap:8px}.batchim-examples button[aria-pressed=true]{background:var(--lime);border-color:var(--ink)}
+.batchim-lesson kbd{font-size:12px;padding:2px 4px;border:1px solid currentColor;border-radius:4px;white-space:nowrap}
+.batchim-word{text-align:center;padding:22px 8px}.batchim-word>p{font-size:16px;margin:0}.batchim-word h3{font-size:clamp(42px,6vw,64px);line-height:1.6;margin:10px 0 20px;overflow-wrap:anywhere}.batchim-last{border-bottom:5px solid var(--coral)}
+.batchim-word button{display:inline-flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
+.batchim-explanation{background:#e5eddf;border:1px solid var(--line);border-radius:16px;padding:20px}.batchim-explanation h4{font-size:22px;margin:20px 0 8px}.batchim-explanation p{margin:8px 0}.batchim-explanation .batchim-note{font-size:14px}.batchim-result{display:block;margin-bottom:16px;font-size:16px}
+.batchim-block{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.batchim-block>span{display:grid;gap:6px;text-align:center;padding:12px 6px;background:white;border-radius:10px;font-size:14px}.batchim-block b{font-size:32px;font-weight:600}.batchim-block .batchim-final{background:var(--ink);color:white}
+.batchim-question>p{font-size:17px;text-align:center}.batchim-question>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.batchim-question button{display:flex;align-items:center;justify-content:center;gap:14px}.batchim-question strong{font-size:34px}.batchim-explanation .batchim-next{margin-top:12px;background:var(--ink);color:white}
+.batchim-dictionary{font-size:14px;color:var(--ink-soft);line-height:1.8}.batchim-dictionary a{display:inline-block;margin-left:8px}.batchim-status{min-height:28px;font-size:14px;line-height:1.8}.batchim-shortcuts{font-size:14px;line-height:1.8;padding-top:14px;border-top:1px solid var(--line);color:var(--ink-soft)}
+.batchim-sources{font-size:14px;line-height:1.8;color:var(--ink-soft)}.batchim-sources summary{cursor:pointer;min-height:40px}.batchim-finished{padding:28px 8px;text-align:center}.batchim-finished h3{font-size:26px}.batchim-finished>strong{font-size:48px}
+.phrase-batchim-link{display:inline-flex;align-items:center;min-height:44px;margin-top:8px;font-size:14px;text-decoration:underline;text-underline-offset:4px}
+@media(max-width:900px){.batchim-lesson{grid-template-columns:1fr;gap:24px}.batchim-heading h2 br{display:none}}
+@media(max-width:520px){.batchim-lesson{width:calc(100% - 28px);margin-bottom:70px}.batchim-workspace{padding:14px}.batchim-mode-controls>span{width:100%;margin:4px 0}.batchim-explanation{padding:14px}.batchim-question button{gap:8px;padding:10px 8px}.batchim-examples button{flex:1 1 auto}}
