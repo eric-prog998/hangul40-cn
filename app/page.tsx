@@ -81,13 +81,19 @@ import {
   typingErrorDistance,
   type TypingBestRecord,
 } from "./typing-logic";
-import { keyboardShortcutKey, koreanKeyInput, koreanKeyLabel, resolveKoreanChoice } from "./keyboard-logic";
+import { keyboardShortcutKey, koreanKeyInput, koreanKeyLabel, resolveKoreanChoice, keyboardSectionIndex, isImeConfirmation } from "./keyboard-logic";
 import KoreanKeyboard from "./korean-keyboard";
+import LetterKeyboardLab from "./letter-keyboard-lab";
 import VowelPractice, { type VowelPracticeHandle } from "./vowel-practice";
 import DailyReview, { type DailyReviewHandle } from "./daily-review";
 import { useDailyReview } from "./use-daily-review";
 import BatchimLesson, { type BatchimLessonHandle } from "./batchim-lesson";
 import { millisecondsUntilNextLocalMidnight } from "./date-logic";
+import LearningTools from "./learning-tools";
+import { AUTO_ADVANCE_KEY, parseAutoAdvance, type AutoAdvanceDelay } from "./learning-settings";
+import { useVowelHistory } from "./use-vowel-history";
+import { writeVowelHistory } from "./vowel-history";
+import { mergePortableProgress, parsePortableBackup, type PortableBackup } from "./portable-backup";
 
 type Letter = {
   char: string;
@@ -262,8 +268,7 @@ const blendVowelKeys = ["J", "K", "L", ";"];
 const matchKeys = ["Q", "W", "E", "R", "A", "S", "D", "F", "Z", "X", "C", "V"];
 const gameModes = ["listen", "shadow", "match", "blend", "speed", "typing"] as const;
 type GameMode = typeof gameModes[number];
-const AUTO_ADVANCE_DELAY_MS = 900;
-const APP_VERSION = "37";
+const APP_VERSION = "41";
 const KEYBOARD_MODE_KEY = "hangul-keyboard-mode-v33";
 const AUDIO_ASSET_VERSION = "21";
 const TYPING_BEST_KEY = "hangul-typing-best-v1";
@@ -940,6 +945,8 @@ export default function Home() {
   const [gameStats, setGameStats] = useState<GameStats>(emptyStats);
   const [localToday, setLocalToday] = useState("");
   const dailyReview = useDailyReview(reviewPhraseIds);
+  const vowelHistory = useVowelHistory();
+  const [autoAdvanceMs, setAutoAdvanceMs] = useState<AutoAdvanceDelay>(3000);
   const [audioSpeed, setAudioSpeed] = useState<1 | 0.82>(1);
   const [showRomanization, setShowRomanization] = useState(true);
   const [beginnerBlendCompleted, setBeginnerBlendCompleted] = useState(false);
@@ -1080,6 +1087,7 @@ export default function Home() {
   const typingAccumulatedMsRef = useRef(0);
   const typingSubmissionLockedRef = useRef(false);
   const typingCompositionRef = useRef(false);
+  const typingImeEnterRef = useRef(false);
   const typingMissedIdsRef = useRef<string[]>([]);
   const typingErrorCharactersRef = useRef(0);
   const typingCompletedCharactersRef = useRef(0);
@@ -1274,7 +1282,7 @@ export default function Home() {
     phraseQuestionTokenRef.current += 1;
     listenQuestionTokenRef.current += 1;
     blendQuestionTokenRef.current += 1;
-    cancelActiveSpeedRound("已开始词句学习，本轮极速认读已取消。");
+    cancelActiveSpeedRound("已切换学习内容，本轮极速认读已取消。");
     pauseTypingRun("已离开训练场，本次行程已暂停；返回后可继续。");
     gamePlaybackRequestRef.current += 1;
     cancelMatchInteraction();
@@ -1841,6 +1849,7 @@ export default function Home() {
     let cancelled = false;
     const frame = window.requestAnimationFrame(() => {
       if (Number(readStoredValue("hangul-audio-speed")) === 0.82) setAudioSpeed(0.82);
+      setAutoAdvanceMs(parseAutoAdvance(readStoredValue(AUTO_ADVANCE_KEY)));
       if (readStoredValue(KEYBOARD_MODE_KEY) === "shortcuts") setKeyboardInputMode("shortcuts");
       if (readStoredValue(ROMAN_HINT_KEY) === "false") setShowRomanization(false);
       if (readStoredValue(BEGINNER_BLEND_KEY) === "true") setBeginnerBlendCompleted(true);
@@ -2220,6 +2229,27 @@ export default function Home() {
     focusGameKeyboard();
   }
 
+  function navigateKeyboardSection(index: number) {
+    if (index === 1) { enterKeyboardTraining(); return; }
+    prepareReferenceActivity();
+    if (index === 3) claimPhraseActivity();
+    const id = index === 2 ? "letter-keyboard-console" : index === 3 ? "phrase-quiz-panel" : "batchim-lesson";
+    const panel = document.getElementById(id);
+    panel?.scrollIntoView({ behavior: "instant", block: "start" });
+    panel?.focus({ preventScroll: true });
+  }
+
+  function playKeyboardLetter(char: string, name: boolean) {
+    const letter = allLetters.find((item) => item.char === char);
+    if (!letter) return;
+    const consonantName = consonantNameMap.get(char);
+    setActiveSet(consonantName ? "consonants" : "vowels");
+    setLetterFilter("all");
+    setLetterLesson("all");
+    if (name && consonantName) void playLetterName(consonantName.name);
+    else void playLetterExample(letter);
+  }
+
   function clearKoreanPending() {
     koreanPendingRef.current = "";
     setKoreanPending("");
@@ -2312,29 +2342,29 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!pageVisible || !gameSectionVisible || gameAutoAdvanceCancelled || gameAudioFailed || !gameAudioReady || gameMode !== "listen" || !listenStarted || listenFinished || listenAnswer === null) return;
+    if (autoAdvanceMs === 0 || !pageVisible || !gameSectionVisible || gameAutoAdvanceCancelled || gameAudioFailed || !gameAudioReady || gameMode !== "listen" || !listenStarted || listenFinished || listenAnswer === null) return;
     const token = listenQuestionTokenRef.current;
-    const timer = window.setTimeout(() => nextListenQuestion(token), AUTO_ADVANCE_DELAY_MS);
+    const timer = window.setTimeout(() => nextListenQuestion(token), autoAdvanceMs);
     return () => window.clearTimeout(timer);
     // The answer/round state deliberately chooses the exact question-advance closure.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameAudioFailed, gameAudioReady, gameAutoAdvanceCancelled, gameMode, gameSectionVisible, listenAnswer, listenFinished, listenHearts, listenRound, listenStarted, pageVisible]);
+  }, [autoAdvanceMs, gameAudioFailed, gameAudioReady, gameAutoAdvanceCancelled, gameMode, gameSectionVisible, listenAnswer, listenFinished, listenHearts, listenRound, listenStarted, pageVisible]);
 
   useEffect(() => {
-    if (!pageVisible || !phraseSectionVisible || phraseAutoAdvanceCancelled || phraseAudioFailed || !phraseAudioReady || !phraseQuizStarted || phraseQuizFinished || phraseQuizAnswer === null) return;
+    if (autoAdvanceMs === 0 || !pageVisible || !phraseSectionVisible || phraseAutoAdvanceCancelled || phraseAudioFailed || !phraseAudioReady || !phraseQuizStarted || phraseQuizFinished || phraseQuizAnswer === null) return;
     const token = phraseQuestionTokenRef.current;
-    const timer = window.setTimeout(() => nextPhraseQuestion(token), AUTO_ADVANCE_DELAY_MS);
+    const timer = window.setTimeout(() => nextPhraseQuestion(token), autoAdvanceMs);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageVisible, phraseAudioFailed, phraseAudioReady, phraseAutoAdvanceCancelled, phraseQuizAnswer, phraseQuizFinished, phraseQuizRound, phraseQuizStarted, phraseSectionVisible]);
+  }, [autoAdvanceMs, pageVisible, phraseAudioFailed, phraseAudioReady, phraseAutoAdvanceCancelled, phraseQuizAnswer, phraseQuizFinished, phraseQuizRound, phraseQuizStarted, phraseSectionVisible]);
 
   useEffect(() => {
-    if (!pageVisible || !gameSectionVisible || gameAutoAdvanceCancelled || gameAudioFailed || !gameAudioReady || gameMode !== "blend" || blendFinished || blendFeedback === null) return;
+    if (autoAdvanceMs === 0 || !pageVisible || !gameSectionVisible || gameAutoAdvanceCancelled || gameAudioFailed || !gameAudioReady || gameMode !== "blend" || blendFinished || blendFeedback === null) return;
     const token = blendQuestionTokenRef.current;
-    const timer = window.setTimeout(() => nextBlendQuestion(token), AUTO_ADVANCE_DELAY_MS);
+    const timer = window.setTimeout(() => nextBlendQuestion(token), autoAdvanceMs);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [blendFeedback, blendFinished, blendRound, gameAudioFailed, gameAudioReady, gameAutoAdvanceCancelled, gameMode, gameSectionVisible, pageVisible]);
+  }, [autoAdvanceMs, blendFeedback, blendFinished, blendRound, gameAudioFailed, gameAudioReady, gameAutoAdvanceCancelled, gameMode, gameSectionVisible, pageVisible]);
 
   useEffect(() => {
     if (!speedRunning) return;
@@ -2380,6 +2410,13 @@ export default function Home() {
       if (event.repeat) return;
       const key = keyboardShortcutKey(event.key, event.code);
 
+      const sectionIndex = keyboardSectionIndex(event.code, event.shiftKey);
+      if (!showKeyboardHelp && sectionIndex !== null) {
+        event.preventDefault();
+        navigateKeyboardSection(sectionIndex);
+        return;
+      }
+
       if (event.key === "?") {
         event.preventDefault();
         if (showKeyboardHelp) setShowKeyboardHelp(false);
@@ -2398,7 +2435,7 @@ export default function Home() {
         return;
       }
       // Independent learning panels own their keys, never game answers.
-      if (element?.closest('[data-keyboard-scope="pronunciation"], [data-keyboard-scope="daily-review"], [data-keyboard-scope="batchim"]')) return;
+      if (element?.closest('[data-keyboard-scope="pronunciation"], [data-keyboard-scope="daily-review"], [data-keyboard-scope="batchim"], [data-keyboard-scope="letters"], [data-keyboard-scope="settings"]')) return;
       const replayKey = key === " " || event.key === "F8" || (!(keyboardZone === "games" && directKoreanKeyboard) && key === "r");
       const focusedGameTab = element?.getAttribute("role") === "tab" && element.id.startsWith("game-tab-");
       const focusedPhraseTab = element?.id === "phrase-tab-word" || element?.id === "phrase-tab-sentence";
@@ -2610,6 +2647,75 @@ export default function Home() {
     syncProgressFromStorage();
   }
 
+  function changeAutoAdvance(value: AutoAdvanceDelay, save = true) {
+    prepareReferenceActivity();
+    setAutoAdvanceMs(value);
+    if (!save) return;
+    try {
+      window.localStorage.setItem(AUTO_ADVANCE_KEY, String(value));
+      if (window.localStorage.getItem(AUTO_ADVANCE_KEY) !== String(value)) throw new Error("write failed");
+    } catch { showNotice("下一题设置仅本页有效，浏览器暂未保存。"); }
+  }
+
+  useEffect(() => {
+    const update = (event: StorageEvent) => {
+      if (event.key === AUTO_ADVANCE_KEY || event.key === null) changeAutoAdvance(parseAutoAdvance(event.newValue), false);
+    };
+    window.addEventListener("storage", update);
+    return () => window.removeEventListener("storage", update);
+  });
+
+  const backupValidation = { ...progressValidation, allowedRouteIds: typingRouteIds };
+
+  async function exportLearningBackup(): Promise<PortableBackup> {
+    if (!progressEpochReadyRef.current && !await ensureProgressEpoch(false)) throw new Error("学习进度还未能安全读取，请稍后再导出；原数据不会被覆盖。");
+    flushPendingProgressOperations();
+    syncProgressFromStorage();
+    const backup: PortableBackup = {
+      format: "hangul40-progress", version: 1, createdAt: new Date().toISOString(),
+      progress: { stats: gameStatsRef.current, mastered: masteredRef.current, masteredPhrases: masteredPhrasesRef.current },
+      reviews: dailyReview.refresh()?.records ?? dailyReview.records,
+      typing: mergeTypingBestRecords(parseTypingBestRecords(readStoredValue(TYPING_BEST_KEY), typingRouteIds), typingBestRecordsRef.current),
+      vowelHistory: vowelHistory.refresh(),
+      preferences: { autoAdvanceMs, audioSpeed, showRomanization, keyboardMode: keyboardInputMode, beginnerBlendCompleted, fullReviewCompleted },
+    };
+    return parsePortableBackup(JSON.stringify(backup), backupValidation);
+  }
+
+  async function importLearningBackup(input: PortableBackup): Promise<string> {
+    const backup = parsePortableBackup(JSON.stringify(input), backupValidation);
+    if (!navigator.locks?.request) throw new Error("当前浏览器不支持安全恢复锁。请使用 Chrome 打开本站后导入；原记录未改变。");
+    return navigator.locks.request("hangul-portable-import-v41", async () => {
+      if (!progressEpochReadyRef.current && !await ensureProgressEpoch(false)) throw new Error("暂时无法安全读取现有进度，请保留备份后重试。");
+      if (progressRollbackDetectedRef.current || !flushPendingProgressOperations()) throw new Error("现有进度尚未安全保存，暂不导入；请保留备份后重试。");
+      syncProgressFromStorage();
+      const current: ProgressSnapshot = { stats: gameStatsRef.current, mastered: masteredRef.current, masteredPhrases: masteredPhrasesRef.current };
+      const merged = mergePortableProgress(current, backup.progress, localDateKey());
+      const operations: ProgressLedgerOperation[] = [
+        { kind: "stats", delta: createProgressStatsDelta(current.stats, merged.stats, progressValidation) },
+        ...merged.mastered.filter(char => !current.mastered.includes(char)).map(key => ({ kind: "mastered" as const, key, value: true })),
+        ...merged.masteredPhrases.filter(id => !current.masteredPhrases.includes(id)).map(key => ({ kind: "masteredPhrase" as const, key, value: true })),
+      ];
+      if (!applyProgressOperations(operations)) throw new Error("当前浏览器未能保存全部学习进度，请保留备份后重试；未删除旧记录。");
+      syncProgressFromStorage();
+      const failed: string[] = [];
+      if (!dailyReview.restore(backup.reviews)) failed.push("每日复习");
+      try { writeVowelHistory(window.localStorage, backup.vowelHistory); vowelHistory.refresh(); } catch { failed.push("盲听记录"); }
+      if (!await persistTypingBestRecords(mergeTypingBestRecords(typingBestRecordsRef.current, backup.typing), false)) failed.push("打字最佳");
+      const p = backup.preferences;
+      try {
+        const beginnerCompleted = beginnerBlendCompleted || p.beginnerBlendCompleted || window.localStorage.getItem(BEGINNER_BLEND_KEY) === "true";
+        const reviewCompleted = fullReviewCompleted || p.fullReviewCompleted || window.localStorage.getItem(FULL_REVIEW_KEY) === "true";
+        const settings: Array<[string, string]> = [[AUTO_ADVANCE_KEY, String(p.autoAdvanceMs)], ["hangul-audio-speed", String(p.audioSpeed)], [ROMAN_HINT_KEY, String(p.showRomanization)], [KEYBOARD_MODE_KEY, p.keyboardMode], [BEGINNER_BLEND_KEY, String(beginnerCompleted)], [FULL_REVIEW_KEY, String(reviewCompleted)]];
+        for (const [key, value] of settings) { window.localStorage.setItem(key, value); if (window.localStorage.getItem(key) !== value) throw new Error("write failed"); }
+        setAutoAdvanceMs(p.autoAdvanceMs); setAudioSpeed(p.audioSpeed); setShowRomanization(p.showRomanization); setKeyboardInputMode(p.keyboardMode);
+        setBeginnerBlendCompleted(beginnerCompleted); setFullReviewCompleted(reviewCompleted); setFullReviewSaved(reviewCompleted);
+      } catch { failed.push("练习设置"); }
+      if (failed.length) throw new Error(`已合并部分记录，但${failed.join("、")}未能完整保存。请保留备份并重试；已保存部分不会重复累加。`);
+      return "已合并恢复到本浏览器。现有已学内容保留，经验未重复累加；可以继续学习。";
+    });
+  }
+
   function awardXp(points: number, combo = 0) {
     updateStats((current) => ({
       ...current,
@@ -2794,7 +2900,7 @@ export default function Home() {
 
   function submitTypingStop(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (typingPhaseRef.current !== "typing" || typingCompositionRef.current || typingSubmissionLockedRef.current) return;
+    if (typingPhaseRef.current !== "typing" || typingCompositionRef.current || typingImeEnterRef.current || typingSubmissionLockedRef.current) return;
     const targetIndex = typingStopIndexRef.current;
     const target = typingItems[targetIndex];
     if (!target) return;
@@ -4133,6 +4239,7 @@ export default function Home() {
           <a href="#daily-review" onClick={prepareReferenceActivity}>今日复习</a>
           <a href="#pronunciation-practice" onClick={prepareReferenceActivity}>发音对比</a>
           <a href="#learn" onClick={prepareReferenceActivity}>40 音表</a>
+          <a href="#learning-tools" onClick={prepareReferenceActivity}>设置·备份</a>
         </nav>
         <div className="topbar-actions">
           <button className="header-keyboard" type="button" onClick={openKeyboardHelp} aria-haspopup="dialog" aria-expanded={showKeyboardHelp} aria-label="打开键盘快捷键帮助"><span aria-hidden="true">⌨</span><b>快捷键</b></button>
@@ -4156,6 +4263,7 @@ export default function Home() {
               <a className="text-action" href="#daily-review" onClick={prepareReferenceActivity}>复习 10 个词句 <span aria-hidden="true">↗</span></a>
             </div>
             <p className="keyboard-entry-hint">电脑端按 <kbd>Enter</kbd> 进入训练场，再按一次开始；<kbd>F2</kbd> 随时返回训练场。</p>
+            <nav className="keyboard-section-nav" aria-label="键盘练习快速入口">{["训练场", "40 音点读", "词句闯关", "收音练习"].map((label, index) => <button key={label} type="button" onClick={() => navigateKeyboardSection(index + 1)}><kbd>Shift + {index + 1}</kbd> {label}</button>)}</nav>
             <div className="audio-source-card">
               <span className="audio-source-icon" aria-hidden="true">♪</span>
               <div><strong>韩国母语者真人起音 · 已截去完整元音</strong><p>18 个可听辅音保持精修音源；ㄹ、ㄲ、ㄸ、ㅃ 以同一裸起音原样重复两次，中间留短暂停顿，让手机也能听清。</p><small className="voice-status">正式字母名称：19 / 19 条内置音频可用</small></div>
@@ -4280,7 +4388,7 @@ export default function Home() {
                         })}
                       </div>
                       <div className="game-feedback" aria-live="polite">
-                        {listenAnswer === null ? <span>{gameAudioFailed ? "题目音频未能播放，请点“再听一次”重试；本题暂不可作答。" : gameAudioReady ? "可以作答：辅音题只播放真人裁切的起音片段；初声静音的 ㅇ 不进入盲听题。" : "请先听完整条题目音频，播放完即开放选项。"}</span> : <span className="auto-next-status">{listenAnswer === listenTarget.char ? <strong className="success">正确！+{10 + Math.min(listenCombo * 2, 10)} XP</strong> : <strong className="retry">正确答案是 {listenTarget.char}，{consonantNameMap.has(listenTarget.char) ? `真人起音目标是 ${consonantNameMap.get(listenTarget.char)?.ipa}` : `元音本音是 ${listenTarget.sample}`}。</strong>}<small>{gameAudioFailed ? "音频未能播放，已暂停自动下一题；请重播或手动继续。" : gameAutoAdvanceCancelled ? "自动推进已取消；可手动进入下一题。" : "听完反馈后自动进入下一题…"}</small></span>}
+{listenAnswer === null ? <span>{gameAudioFailed ? "题目音频未能播放，请点“再听一次”重试；本题暂不可作答。" : gameAudioReady ? "可以作答：辅音题只播放真人裁切的起音片段；初声静音的 ㅇ 不进入盲听题。" : "请先听完整条题目音频，播放完即开放选项。"}</span> : <span className="auto-next-status">{listenAnswer === listenTarget.char ? <strong className="success">正确！+{10 + Math.min(listenCombo * 2, 10)} XP</strong> : <strong className="retry">正确答案是 {listenTarget.char}，{consonantNameMap.has(listenTarget.char) ? `真人起音目标是 ${consonantNameMap.get(listenTarget.char)?.ipa}` : `元音本音是 ${listenTarget.sample}`}。</strong>}<small>{gameAudioFailed ? "音频未能播放，已暂停自动下一题；请重播或手动继续。" : autoAdvanceMs === 0 ? "自动下一题已关闭；按 Enter 继续。" : gameAutoAdvanceCancelled ? "自动推进已取消；可手动进入下一题。" : "听完反馈后自动进入下一题…"}</small></span>}
                         {listenAnswer !== null && <button type="button" onClick={() => nextListenQuestion()}>{listenRound >= 10 || listenHearts <= 0 ? "立即查看成绩" : "立即下一题 →"}</button>}
                       </div>
                     </>
@@ -4344,7 +4452,7 @@ export default function Home() {
                         <div className="blend-choice-group"><span>② 再选元音</span><div className="blend-choice-row">{blendVowelChoices.map((choice, index) => <button type="button" key={choice} disabled={blendFeedback !== null || !gameAudioReady} className={`${blendSelectedVowel === choice ? "selected" : ""} ${blendFeedback !== null && choice === blendVowel ? "correct" : ""} ${blendFeedback === "wrong" && choice === blendSelectedVowel && choice !== blendVowel ? "wrong" : ""} ${koreanPending === choice ? "keyboard-pending" : ""}`} onClick={() => selectBlendVowel(choice)}><kbd>{index + 5} / {directKoreanKeyboard ? koreanKeyLabel(choice) : blendVowelKeys[index]}</kbd><span lang="ko">{choice}</span></button>)}</div></div>
                       </div>
                       <div className="game-feedback" aria-live="polite">
-                        {blendFeedback === null ? <span>{gameAudioFailed ? "题目音节未能播放，请点上方播放按钮重试；本题暂不可作答。" : gameAudioReady ? "可以作答：两边各选一个，系统会自动合成答案；同音组合会自动跳过。" : "请先听完整条题目音频，播放完即开放两组选项。"}</span> : <span className="auto-next-status">{blendFeedback === "correct" ? <strong className="success">拼对了！{blendInitial} + {blendVowel} = {blendTarget} · +12 XP</strong> : <strong className="retry">再听：{blendInitial} + {blendVowel} 才是 {blendTarget}</strong>}<small>{gameAudioFailed ? "音节未能播放，已暂停自动下一题；请重播或手动继续。" : gameAutoAdvanceCancelled ? "自动推进已取消；可手动进入下一题。" : "听完正确音节后自动进入下一题…"}</small></span>}
+                        {blendFeedback === null ? <span>{gameAudioFailed ? "题目音节未能播放，请点上方播放按钮重试；本题暂不可作答。" : gameAudioReady ? "可以作答：两边各选一个，系统会自动合成答案；同音组合会自动跳过。" : "请先听完整条题目音频，播放完即开放两组选项。"}</span> : <span className="auto-next-status">{blendFeedback === "correct" ? <strong className="success">拼对了！{blendInitial} + {blendVowel} = {blendTarget} · +12 XP</strong> : <strong className="retry">再听：{blendInitial} + {blendVowel} 才是 {blendTarget}</strong>}<small>{gameAudioFailed ? "音节未能播放，已暂停自动下一题；请重播或手动继续。" : autoAdvanceMs === 0 ? "自动下一题已关闭；按 Enter 继续。" : gameAutoAdvanceCancelled ? "自动推进已取消；可手动进入下一题。" : "听完正确音节后自动进入下一题…"}</small></span>}
                         {blendFeedback !== null && <button type="button" onClick={() => nextBlendQuestion()}>{blendRound >= 8 ? "立即查看成绩" : "立即下一题 →"}</button>}
                       </div>
                     </>
@@ -4387,8 +4495,21 @@ export default function Home() {
                         <div className="typing-target"><span>{typingRoute.name} · 当前生活词</span><strong id="typing-target-korean" lang="ko">{typingCurrent.korean}</strong><p id="typing-target-chinese">中文：{typingCurrent.chinese}</p><button type="button" disabled={typingAudioBusy} onClick={() => void replayTypingWord()} aria-label={`播放 ${typingCurrent.korean} 的完整韩语音频`}><span aria-hidden="true">▶</span> {typingAudioBusy ? "正在播放…" : "听完整发音"}</button></div>
                         <form className="typing-form" onSubmit={submitTypingStop}>
                           <label htmlFor="typing-input">输入上方韩文</label>
-                          <input ref={typingInputRef} id="typing-input" type="text" lang="ko" inputMode="text" enterKeyHint="done" autoCapitalize="none" autoCorrect="off" autoComplete="off" spellCheck={false} disabled={typingAudioBusy} value={typingInput} aria-invalid={typingInputInvalid} aria-describedby="typing-target-korean typing-target-chinese typing-input-help" aria-errormessage={typingInputInvalid ? "typing-feedback-message" : undefined} onChange={(event) => { setTypingInput(event.target.value); if (typingInputInvalid) { setTypingInputInvalid(false); setTypingFeedback(`正在修改 ${typingCurrent.korean}；按 Enter 再确认。`); } }} onCompositionStart={() => { typingCompositionRef.current = true; }} onCompositionEnd={(event) => { typingCompositionRef.current = false; setTypingInput(event.currentTarget.value); }} onKeyDown={(event) => { if (event.key === "Enter" && (event.nativeEvent.isComposing || typingCompositionRef.current || event.keyCode === 229)) event.preventDefault(); }} />
-                          <p id="typing-input-help">请切换韩语键盘；输入法候选还没完成时，Enter 不会误提交。</p>
+                          <input ref={typingInputRef} id="typing-input" type="text" lang="ko" inputMode="text" enterKeyHint="done" autoCapitalize="none" autoCorrect="off" autoComplete="off" spellCheck={false} disabled={typingAudioBusy} value={typingInput} aria-invalid={typingInputInvalid} aria-describedby="typing-target-korean typing-target-chinese typing-input-help" aria-errormessage={typingInputInvalid ? "typing-feedback-message" : undefined}
+                            onChange={(event) => { setTypingInput(event.target.value); if (typingInputInvalid) { setTypingInputInvalid(false); setTypingFeedback(`正在修改 ${typingCurrent.korean}；按 Enter 再确认。`); } }}
+                            onCompositionStart={() => { typingCompositionRef.current = true; }}
+                            onCompositionEnd={(event) => { typingCompositionRef.current = false; setTypingInput(event.currentTarget.value); }}
+                            onKeyDown={(event) => {
+                              if (event.key !== "Enter") return;
+                              typingImeEnterRef.current = isImeConfirmation(event.nativeEvent.isComposing, event.keyCode, typingCompositionRef.current);
+                              // Let the IME commit normally; the form submit handler rejects this Enter.
+                              if (typingImeEnterRef.current) return;
+                              if (event.repeat) { event.preventDefault(); return; }
+                              if (event.shiftKey && !event.metaKey && !event.ctrlKey && !event.altKey) { event.preventDefault(); void replayTypingWord(); }
+                            }}
+                            onKeyUp={(event) => { if (event.key === "Enter") typingImeEnterRef.current = false; }}
+                            onBlur={() => { typingImeEnterRef.current = false; }} />
+                          <p id="typing-input-help">请切换 Mac 韩语输入法（두벌식）。Enter 先完成输入法组合，再按一次确认答案；组合完成后按 Shift + Enter 重播，不需要功能键。</p>
                           <button type="submit" disabled={typingAudioBusy}>{typingAudioBusy ? "请先听完发音" : "确认到站"} <kbd>Enter</kbd></button>
                         </form>
                       </div>
@@ -4402,6 +4523,8 @@ export default function Home() {
         </section>
 
         <DailyReview ref={dailyReviewRef} items={phraseItems} {...dailyReview} onPrepare={prepareReferenceActivity} playSample={playSound} />
+
+        <LearningTools autoAdvanceMs={autoAdvanceMs} onAutoAdvance={changeAutoAdvance} onPrepare={prepareReferenceActivity} onExport={exportLearningBackup} onParse={text => parsePortableBackup(text, backupValidation)} onImport={importLearningBackup} />
 
         <section className="phrase-section" id="phrases" aria-labelledby="phrases-title" onMouseDown={claimPhraseActivity} onFocusCapture={claimPhraseActivity}>
           <div className="phrase-heading">
@@ -4476,7 +4599,7 @@ export default function Home() {
                     const pickedWrong = choice.id === phraseQuizAnswer && !correct;
                     return <button type="button" key={choice.id} data-testid={`phrase-choice-${index}`} disabled={answered || !phraseAudioReady} className={`${answered && correct ? "correct" : ""} ${pickedWrong ? "wrong" : ""}`} onClick={() => answerPhraseQuiz(choice.id)}><kbd>{choiceKeyLabels[index]}</kbd><span>{choice.chinese}</span></button>;
                   })}</div>
-                  <div className="phrase-quiz-feedback" aria-live="polite">{phraseQuizAnswer === null ? <span>{phraseAudioFailed ? "音频未能播放，请用 Space、R 或上方按钮重试；本题暂不可作答。" : phraseAudioReady ? "可以作答；Space 或 R 可以重播，不扣分。" : "请先听完整条词句音频，播放完即开放选项。"}</span> : <span className="auto-next-status">{phraseQuizAnswer === phraseQuizTarget.id ? <strong>正确！+10 XP</strong> : <strong className="wrong">答案：{phraseQuizTarget.chinese}</strong>}<small>{phraseAudioFailed ? "音频未能播放，已暂停自动下一题；请重试或手动继续。" : phraseAutoAdvanceCancelled ? "自动推进已取消；返回后可手动进入下一题。" : "听完当前词句后自动进入下一题…"}</small></span>}{phraseQuizAnswer !== null && <button type="button" onClick={() => nextPhraseQuestion()}>{phraseQuizRound >= phraseQuizTotal ? "立即查看成绩" : "立即下一题 →"}</button>}</div>
+                  <div className="phrase-quiz-feedback" aria-live="polite">{phraseQuizAnswer === null ? <span>{phraseAudioFailed ? "音频未能播放，请用 Space、R 或上方按钮重试；本题暂不可作答。" : phraseAudioReady ? "可以作答；Space 或 R 可以重播，不扣分。" : "请先听完整条词句音频，播放完即开放选项。"}</span> : <span className="auto-next-status">{phraseQuizAnswer === phraseQuizTarget.id ? <strong>正确！+10 XP</strong> : <strong className="wrong">答案：{phraseQuizTarget.chinese}</strong>}<small>{phraseAudioFailed ? "音频未能播放，已暂停自动下一题；请重试或手动继续。" : autoAdvanceMs === 0 ? "自动下一题已关闭；按 Enter 继续。" : phraseAutoAdvanceCancelled ? "自动推进已取消；返回后可手动进入下一题。" : "听完当前词句后自动进入下一题…"}</small></span>}{phraseQuizAnswer !== null && <button type="button" onClick={() => nextPhraseQuestion()}>{phraseQuizRound >= phraseQuizTotal ? "立即查看成绩" : "立即下一题 →"}</button>}</div>
                 </div>
               )}
             </aside>
@@ -4488,6 +4611,7 @@ export default function Home() {
             <div><span className="section-kicker">随时查音</span><h2 id="learn-title">韩语 40 音表 · 真人起音版</h2><p>辅音卡的第二个按钮播放韩国母语者的短促起音片段，用于辨认字母，不把它说成脱离语境的唯一读音。ㅇ 作初声时本来就是静音。</p></div>
             <div className="mastery-meter" aria-label={`已标记进度 ${mastered.length} / 40`}><div><span>已标记</span><strong>{mastered.length}<small>/40</small></strong></div><div className="meter-track"><span style={{ width: `${(mastered.length / 40) * 100}%` }} /></div></div>
           </div>
+          <LetterKeyboardLab onPrepare={prepareReferenceActivity} onPlay={playKeyboardLetter} />
           <div className="letter-tabs" role="tablist" aria-label="选择字母类型">
             <button id="letter-tab-consonants" type="button" role="tab" aria-controls="letter-panel" aria-selected={activeSet === "consonants"} tabIndex={activeSet === "consonants" ? 0 : -1} onKeyDown={handleLetterTabKeyDown} onClick={() => changeActiveSet("consonants")}><span>辅音</span><strong>19</strong><small>正式名称 + 真人起音</small></button>
             <button id="letter-tab-vowels" type="button" role="tab" aria-controls="letter-panel" aria-selected={activeSet === "vowels"} tabIndex={activeSet === "vowels" ? 0 : -1} onKeyDown={handleLetterTabKeyDown} onClick={() => changeActiveSet("vowels")}><span>元音</span><strong>21</strong><small>看口型和舌位</small></button>
@@ -4526,9 +4650,9 @@ export default function Home() {
           <p className="pronunciation-note"><span className="pronunciation-note-icon" aria-hidden="true">♪</span><span className="pronunciation-note-copy"><strong>真人起音说明：</strong>18 条起音来自韩国母语者 호로조 的 CC0 原始 WAV，按声谱边界截去完整元音和词尾。ㄹ、ㄲ、ㄸ、ㅃ 的单次片段过短，因此清晰版只做“原片段 + 120ms 静音 + 同一原片段”；没有加入 ㅏ、没有拉伸，也没有合成长音。起音用于字母听辨；跟读统一使用完整音节。ㅇ 初声无声，已从盲听题排除。<a href="https://commons.wikimedia.org/wiki/Category:Lingua_Libre_pronunciation_by_%ED%98%B8%EB%A1%9C%EC%A1%B0" target="_blank" rel="noreferrer">查看真人音源</a><a href="https://www.korean.go.kr/front/onlineQna/onlineQnaView.do?mn_id=261&amp;pageIndex=1&amp;qna_seq=329921" target="_blank" rel="noreferrer">查看 ㅇ 官方说明</a></span></p>
         </section>
 
-        <VowelPractice ref={vowelPracticeRef} onPrepare={prepareReferenceActivity} playSample={playSound} speed={audioSpeed} onSpeedChange={changeAudioSpeed} />
+        <VowelPractice ref={vowelPracticeRef} onPrepare={prepareReferenceActivity} playSample={playSound} speed={audioSpeed} onSpeedChange={changeAudioSpeed} history={vowelHistory} autoAdvanceMs={autoAdvanceMs} />
 
-        <BatchimLesson ref={batchimLessonRef} items={phraseItems} onPrepare={prepareReferenceActivity} playSample={playSound} />
+        <BatchimLesson ref={batchimLessonRef} items={phraseItems} onPrepare={prepareReferenceActivity} playSample={playSound} autoAdvanceMs={autoAdvanceMs} />
 
         <section className="compare-section" id="compare" aria-labelledby="compare-title">
           <div className="compare-intro"><span className="section-kicker">易混音擂台</span><h2 id="compare-title">固定同一元音，<br />比较开头差别。</h2><p>这里固定元音 ㅏ，并按同一播放速度依次听完整音节。素材用于练习松音、紧音和送气音的相对差别；录音时长本身不作为答题线索。可把薄纸放在嘴前辅助观察气流。</p><div className="air-legend"><div><span className="dot plain" /><strong>松音</strong><small>轻、自然</small></div><div><span className="dot tense" /><strong>紧音</strong><small>喉咙绷紧</small></div><div><span className="dot air" /><strong>送气音</strong><small>通常最明显</small></div></div></div>

@@ -42,3 +42,22 @@ test("batchim keyboard and auto-advance cancel safely without changing mastery",
   assert.match(lesson, /playSample\(word\.korean\)/);
   assert.doesNotMatch(lesson, /localStorage|fetch\(|getUserMedia|setMastered|setGameStats/);
 });
+
+test("batchim replay preserves pending advancement but explicit stops and stale audio cannot resume it", async () => {
+  const lesson = await readFile(new URL("../app/batchim-lesson.tsx", import.meta.url), "utf8");
+  const stop = lesson.slice(lesson.indexOf("const stop ="), lesson.indexOf("useImperativeHandle(ref"));
+  const listen = lesson.slice(lesson.indexOf("async function listen()"), lesson.indexOf("function startQuiz()"));
+  const advance = lesson.slice(lesson.indexOf("function advance()"), lesson.indexOf("function choose("));
+  assert.match(stop, /autoAdvancePending\.current = false/);
+  assert.match(listen, /const resumeAfterReplay = mode === "quiz" && answered\.current && autoAdvancePending\.current;\s+onPrepare\(\);\s+autoAdvancePending\.current = resumeAfterReplay/);
+  assert.ok(listen.indexOf("request !== token.current") < listen.indexOf("scheduleAutoAdvance()"));
+  assert.match(listen, /result === "ended" && resumeAfterReplay[\s\S]*?scheduleAutoAdvance\(\)/);
+  assert.match(listen, /自动下一题已暂停；按 Enter 继续/);
+  assert.match(advance, /if \(mode !== "quiz" \|\| !answered\.current\) return/);
+});
+
+test("shared reference activity uses a neutral speed-round cancellation reason", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(page, /cancelActiveSpeedRound\("已切换学习内容，本轮极速认读已取消。"\)/);
+  assert.doesNotMatch(page, /已开始词句学习，本轮极速认读已取消/);
+});

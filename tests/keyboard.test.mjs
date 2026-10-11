@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { koreanKeyInput, koreanKeyLabel, resolveKoreanChoice, keyboardShortcutKey } from "../app/keyboard-logic.ts";
+import { koreanKeyInput, koreanKeyLabel, resolveKoreanChoice, keyboardShortcutKey, keyboardSectionIndex, isImeConfirmation } from "../app/keyboard-logic.ts";
 
 test("Korean physical keys work with Latin, Hangul and Process IME events", () => {
   for (const key of ["r", "R", "ㄱ", "Process", "Unidentified"]) {
@@ -43,4 +43,20 @@ test("compound-vowel prefixes never submit the shorter option early", () => {
   assert.equal(resolveKoreanChoice("ㅜ", "ㅔ", ["ㅞ", "ㅣ"]).submit, true);
   assert.equal(resolveKoreanChoice("", "ㄱ", ["ㄴ", "ㄷ"]).submit, false);
   assert.equal(resolveKoreanChoice("ㅗ", "ㄲ", ["ㄲ", "ㅘ"]).char, "ㄲ", "a new consonant discards an incomplete vowel");
+});
+
+test("section navigation uses shifted physical number keys only", () => {
+  for (let index = 1; index <= 4; index++) {
+    assert.equal(keyboardSectionIndex(`Digit${index}`, true), index);
+    assert.equal(keyboardSectionIndex(`Digit${index}`, false), null);
+  }
+  assert.equal(keyboardSectionIndex("Digit5", true), null);
+  assert.equal(keyboardSectionIndex("KeyR", true), null);
+});
+
+test("Korean IME confirmation never counts as a normal answer Enter", () => {
+  assert.equal(isImeConfirmation(true, 13, false), true);
+  assert.equal(isImeConfirmation(false, 229, false), true);
+  assert.equal(isImeConfirmation(false, 13, true), true);
+  assert.equal(isImeConfirmation(false, 13, false), false);
 });

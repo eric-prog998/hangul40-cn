@@ -81,3 +81,13 @@ export function resolveKoreanChoice(previous: string, next: string, choices: rea
   const canExtend = Object.entries(COMPOUND_VOWELS).some(([parts, value]) => parts.startsWith(char) && choices.includes(value));
   return { char, exact, canExtend, submit: exact && !canExtend };
 }
+
+/** Mac-friendly navigation without intercepting system Cmd/Option shortcuts. */
+export function keyboardSectionIndex(code: string, shiftKey: boolean) {
+  return shiftKey && /^Digit[1-4]$/.test(code) ? Number(code.slice(-1)) : null;
+}
+
+/** keyCode 229 also covers browsers reporting compositionend before keydown. */
+export function isImeConfirmation(isComposing: boolean, keyCode: number, trackedComposition: boolean) {
+  return isComposing || keyCode === 229 || trackedComposition;
+}

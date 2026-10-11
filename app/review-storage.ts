@@ -42,6 +42,26 @@ export class DailyReviewRepository {
     return this.snapshot();
   }
 
+  restore(incoming: ReviewRecords) {
+    let failed = 0;
+    for (const [id, candidate] of Object.entries(incoming)) {
+      if (!this.ids.has(id) || !parseReviewRecord(JSON.stringify(candidate), id)) { failed++; continue; }
+      try {
+        const storage = this.getStorage();
+        const stored = parseReviewRecord(storage.getItem(reviewStorageKey(id)), id);
+        const previous = [stored, this.records[id], this.unsaved[id]].filter(Boolean).sort((a, b) => b!.updatedAt - a!.updatedAt)[0];
+        const next = previous && previous.updatedAt >= candidate.updatedAt ? previous : candidate;
+        const raw = JSON.stringify(next);
+        storage.setItem(reviewStorageKey(id), raw);
+        if (storage.getItem(reviewStorageKey(id)) !== raw) throw new Error("write failed");
+        this.records[id] = next;
+        delete this.unsaved[id];
+      } catch { failed++; }
+    }
+    this.refresh();
+    return failed === 0;
+  }
+
   rate(id: string, rating: ReviewRating, displayedDay: string) {
     const now = this.now();
     const today = localDateKey(now);

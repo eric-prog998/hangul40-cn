@@ -499,7 +499,7 @@ test("renders the real Korean learning product", async () => {
 
   const html = await response.text();
   assert.match(html, /韩语 40 音｜中文闯关版/);
-  assert.match(html, /中文闯关版 · v37/);
+  assert.match(html, /中文闯关版 · v41/);
   assert.match(html, /用自己的韩文键盘作答/);
   assert.doesNotMatch(html, /v24 把零基础路线/);
   assert.match(html, /中文零基础 · 10 分钟起步/);
@@ -554,8 +554,8 @@ test("ships four complete typing lines with IME-safe mobile controls", async () 
   assert.match(page, /aria-describedby="typing-target-korean typing-target-chinese typing-input-help"/,
     "the focused typing input must expose the current Korean target and Chinese meaning");
   assert.match(page, /autoCapitalize="none" autoCorrect="off" autoComplete="off" spellCheck=\{false\}/);
-  assert.match(page, /event\.nativeEvent\.isComposing \|\| typingCompositionRef\.current \|\| event\.keyCode === 229/);
-  assert.match(page, /if \(typingPhaseRef\.current !== "typing" \|\| typingCompositionRef\.current \|\| typingSubmissionLockedRef\.current\) return/);
+  assert.match(page, /isImeConfirmation\(event\.nativeEvent\.isComposing, event\.keyCode, typingCompositionRef\.current\)/);
+  assert.match(page, /if \(typingPhaseRef\.current !== "typing" \|\| typingCompositionRef\.current \|\| typingImeEnterRef\.current \|\| typingSubmissionLockedRef\.current\) return/);
   assert.match(page, /const draft = typingInputRef\.current\?\.value \?\? typingInput/);
   assert.match(page, /typingSubmissionLockedRef\.current = true/);
   assert.match(page, /const replayToken = \+\+typingReplayTokenRef\.current/);
@@ -1061,7 +1061,7 @@ test("keeps one preferred target from every byte-identical blend group", async (
 test("versions every audio URL and evicts failed cache entries", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
 
-  assert.match(page, /const APP_VERSION = "37"/);
+  assert.match(page, /const APP_VERSION = "41"/);
   assert.match(page, /const AUDIO_ASSET_VERSION = "21"/);
   assert.match(page, /return `\$\{phraseSource\}\?v=\$\{AUDIO_ASSET_VERSION\}`/);
   assert.match(page, /\/audio\/hangul-natural\/s-\$\{syllable\.codePointAt\(0\)\?\.toString\(16\)\}\.mp3\?v=\$\{AUDIO_ASSET_VERSION\}/);
@@ -1186,11 +1186,11 @@ test("prevents ambiguous mixed-category questions and advances only after playab
   assert.doesNotMatch(page, /playSound\((listenTarget|shadowCurrent|speedTarget|card\.letter)\.sample\)/);
   assert.doesNotMatch(page, /consonant-synthetic|离线数字合成|无元音合成|合成近似/);
   assert.doesNotMatch(page, /ㅏ 组合示范|辅音 \+ ㅏ 示例/);
-  assert.match(page, /AUTO_ADVANCE_DELAY_MS/);
+  assert.match(page, /autoAdvanceMs === 0/);
   assert.match(page, /!pageVisible \|\| !gameSectionVisible \|\| gameAutoAdvanceCancelled \|\| gameAudioFailed \|\| !gameAudioReady/);
-  assert.match(page, /setTimeout\(\(\) => nextListenQuestion\(token\), AUTO_ADVANCE_DELAY_MS\)/);
-  assert.equal(page.match(/setTimeout\(\(\) => (nextListenQuestion|nextPhraseQuestion|nextBlendQuestion)\(token\), AUTO_ADVANCE_DELAY_MS\)/g)?.length, 3);
-  assert.match(page, /const AUTO_ADVANCE_DELAY_MS = 900/);
+  assert.match(page, /setTimeout\(\(\) => nextListenQuestion\(token\), autoAdvanceMs\)/);
+  assert.equal(page.match(/setTimeout\(\(\) => (nextListenQuestion|nextPhraseQuestion|nextBlendQuestion)\(token\), autoAdvanceMs\)/g)?.length, 3);
+  assert.match(page, /useState<AutoAdvanceDelay>\(3000\)/);
   assert.match(page, /const handleEnded = \(\) => finish\("ended"\)/);
   assert.match(page, /const handleError = \(\) => finish\("failed", true\)/);
   assert.doesNotMatch(page, /pickPreferredKoreanVoice|noveltyKoreanVoiceNames|SpeechSynthesisUtterance/);
@@ -1336,7 +1336,7 @@ test("v25 guards beginner flow, fair games, playback, focus, and responsive choi
     ["blendQuestionTokenRef", "blendAdvancedTokenRef", "nextBlendQuestion"],
   ]) {
     assert.match(page, new RegExp(
-      `const token = ${tokenRef}\\.current;\\s*const timer = window\\.setTimeout\\(\\(\\) => ${nextFunction}\\(token\\), AUTO_ADVANCE_DELAY_MS\\)`,
+      `const token = ${tokenRef}\\.current;\\s*const timer = window\\.setTimeout\\(\\(\\) => ${nextFunction}\\(token\\), autoAdvanceMs\\)`,
     ), `${nextFunction} auto-advance must capture the current question token in an arrow callback`);
     const nextSource = page.match(new RegExp(`function ${nextFunction}\\b[\\s\\S]*?\\n  }`))?.[0] ?? "";
     assert.match(nextSource, new RegExp(`expectedToken = ${tokenRef}\\.current`));

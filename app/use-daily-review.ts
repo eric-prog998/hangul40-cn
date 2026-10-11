@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { millisecondsUntilNextLocalMidnight } from "./date-logic";
-import { REVIEW_STORAGE_PREFIX, type ReviewRating } from "./review-logic";
+import { REVIEW_STORAGE_PREFIX, type ReviewRating, type ReviewRecords } from "./review-logic";
 import { DailyReviewRepository, type ReviewSnapshot } from "./review-storage";
 
 export function useDailyReview(ids: readonly string[]) {
@@ -49,5 +49,17 @@ export function useDailyReview(ids: readonly string[]) {
     return result;
   }, [state.today]);
 
-  return { ...state, ready, onRate };
+  const refresh = useCallback(() => {
+    const next = repository.current?.refresh();
+    if (next) setState(next);
+    return next;
+  }, []);
+
+  const restore = useCallback((records: ReviewRecords) => {
+    const controller = repository.current;
+    if (!controller) return false;
+    const ok = controller.restore(records); setState(controller.snapshot()); return ok;
+  }, []);
+
+  return { ...state, ready, onRate, refresh, restore };
 }

@@ -1,27 +1,31 @@
-这是“韩语 40 音｜中文闯关版 v37”的可编辑源码。请先阅读 README.md、README.zh-CN.md、LEARNING_ROADMAP_ZH.md，再阅读与本次任务相关的源码和 tests/ 中的回归测试；以实际源码为准，不要按旧版说明重建项目。
+这是“韩语 40 音｜中文闯关版 v41”的可编辑源码。请先阅读 README.md、README.zh-CN.md、V41-FEATURE-NOTES.md、LEARNING_ROADMAP_ZH.md，再阅读与本次任务相关的源码和 tests/ 中的回归测试；以实际源码为准，不要按旧版说明重建项目。v41 是应用版本，package.json 的 0.1.0 是私有 npm 项目的包版本；不要仅为对齐应用版本而修改它。
 
 主要模块：
 - app/page.tsx、app/globals.css：主页面与六种训练（听音、跟读、配对、拼读、极速、地铁打字）。
 - app/keyboard-logic.ts、app/korean-keyboard.tsx：韩国标准双拼键位和复合元音输入。
+- app/letter-keyboard-lab.tsx、app/letter-keyboard-lab.css：40 音点读与韩文实体键盘联动。
 - app/learning-logic.ts、app/typing-logic.ts、app/progress-ledger.ts：字块、打字与学习进度保护。
 - app/pronunciation-data.ts、app/vowel-practice.tsx、app/local-voice-recorder.tsx、app/recording-logic.ts：发音对比与本地录音。
+- app/vowel-listening-challenge.tsx、app/vowel-challenge-logic.ts：元音盲听、题目转换及本轮错题。
+- app/vowel-history.ts、app/use-vowel-history.ts：长期作答历史、去重、保留上限与错题巩固。
+- app/learning-tools.tsx、app/learning-settings.ts、app/portable-backup.ts：自动切题设置、JSON 备份界面、格式校验及合并；app/page.tsx 协调各类记录的恢复。
 - app/review-logic.ts、app/review-storage.ts、app/use-daily-review.ts、app/daily-review.tsx、app/date-logic.ts：今日复习、排期、存储与跨日更新。
-- app/batchim-data.ts、app/batchim-lesson.tsx、app/batchim-lesson.css：v37 收音入门第一课。
+- app/batchim-data.ts、app/batchim-lesson.tsx、app/batchim-lesson.css：收音入门第一课。
 - data/、public/audio/、HUMAN_CONSONANT_AUDIO.md：题库、音频、来源与许可。
 
 维护约束：
 1. 保留 19 个辅音、21 个元音、中文界面、移动端适配和无障碍操作。
 2. 保留真人辅音起音、ㅇ 初声静音及收音 [ŋ] 的区别。真人起音是录音裁剪，不是完整独立发音；不要改成振荡器或用“辅音 + ㅏ”冒充。来源和 CC0 说明必须保留。
 3. 完整音节与词句包含固定 AI 示范音频，未全部经过母语教师逐条复核。保留官方资料来源，不把听辨得分、跟读完成或复习自评称为发音准确度，不添加未经授权的自动发音评分。
-4. 保持音频互斥：一次操作不能产生重叠播放。对支持自动推进的练习，确保只推进一次，并在切换区域、取消或页面隐藏时清理过期播放与定时器；今日复习不自动播放下一题。
+4. 保持音频互斥：一次操作不能产生重叠播放。听音、拼读、词句闯关、元音盲听、收音练习统一支持手动或 2／3／5 秒自动下一题，默认 3 秒，刷新后保留；其他模式保持各自规则。推进必须只执行一次，并在切换区域、取消、设置改变或页面隐藏时清理过期播放与定时器。明确暂停后重听不能擅自恢复自动推进；音频失败时不跳题；今日复习不自动播放下一题。
 5. 听音和拼读默认使用韩国标准双拼物理键位；例如 R 是 ㄱ，H 后接 K 是 ㅘ。保留复合元音待选确认、数字选项与传统 ASDF 模式。韩文键位模式下重播用空格/F8，不能把 R 全局绑定成重播。
-6. 保留 Enter、F2、[ / ] 等导航及各区域显示的快捷键。尊重按钮的原生 Enter/Space 和输入框的系统韩语输入法组合；地铁打字需要韩语输入法，发音对比、复习和收音课有各自按键，不应互相触发。
-7. 学习进度和复习记录保存在当前浏览器，不上传、不跨设备同步。不要随意改名、覆盖或清空既有存储键；测试使用独立本地端口，避免修改用户线上进度。
+6. 保留 Enter、F2、[ / ] 及 Shift + 1／2／3／4 区域导航；输入框内不拦截区域导航。40 音点读支持韩文物理键、1.5 秒复合元音连按、1／2 辅音音源、空格／Enter 重播、Backspace 清除、Esc 停止。收音 F／A／D 对应 ㄹ／ㅁ／ㅇ；元音盲听保留 1／2 和 J／H／M／N。各区域快捷键不得互相触发，设置控件不能误触游戏。尊重按钮原生 Enter/Space 和输入框的系统韩语输入法组合；地铁打字需要韩语输入法，IME 确认 Enter 不提交，组合结束后 Shift + Enter 可重播。事件模拟或逻辑测试不能声称已验证实体 Mac 韩语输入法。
+7. 学习进度、复习记录、盲听历史和设置保存在当前浏览器，没有账号云同步；可手动导出／导入 JSON 迁移到其他设备。不要随意改名、覆盖或清空既有存储键。导入先严格检查并预览，经确认后合并：已学标记取并集，经验和累计次数取较高值，每日复习保留较新记录，作答按 ID 去重；重复导入不应重复加分。保留 Web Locks、写入回读验证、2 MB 限制、异常提示和原记录保护；恢复时其他标签页应暂停学习。备份只在本地浏览器读取，不上传，不包含录音、音频资源或进行中的题目。测试使用独立本地端口，避免修改用户线上进度。
 8. 录音仅在主动点击后申请麦克风，最长 15 秒，仅存本页内存，不上传、不持久保存。保留停止、删除、切换区域和后台清理；自动测试使用模拟设备，不开启真实麦克风。
-9. v37 收音课只覆盖词尾 ㄹ、ㅁ、ㅇ 与五个现有词例，不代表七类收音、连读或复杂变音已完成，也不自动授予背熟标记或发音分数。
-10. 不将 API 密钥、访问令牌、账号隐私或本机环境文件提交到仓库。保留 LICENSE 与音频来源文档。
+9. 收音课只覆盖词尾 ㄹ、ㅁ、ㅇ 与五个现有词例，不代表七类收音、连读或复杂变音已完成，也不自动授予背熟标记或发音分数。元音盲听每轮均衡 8 题，示范完整播放成功后才允许作答；长期历史保留最近 200 次，展示最近 20 次表现，在保留记录范围内错过的音例连续答对两次后移出待巩固。不得将这些听辨成绩当作发音评分。
+10. 不将 API 密钥、访问令牌、账号隐私、学习备份、录音或本机环境文件提交到仓库；排除构建产物、日志、node_modules 和本地重复副本。保留现有 LICENSE：Copyright (c) 2026 Eric D，代码采用 MIT；真人辅音起音的原始录音遵循 CC0 1.0，不把所有音频一概称为 MIT 或全部真人。保留 HUMAN_CONSONANT_AUDIO.md、data/consonant-human-clips.json 以及其他来源和许可说明，不擅自改变许可证。
 
-运行环境为 Node.js >=22.13.0。修改后运行 npm run lint 与 npm test，报告改动文件、测试结果和仍需人工检查的发音问题。
+运行环境为 Node.js >=22.13.0；用 npm ci 安装锁定依赖、npm run dev 本地运行，不需要为现有固定音频配置 API 密钥。当前 npm 脚本使用 POSIX 环境变量写法，Windows 可使用 WSL。修改后运行 npx tsc --noEmit、npm run lint 与 npm test（包含生产构建），并按改动范围做真实浏览器检查；报告实际执行的检查和失败项，不把源码断言或模拟设备测试冒充真实交互／真人音质验收。
 
 现有网站：https://hangul40-cn-eric0716.ericlll1.chatgpt.site/
-更新 GitHub 源码不等于部署网站。只执行用户明确要求的操作；若要求部署，沿用 .openai/hosting.json 的现有 project_id，不创建重复站点。
+更新 GitHub 源码不等于部署网站。项目采用 Vinext／Cloudflare Worker，不是可双击运行或直接上传 GitHub Pages 的纯静态页面。只执行用户明确要求的操作；若要求部署，沿用 .openai/hosting.json 的现有 project_id，不创建重复站点，不擅自改变公开范围。该配置含项目标识而非部署凭据；任何临时发布凭据都不得写入代码、文档或命令行。

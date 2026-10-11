@@ -1,0 +1,17 @@
+.letter-keyboard-lab { margin: 24px 0; padding: 22px; border: 1px solid #cac4ec; border-radius: 18px; background: #f6f5ff; scroll-margin-top: 100px; }
+.letter-keyboard-lab:focus { outline: 3px solid #7154d9; outline-offset: 4px; }
+.letter-keyboard-intro, .letter-keyboard-result { display: flex; align-items: center; gap: 20px; }
+.letter-keyboard-intro { justify-content: space-between; }
+.letter-keyboard-lab h3 { margin: 0; font-size: 1.25rem; }
+.letter-keyboard-lab p { font-size: .95rem; line-height: 1.7; color: #514b69; }
+.letter-keyboard-lab button { border: 1px solid #cbc4e3; border-radius: 10px; padding: 10px 14px; background: white; color: #342750; font: inherit; cursor: pointer; }
+.letter-keyboard-lab button[aria-pressed=true] { background: #483483; border-color: #483483; color: white; }
+.letter-keyboard-result { margin-top: 18px; }
+.letter-keyboard-result > button { min-width: 142px; display: grid; justify-items: center; gap: 6px; }
+.letter-keyboard-result strong { font-size: 3.5rem; line-height: 1.2; }
+.letter-keyboard-result > button span { font-size: .875rem; }
+.letter-keyboard-modes { display: flex; flex-wrap: wrap; gap: 8px; }
+.keyboard-section-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.keyboard-section-nav button { font: inherit; font-size: .875rem; padding: 9px 12px; border: 1px solid #cac4dc; background: white; color: #443665; border-radius: 9px; cursor: pointer; }
+.letter-key-hint { display: block; margin: 4px 0; color: #655580; font-size: .875rem; }
+@media (max-width: 640px) { .letter-keyboard-intro, .letter-keyboard-result { align-items: stretch; flex-direction: column; } .letter-keyboard-lab { padding: 16px; } }

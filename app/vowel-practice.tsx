@@ -2,8 +2,11 @@
 
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
 import LocalVoiceRecorder, { type LocalVoiceRecorderHandle } from "./local-voice-recorder";
+import VowelListeningChallenge, { type VowelChallengeHandle } from "./vowel-listening-challenge";
 import { keyboardShortcutKey } from "./keyboard-logic";
 import { VOWEL_CONTRASTS, VOWEL_GUIDE_SOURCE, type VowelPracticeMode } from "./pronunciation-data";
+import type { VowelHistoryModel } from "./use-vowel-history";
+import type { AutoAdvanceDelay } from "./learning-settings";
 
 export type VowelPracticeHandle = { stop: () => void };
 type Props = {
@@ -11,10 +14,13 @@ type Props = {
   playSample: (text: string, speed: 1 | 0.82) => Promise<"ended" | "interrupted" | "failed">;
   speed: 1 | 0.82;
   onSpeedChange: (speed: 1 | 0.82) => void;
+  history: VowelHistoryModel;
+  autoAdvanceMs: AutoAdvanceDelay;
 };
 
-const VowelPractice = forwardRef<VowelPracticeHandle, Props>(function VowelPractice({ onPrepare, playSample, speed, onSpeedChange }, ref) {
+const VowelPractice = forwardRef<VowelPracticeHandle, Props>(function VowelPractice({ onPrepare, playSample, speed, onSpeedChange, history, autoAdvanceMs }, ref) {
   const [pairIndex, setPairIndex] = useState(0);
+  const [view, setView] = useState<"compare" | "challenge">("compare");
   const [mode, setMode] = useState<VowelPracticeMode>("isolated");
   const [playing, setPlaying] = useState<number | null>(null);
   const [status, setStatus] = useState("先听 A，再听 B，观察自己的嘴唇有没有改变。");
@@ -23,12 +29,14 @@ const VowelPractice = forwardRef<VowelPracticeHandle, Props>(function VowelPract
   const mounted = useRef(true);
   const gap = useRef<{ timer: ReturnType<typeof setTimeout>; resolve: (value: boolean) => void } | null>(null);
   const recorder = useRef<LocalVoiceRecorderHandle | null>(null);
+  const challenge = useRef<VowelChallengeHandle | null>(null);
   const pair = VOWEL_CONTRASTS[pairIndex];
 
   const stop = useCallback(() => {
     token.current += 1;
     if (gap.current) { clearTimeout(gap.current.timer); gap.current.resolve(false); gap.current = null; }
     recorder.current?.stop();
+    challenge.current?.stop();
     if (mounted.current) {
       setPlaying(null);
       if (playingRef.current) setStatus("对比播放已停止，可重新试听。");
@@ -74,6 +82,7 @@ const VowelPractice = forwardRef<VowelPracticeHandle, Props>(function VowelPract
   }
 
   function handleKeyboard(event: KeyboardEvent<HTMLElement>) {
+    if (view !== "compare") return;
     if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey || event.repeat) return;
     const target = event.target as HTMLElement;
     if (target.closest("input, textarea, select, audio, [contenteditable=true]")) return;
@@ -85,8 +94,10 @@ const VowelPractice = forwardRef<VowelPracticeHandle, Props>(function VowelPract
   }
 
   return <section id="pronunciation-practice" className="vowel-practice" aria-labelledby="vowel-practice-title" data-keyboard-scope="pronunciation" tabIndex={-1} onKeyDown={handleKeyboard}>
-    <div className="vowel-practice-heading"><span className="section-kicker">听清差别，再听自己</span><h2 id="vowel-practice-title">嘴唇一变，<br />声音就不一样。</h2><p>先比较示范，再录音回听。不用汉语谐音硬套，也不把“听懂了”当成“已经发音准确”。</p></div>
+    <div className="vowel-practice-heading"><span className="section-kicker">听清差别，再听自己</span><h2 id="vowel-practice-title">嘴唇一变，<br />声音就不一样。</h2><p>先比较示范，再录音回听。不用汉语谐音硬套，也不把“听懂了”当成“已经发音准确”。</p><p>新：试试 8 题盲听挑战，找出自己还会混淆的元音，再单独练错题。</p></div>
     <div className="vowel-practice-workspace">
+      <div className="vowel-practice-views" role="group" aria-label="元音练习方式"><button type="button" aria-pressed={view === "compare"} onClick={() => { if (view !== "compare") { onPrepare(); setView("compare"); } }}>口型对比与跟读</button><button type="button" aria-pressed={view === "challenge"} onClick={() => { if (view !== "challenge") { onPrepare(); setView("challenge"); } }}>盲听 8 题 · 新</button></div>
+      {view === "challenge" ? <VowelListeningChallenge ref={challenge} onPrepare={onPrepare} playSample={playSample} speed={speed} onSpeedChange={onSpeedChange} history={history} autoAdvanceMs={autoAdvanceMs} /> : <>
       <div className="vowel-pair-picker" role="group" aria-label="选择元音对比组">{VOWEL_CONTRASTS.map((item, index) => <button type="button" key={item.id} aria-pressed={pairIndex === index} onClick={() => { onPrepare(); setPairIndex(index); setStatus("已切换对比组，先听两边，再跟读。"); }}><strong lang="ko">{item.title}</strong><span>{item.subtitle}</span></button>)}</div>
       <div className="vowel-practice-settings"><div role="group" aria-label="选择对比形式"><button type="button" aria-pressed={mode === "isolated"} onClick={() => { onPrepare(); setMode("isolated"); setStatus("只比较元音本音；ㅇ 在开头不发音。"); }}>先听元音</button><button type="button" aria-pressed={mode === "syllable"} onClick={() => { onPrepare(); setMode("syllable"); setStatus("两边固定同一个辅音 ㄱ，比较后面的元音。"); }}>放进 ㄱ 音节</button></div><div role="group" aria-label="对比播放速度"><button type="button" aria-pressed={speed === 1} onClick={() => { onPrepare(); onSpeedChange(1); }}>标准</button><button type="button" aria-pressed={speed === 0.82} onClick={() => { onPrepare(); onSpeedChange(0.82); }}>慢放</button></div></div>
       <div className="vowel-contrast-cards">{pair.sides.map((side, index) => <button type="button" key={side.letter} className={`vowel-contrast-card ${playing === index ? "is-playing" : ""}`} aria-label={`播放 ${index === 0 ? "A" : "B"}：${side[mode]}`} onClick={() => void listen([index])}><span className="vowel-card-top"><kbd>{index === 0 ? "A" : "B"}</kbd><span>{side.lip === "rounded" ? "圆唇" : "不圆唇"}</span></span><strong lang="ko">{side[mode]}</strong><span className={`lip-cue ${side.lip}`} aria-hidden="true" /><span className="vowel-card-cue">{side.cue}</span><small>{playing === index ? "正在播放…" : "▶ 听完整示范"}</small></button>)}</div>
@@ -94,6 +105,7 @@ const VowelPractice = forwardRef<VowelPracticeHandle, Props>(function VowelPract
       <div className="vowel-practice-actions"><button type="button" onClick={() => void listen([0, 1])}>顺序听 A → B</button><button type="button" onClick={onPrepare}>停止播放／录音</button><span>聚焦本区：A / B 试听 · 空格顺序听 · Esc 停止</span></div>
       <p className="vowel-playback-status" role="status" aria-live="polite">{status}</p>
       <LocalVoiceRecorder ref={recorder} onPrepare={onPrepare} contextKey={`${pair.id}-${mode}`} />
+      </>}
       <details className="vowel-source-note"><summary>示范音来源与使用边界</summary><p>这里使用网站已有的固定 AI 完整音节音频，不是新增真人录音，也不是把裁切辅音和元音拼接。两侧使用同一播放速度与播放器音量设置；不同音频的实际响度可能略有差异。</p><p>口型提示已按官方资料核对；音频尚未新增母语教师逐条复核。录音回听用于自我比较，不提供自动发音分数或“标准发音”认证。</p><a href={VOWEL_GUIDE_SOURCE} target="_blank" rel="noreferrer">教学依据：国立国语院标准发音法 ↗</a></details>
     </div>
   </section>;
