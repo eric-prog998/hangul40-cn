@@ -68,9 +68,12 @@ npm run dev
 ```bash
 npx tsc --noEmit
 npm test
+npm run test:e2e
 ```
 
 `npm test` 先生产构建再运行测试。v41 发布时通过了 106 项自动测试；其中部分交互守卫是源码断言，不等同于完整浏览器端测试。测试不启用真实麦克风，实体 Mac 韩语输入法仍需要人工验收。
+
+`npm run test:e2e` 是 v41 之后补上的真浏览器测试（Playwright）：自动构建网站，在本机 Chromium 里实际操作全部玩法、新手路线、纯键盘操作、录音、进度保存和备份，并在浏览器出现任何报错时判定失败。首次运行前执行 `npx playwright install chromium`；测试只访问本机 `127.0.0.1:4173`。它使用桌面 Chromium、模拟麦克风和模拟的输入法组合事件，不能替代 Safari／手机真机、实体 Mac 韩语输入法和音质的人工验收。GitHub Actions（`.github/workflows/ci.yml`）会在每次推送和 Pull Request 时自动运行类型检查、lint 和这两套测试。
 
 单独构建／运行生产预览：`npm run build`、`npm run start`。另有 `npm run lint` 可按需执行。测试学习记录请使用独立本地端口，避免修改正式网站的个人进度。
 
@@ -86,6 +89,7 @@ npm test
 | `app/local-voice-recorder.tsx`、`app/recording-logic.ts` | 本地录音与设备生命周期 |
 | `app/batchim-*`、`data/`、`public/audio/` | 收音课、题库与音频资源 |
 | `tests/` | 逻辑、存储、资产与页面回归测试 |
+| `e2e/`、`playwright.config.ts` | 真浏览器测试：在 Chromium 里实际操作各玩法 |
 | `build/`、`worker/`、`.openai/hosting.json` | 构建和已有 Sites 项目配置 |
 
 ## 网站部署与 GitHub 的区别
