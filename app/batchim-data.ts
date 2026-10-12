@@ -10,7 +10,7 @@ export const BATCHIM_WORDS = [
   { id: "word-subway", final: "ㄹ", last: "철", pronunciation: "지하철", source: "https://krdict.korean.go.kr/eng/dicMarinerSearch/search?mainSearchWord=%EC%A7%80%ED%95%98%EC%B2%A0&nation=eng" },
   { id: "word-person", final: "ㅁ", last: "람", pronunciation: "사ː람", source: "https://krdict.korean.go.kr/eng/dicSearch/wordLinkViewPopup?ParaWordNo=58161&nation=eng&nationCode=6" },
   { id: "word-now", final: "ㅁ", last: "금", pronunciation: "지금", source: "https://krdict.korean.go.kr/eng/dicMarinerSearch/search?mainSearchWord=%EC%A7%80%EA%B8%88&nation=eng" },
-  { id: "word-receipt", final: "ㅇ", last: "증", pronunciation: "영수증", source: "https://krdict.korean.go.kr/eng/dicMarinerSearch/search?mainSearchWord=%EC%98%81&nation=eng" },
+  { id: "word-receipt", final: "ㅇ", last: "증", pronunciation: "영수증", source: "https://krdict.korean.go.kr/eng/dicMarinerSearch/search?mainSearchWord=%EC%98%81%EC%88%98%EC%A6%9D&nation=eng" },
 ] as const;
 
 export function batchimExampleIndex(id?: string) {

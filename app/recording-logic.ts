@@ -239,8 +239,10 @@ export class LocalRecordingSession {
       };
       audio.onpause = () => {
         if (token !== this.playbackToken || this.disposed) return;
+        // Browsers dispatch pause immediately before ended when a clip finishes by itself.
+        const finished = audio.ended;
         this.stopPlayback();
-        this.update({ phase: "ready", message: "回放已暂停。" });
+        this.update({ phase: "ready", message: finished ? "回放结束。再听一次示范，或重录后比较。" : "回放已暂停。" });
       };
       audio.onerror = () => {
         if (token !== this.playbackToken || this.disposed) return;

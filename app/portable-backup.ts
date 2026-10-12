@@ -1,5 +1,5 @@
 import { mergeLegacyProgressStatsHighWater, parseProgressEpochBaseline, type ProgressSnapshot, type ProgressValidation } from "./progress-ledger.ts";
-import { parseReviewRecord, type ReviewRecords } from "./review-logic.ts";
+import { localDateKey, parseReviewRecord, type ReviewRecords } from "./review-logic.ts";
 import { parseTypingBestRecords, type TypingBestRecord } from "./typing-logic.ts";
 import { mergeVowelHistory, parseVowelHistoryEntry, VOWEL_HISTORY_LIMIT, type VowelHistoryEntry } from "./vowel-history.ts";
 import { validAutoAdvance, type AutoAdvanceDelay } from "./learning-settings.ts";
@@ -42,6 +42,11 @@ export function parsePortableBackup(text: string, validation: Validation): Porta
     || typeof p.showRomanization !== "boolean" || typeof p.beginnerBlendCompleted !== "boolean" || typeof p.fullReviewCompleted !== "boolean"
     || (p.keyboardMode !== "hangul" && p.keyboardMode !== "shortcuts")) fail();
   return { format: "hangul40-progress", version: 1, createdAt: value.createdAt, progress: baseline.snapshot, reviews, typing, vowelHistory: mergeVowelHistory(vowelHistory as VowelHistoryEntry[]), preferences: { autoAdvanceMs: p.autoAdvanceMs, audioSpeed: p.audioSpeed, showRomanization: p.showRomanization, keyboardMode: p.keyboardMode, beginnerBlendCompleted: p.beginnerBlendCompleted, fullReviewCompleted: p.fullReviewCompleted } };
+}
+
+/** Named after the learner's local calendar day; `createdAt` itself stays an exact UTC timestamp. */
+export function backupFileName(createdAt: string) {
+  return `hangul40-progress-${localDateKey(new Date(createdAt))}.json`;
 }
 
 export function mergePortableProgress(current: ProgressSnapshot, incoming: ProgressSnapshot, today: string): ProgressSnapshot {

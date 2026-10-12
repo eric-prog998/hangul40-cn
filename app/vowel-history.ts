@@ -18,6 +18,21 @@ export function parseVowelHistoryEntry(value: unknown): VowelHistoryEntry | null
   return { id: record.id, questionId: record.questionId, choice: record.choice, at: Number(record.at) };
 }
 
+/**
+ * A new attempt id. Older browsers have no crypto.randomUUID; the fallback
+ * still satisfies the id format checked by parseVowelHistoryEntry.
+ */
+export function createVowelAttemptId(
+  source: { randomUUID?: () => string } | null = globalThis.crypto ?? null,
+  random: () => number = Math.random,
+  now: () => number = Date.now,
+) {
+  const uuid = typeof source?.randomUUID === "function" ? source.randomUUID().toLowerCase() : "";
+  if (/^[a-z0-9-]{16,80}$/.test(uuid)) return uuid;
+  const part = () => Math.floor(random() * 36 ** 8).toString(36).padStart(8, "0");
+  return `attempt-${now().toString(36)}-${part()}-${part()}`;
+}
+
 export function mergeVowelHistory(...sources: readonly VowelHistoryEntry[][]): VowelHistoryEntry[] {
   const records = new Map<string, VowelHistoryEntry>();
   // Existing entries win an ID conflict: importing cannot rewrite an answer.

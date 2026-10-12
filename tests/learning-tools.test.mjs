@@ -3,8 +3,8 @@ import test from "node:test";
 import { readFile } from "node:fs/promises";
 import { emptyProgressStats } from "../app/progress-ledger.ts";
 import { parseAutoAdvance } from "../app/learning-settings.ts";
-import { parsePortableBackup, mergePortableProgress, BACKUP_MAX_BYTES } from "../app/portable-backup.ts";
-import { VOWEL_HISTORY_PREFIX, VOWEL_HISTORY_LIMIT, mergeVowelHistory, readVowelHistory, writeVowelHistory, pendingVowelQuestions, recentVowelResults, parseVowelHistoryEntry } from "../app/vowel-history.ts";
+import { parsePortableBackup, mergePortableProgress, backupFileName, BACKUP_MAX_BYTES } from "../app/portable-backup.ts";
+import { createVowelAttemptId, VOWEL_HISTORY_PREFIX, VOWEL_HISTORY_LIMIT, mergeVowelHistory, readVowelHistory, writeVowelHistory, pendingVowelQuestions, recentVowelResults, parseVowelHistoryEntry } from "../app/vowel-history.ts";
 import { DailyReviewRepository } from "../app/review-storage.ts";
 import { rateReview, reviewStorageKey } from "../app/review-logic.ts";
 
@@ -136,4 +136,22 @@ test("v41 all five auto-next modes use the shared setting and backup keys stay s
     assert.match(source, /useEffect\(\(\) => \{ stop\(\); \}, \[autoAdvanceMs, stop\]\)/);
     assert.match(source, /\}, autoAdvanceMs\)/);
   }
+});
+
+test("backup files are named after the learner's local calendar day, whatever the UTC date is", () => {
+  // Half past midnight and half past eleven at night, local time: in most time zones one of them falls on another UTC day.
+  assert.equal(backupFileName(new Date(2026, 9, 12, 0, 30).toISOString()), "hangul40-progress-2026-10-12.json");
+  assert.equal(backupFileName(new Date(2026, 9, 12, 23, 30).toISOString()), "hangul40-progress-2026-10-12.json");
+  assert.equal(backupFileName(new Date(2027, 0, 1, 0, 5).toISOString()), "hangul40-progress-2027-01-01.json");
+});
+
+test("attempt ids are valid and unique even where crypto.randomUUID does not exist", () => {
+  const withUuid = createVowelAttemptId();
+  const fallbackIds = new Set(Array.from({ length: 200 }, () => createVowelAttemptId(null)));
+  assert.equal(fallbackIds.size, 200);
+  for (const id of [withUuid, ...fallbackIds, createVowelAttemptId({}), createVowelAttemptId({ randomUUID: () => "NOT A VALID ID" })]) {
+    assert.ok(parseVowelHistoryEntry({ id, questionId: "0-isolated-0", choice: 0, at: 1 }), `${id} must pass history validation`);
+  }
+  // Deterministic sources still produce a well-formed id.
+  assert.equal(createVowelAttemptId(null, () => 0, () => 0), "attempt-0-00000000-00000000");
 });

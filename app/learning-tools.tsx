@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useState, type ChangeEvent } from "react";
 import { AUTO_ADVANCE_OPTIONS, type AutoAdvanceDelay } from "./learning-settings";
-import { BACKUP_MAX_BYTES, type PortableBackup } from "./portable-backup";
+import { BACKUP_MAX_BYTES, backupFileName, type PortableBackup } from "./portable-backup";
 
 type Props = {
   autoAdvanceMs: AutoAdvanceDelay;
@@ -26,7 +26,7 @@ export default function LearningTools({ autoAdvanceMs, onAutoAdvance, onPrepare,
       const backup = await onExport();
       const url = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" }));
       const link = document.createElement("a");
-      link.href = url; link.download = `hangul40-progress-${backup.createdAt.slice(0, 10)}.json`;
+      link.href = url; link.download = backupFileName(backup.createdAt);
       document.body.appendChild(link); link.click(); link.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       setMessage("已发起备份下载，请检查浏览器下载列表。把 JSON 文件带到另一台设备即可导入。");

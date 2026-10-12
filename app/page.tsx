@@ -1059,11 +1059,13 @@ export default function Home() {
   const [phraseSectionVisible, setPhraseSectionVisible] = useState(true);
   const [phraseAutoAdvanceCancelled, setPhraseAutoAdvanceCancelled] = useState(false);
   const [phraseAudioFailed, setPhraseAudioFailed] = useState(false);
+  const [phraseAudioPlaying, setPhraseAudioPlaying] = useState(false);
   const [gameSectionVisible, setGameSectionVisible] = useState(true);
   const [pageVisible, setPageVisible] = useState(true);
   const [gameAutoAdvanceCancelled, setGameAutoAdvanceCancelled] = useState(false);
   const [gameAudioReady, setGameAudioReady] = useState(false);
   const [gameAudioFailed, setGameAudioFailed] = useState(false);
+  const [gameAudioPlaying, setGameAudioPlaying] = useState(false);
   const [comparisonConsonant, setComparisonConsonant] = useState("ㄹ");
   const [comparisonVowel, setComparisonVowel] = useState("ㅏ");
   const [comparisonStatus, setComparisonStatus] = useState("分别试听，先感受短促起音，再听它进入完整音节。");
@@ -1106,6 +1108,8 @@ export default function Home() {
   const matchLockedRef = useRef(false);
   const gamePlaybackRequestRef = useRef(0);
   const phrasePlaybackRequestRef = useRef(0);
+  const gameAudioPlayingRequestRef = useRef(0);
+  const phraseAudioPlayingRequestRef = useRef(0);
   const comparisonSequenceRef = useRef(0);
   const comparisonPlaybackActiveRef = useRef(false);
   const noticeTimerRef = useRef<number | null>(null);
@@ -3031,7 +3035,17 @@ export default function Home() {
     const request = ++gamePlaybackRequestRef.current;
     setGameAudioReady(false);
     setGameAudioFailed(false);
-    const result = await playback();
+    // "Playing" is tracked apart from "ready": when another sound, scrolling away or a hidden tab cuts
+    // the question off, nothing is playing and nothing is ready, and the learner must be told to replay.
+    gameAudioPlayingRequestRef.current = request;
+    setGameAudioPlaying(true);
+    let result: AudioPlaybackResult;
+    try {
+      result = await playback();
+    } catch {
+      result = "failed";
+    }
+    if (gameAudioPlayingRequestRef.current === request) setGameAudioPlaying(false);
     const played = result === "ended";
     if (request !== gamePlaybackRequestRef.current) return played;
     setGameAudioReady(played);
@@ -3054,7 +3068,15 @@ export default function Home() {
     const request = ++phrasePlaybackRequestRef.current;
     setPhraseAudioFailed(false);
     setPhraseAudioReady(false);
-    const result = await playPhraseItemSource(item);
+    phraseAudioPlayingRequestRef.current = request;
+    setPhraseAudioPlaying(true);
+    let result: AudioPlaybackResult;
+    try {
+      result = await playPhraseItemSource(item);
+    } catch {
+      result = "failed";
+    }
+    if (phraseAudioPlayingRequestRef.current === request) setPhraseAudioPlaying(false);
     const played = result === "ended";
     if (request !== phrasePlaybackRequestRef.current) return played;
     setPhraseAudioFailed(result === "failed");
@@ -4384,11 +4406,11 @@ export default function Home() {
                           const answered = listenAnswer !== null;
                           const correct = choice.char === listenTarget.char;
                           const pickedWrong = choice.char === listenAnswer && !correct;
-                          return <button type="button" key={choice.char} data-testid={`listen-choice-${index}`} disabled={answered || !gameAudioReady} className={`${answered && correct ? "correct" : ""} ${pickedWrong ? "wrong" : ""} ${koreanPending === choice.char ? "keyboard-pending" : ""}`} onClick={() => answerListen(choice.char)}><kbd>{directKoreanKeyboard ? `${index + 1} / ${koreanKeyLabel(choice.char)}` : choiceKeyLabels[index]}</kbd><strong lang="ko">{choice.char}</strong><small>{answered ? showRomanization ? choice.roman : "罗马字已隐藏" : gameAudioFailed ? "先重播" : gameAudioReady ? koreanPending === choice.char ? "Enter 确认" : "选择" : "先听完"}</small></button>;
+                          return <button type="button" key={choice.char} data-testid={`listen-choice-${index}`} disabled={answered || !gameAudioReady} className={`${answered && correct ? "correct" : ""} ${pickedWrong ? "wrong" : ""} ${koreanPending === choice.char ? "keyboard-pending" : ""}`} onClick={() => answerListen(choice.char)}><kbd>{directKoreanKeyboard ? `${index + 1} / ${koreanKeyLabel(choice.char)}` : choiceKeyLabels[index]}</kbd><strong lang="ko">{choice.char}</strong><small>{answered ? showRomanization ? choice.roman : "罗马字已隐藏" : gameAudioFailed ? "先重播" : gameAudioReady ? koreanPending === choice.char ? "Enter 确认" : "选择" : gameAudioPlaying ? "先听完" : "先重播"}</small></button>;
                         })}
                       </div>
                       <div className="game-feedback" aria-live="polite">
-{listenAnswer === null ? <span>{gameAudioFailed ? "题目音频未能播放，请点“再听一次”重试；本题暂不可作答。" : gameAudioReady ? "可以作答：辅音题只播放真人裁切的起音片段；初声静音的 ㅇ 不进入盲听题。" : "请先听完整条题目音频，播放完即开放选项。"}</span> : <span className="auto-next-status">{listenAnswer === listenTarget.char ? <strong className="success">正确！+{10 + Math.min(listenCombo * 2, 10)} XP</strong> : <strong className="retry">正确答案是 {listenTarget.char}，{consonantNameMap.has(listenTarget.char) ? `真人起音目标是 ${consonantNameMap.get(listenTarget.char)?.ipa}` : `元音本音是 ${listenTarget.sample}`}。</strong>}<small>{gameAudioFailed ? "音频未能播放，已暂停自动下一题；请重播或手动继续。" : autoAdvanceMs === 0 ? "自动下一题已关闭；按 Enter 继续。" : gameAutoAdvanceCancelled ? "自动推进已取消；可手动进入下一题。" : "听完反馈后自动进入下一题…"}</small></span>}
+{listenAnswer === null ? <span>{gameAudioFailed ? "题目音频未能播放，请点“再听一次”重试；本题暂不可作答。" : gameAudioReady ? "可以作答：辅音题只播放真人裁切的起音片段；初声静音的 ㅇ 不进入盲听题。" : gameAudioPlaying ? "请先听完整条题目音频，播放完即开放选项。" : "题目声音已中断：请点“再听一次”或按空格重播，听完即可作答。"}</span> : <span className="auto-next-status">{listenAnswer === listenTarget.char ? <strong className="success">正确！+{10 + Math.min(listenCombo * 2, 10)} XP</strong> : <strong className="retry">正确答案是 {listenTarget.char}，{consonantNameMap.has(listenTarget.char) ? `真人起音目标是 ${consonantNameMap.get(listenTarget.char)?.ipa}` : `元音本音是 ${listenTarget.sample}`}。</strong>}<small>{gameAudioFailed ? "音频未能播放，已暂停自动下一题；请重播或手动继续。" : autoAdvanceMs === 0 ? "自动下一题已关闭；按 Enter 继续。" : gameAutoAdvanceCancelled ? "自动推进已取消；可手动进入下一题。" : "听完反馈后自动进入下一题…"}</small></span>}
                         {listenAnswer !== null && <button type="button" onClick={() => nextListenQuestion()}>{listenRound >= 10 || listenHearts <= 0 ? "立即查看成绩" : "立即下一题 →"}</button>}
                       </div>
                     </>
@@ -4452,7 +4474,7 @@ export default function Home() {
                         <div className="blend-choice-group"><span>② 再选元音</span><div className="blend-choice-row">{blendVowelChoices.map((choice, index) => <button type="button" key={choice} disabled={blendFeedback !== null || !gameAudioReady} className={`${blendSelectedVowel === choice ? "selected" : ""} ${blendFeedback !== null && choice === blendVowel ? "correct" : ""} ${blendFeedback === "wrong" && choice === blendSelectedVowel && choice !== blendVowel ? "wrong" : ""} ${koreanPending === choice ? "keyboard-pending" : ""}`} onClick={() => selectBlendVowel(choice)}><kbd>{index + 5} / {directKoreanKeyboard ? koreanKeyLabel(choice) : blendVowelKeys[index]}</kbd><span lang="ko">{choice}</span></button>)}</div></div>
                       </div>
                       <div className="game-feedback" aria-live="polite">
-                        {blendFeedback === null ? <span>{gameAudioFailed ? "题目音节未能播放，请点上方播放按钮重试；本题暂不可作答。" : gameAudioReady ? "可以作答：两边各选一个，系统会自动合成答案；同音组合会自动跳过。" : "请先听完整条题目音频，播放完即开放两组选项。"}</span> : <span className="auto-next-status">{blendFeedback === "correct" ? <strong className="success">拼对了！{blendInitial} + {blendVowel} = {blendTarget} · +12 XP</strong> : <strong className="retry">再听：{blendInitial} + {blendVowel} 才是 {blendTarget}</strong>}<small>{gameAudioFailed ? "音节未能播放，已暂停自动下一题；请重播或手动继续。" : autoAdvanceMs === 0 ? "自动下一题已关闭；按 Enter 继续。" : gameAutoAdvanceCancelled ? "自动推进已取消；可手动进入下一题。" : "听完正确音节后自动进入下一题…"}</small></span>}
+                        {blendFeedback === null ? <span>{gameAudioFailed ? "题目音节未能播放，请点上方播放按钮重试；本题暂不可作答。" : gameAudioReady ? "可以作答：两边各选一个，系统会自动合成答案；同音组合会自动跳过。" : gameAudioPlaying ? "请先听完整条题目音频，播放完即开放两组选项。" : "题目声音已中断：请点上方播放按钮或按空格重播，听完即可作答。"}</span> : <span className="auto-next-status">{blendFeedback === "correct" ? <strong className="success">拼对了！{blendInitial} + {blendVowel} = {blendTarget} · +12 XP</strong> : <strong className="retry">再听：{blendInitial} + {blendVowel} 才是 {blendTarget}</strong>}<small>{gameAudioFailed ? "音节未能播放，已暂停自动下一题；请重播或手动继续。" : autoAdvanceMs === 0 ? "自动下一题已关闭；按 Enter 继续。" : gameAutoAdvanceCancelled ? "自动推进已取消；可手动进入下一题。" : "听完正确音节后自动进入下一题…"}</small></span>}
                         {blendFeedback !== null && <button type="button" onClick={() => nextBlendQuestion()}>{blendRound >= 8 ? "立即查看成绩" : "立即下一题 →"}</button>}
                       </div>
                     </>
@@ -4599,7 +4621,7 @@ export default function Home() {
                     const pickedWrong = choice.id === phraseQuizAnswer && !correct;
                     return <button type="button" key={choice.id} data-testid={`phrase-choice-${index}`} disabled={answered || !phraseAudioReady} className={`${answered && correct ? "correct" : ""} ${pickedWrong ? "wrong" : ""}`} onClick={() => answerPhraseQuiz(choice.id)}><kbd>{choiceKeyLabels[index]}</kbd><span>{choice.chinese}</span></button>;
                   })}</div>
-                  <div className="phrase-quiz-feedback" aria-live="polite">{phraseQuizAnswer === null ? <span>{phraseAudioFailed ? "音频未能播放，请用 Space、R 或上方按钮重试；本题暂不可作答。" : phraseAudioReady ? "可以作答；Space 或 R 可以重播，不扣分。" : "请先听完整条词句音频，播放完即开放选项。"}</span> : <span className="auto-next-status">{phraseQuizAnswer === phraseQuizTarget.id ? <strong>正确！+10 XP</strong> : <strong className="wrong">答案：{phraseQuizTarget.chinese}</strong>}<small>{phraseAudioFailed ? "音频未能播放，已暂停自动下一题；请重试或手动继续。" : autoAdvanceMs === 0 ? "自动下一题已关闭；按 Enter 继续。" : phraseAutoAdvanceCancelled ? "自动推进已取消；返回后可手动进入下一题。" : "听完当前词句后自动进入下一题…"}</small></span>}{phraseQuizAnswer !== null && <button type="button" onClick={() => nextPhraseQuestion()}>{phraseQuizRound >= phraseQuizTotal ? "立即查看成绩" : "立即下一题 →"}</button>}</div>
+                  <div className="phrase-quiz-feedback" aria-live="polite">{phraseQuizAnswer === null ? <span>{phraseAudioFailed ? "音频未能播放，请用 Space、R 或上方按钮重试；本题暂不可作答。" : phraseAudioReady ? "可以作答；Space 或 R 可以重播，不扣分。" : phraseAudioPlaying ? "请先听完整条词句音频，播放完即开放选项。" : "词句声音已中断：请点上方“只听声音”或按空格重播，听完即可作答。"}</span> : <span className="auto-next-status">{phraseQuizAnswer === phraseQuizTarget.id ? <strong>正确！+10 XP</strong> : <strong className="wrong">答案：{phraseQuizTarget.chinese}</strong>}<small>{phraseAudioFailed ? "音频未能播放，已暂停自动下一题；请重试或手动继续。" : autoAdvanceMs === 0 ? "自动下一题已关闭；按 Enter 继续。" : phraseAutoAdvanceCancelled ? "自动推进已取消；返回后可手动进入下一题。" : "听完当前词句后自动进入下一题…"}</small></span>}{phraseQuizAnswer !== null && <button type="button" onClick={() => nextPhraseQuestion()}>{phraseQuizRound >= phraseQuizTotal ? "立即查看成绩" : "立即下一题 →"}</button>}</div>
                 </div>
               )}
             </aside>
@@ -4618,7 +4640,7 @@ export default function Home() {
           </div>
           {activeSet === "consonants" && (
             <section className="onset-lab" aria-labelledby="onset-lab-title" aria-busy={comparisonBusy}>
-              <div className="onset-lab-copy"><span>v32 教学清晰重播</span><h3 id="onset-lab-title">真人起音 ↔ 完整音节对照器</h3><p>左边只播辅音起音；ㄹ、ㄲ、ㄸ、ㅃ 会把同一真人裸起音原样重复两次。盲听与配对仍统一播放单次起音，右边才把辅音和元音合成完整音节。</p></div>
+              <div className="onset-lab-copy"><span>教学清晰重播</span><h3 id="onset-lab-title">真人起音 ↔ 完整音节对照器</h3><p>左边只播辅音起音；ㄹ、ㄲ、ㄸ、ㅃ 会把同一真人裸起音原样重复两次。盲听与配对仍统一播放单次起音，右边才把辅音和元音合成完整音节。</p></div>
               <div className="onset-lab-workspace">
                 <div className="onset-lab-controls">
                   <label><span>选辅音</span><select lang="ko" value={comparisonConsonant} onChange={(event) => { cancelComparisonSequence(); setComparisonConsonant(event.target.value); setComparisonStatus("已换辅音；可分别试听或做顺序对照。"); }}>{initialOrder.map((item) => <option key={item}>{item}</option>)}</select></label>

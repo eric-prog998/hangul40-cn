@@ -44,9 +44,11 @@ function harness({ pendingStream, empty = false, playReject = false, recorderErr
     revokeUrl: (url) => revoked.push(url),
     createAudio: () => {
       const audio = {
-        paused: true, onended: null, onpause: null, onerror: null,
+        paused: true, ended: false, onended: null, onpause: null, onerror: null,
         play() { this.paused = false; return playReject ? Promise.reject(new Error("blocked")) : Promise.resolve(); },
         pause() { this.paused = true; this.onpause?.(); },
+        // What browsers do when a clip reaches its end: pause first, then ended.
+        finish() { this.ended = true; this.paused = true; this.onpause?.(); this.onended?.(); },
       };
       audioElements.push(audio);
       return audio;
@@ -193,6 +195,25 @@ test("stopping playback retains clip, while disposal pauses it and suppresses fu
   assert.equal(h.audioElements.at(-1).paused, true);
   assert.equal(h.states.length, count);
   assert.deepEqual(h.revoked, ["blob:recording-1"]);
+});
+
+test("a clip that plays to its end reports that it finished, while an outside pause reports a pause", async () => {
+  const h = harness();
+  await h.session.start();
+  h.session.stop();
+  h.recorders[0].flush();
+
+  await h.session.play();
+  h.audioElements[0].finish();
+  assert.equal(h.last().phase, "ready");
+  assert.match(h.last().message, /回放结束/);
+  assert.equal(h.last().hasRecording, true);
+
+  await h.session.play();
+  assert.equal(h.last().phase, "playing");
+  h.audioElements[1].pause(); // e.g. the system or another player paused it
+  assert.equal(h.last().phase, "ready");
+  assert.match(h.last().message, /回放已暂停/);
 });
 
 test("recorder initialization failures stop the acquired microphone", async () => {

@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { mergeVowelHistory, readVowelHistory, VOWEL_HISTORY_PREFIX, writeVowelHistory, type VowelHistoryEntry } from "./vowel-history";
+import { createVowelAttemptId, mergeVowelHistory, readVowelHistory, VOWEL_HISTORY_PREFIX, writeVowelHistory, type VowelHistoryEntry } from "./vowel-history";
 import type { VowelQuestion } from "./vowel-challenge-logic";
 
 export function useVowelHistory() {
@@ -28,7 +28,7 @@ export function useVowelHistory() {
     return () => { cancelAnimationFrame(frame); window.removeEventListener("storage", onStorage); window.removeEventListener("focus", refresh); };
   }, [refresh]);
   const record = useCallback((question: VowelQuestion, choice: 0 | 1) => {
-    const entry: VowelHistoryEntry = { id: crypto.randomUUID(), questionId: question.id, choice, at: Date.now() };
+    const entry: VowelHistoryEntry = { id: createVowelAttemptId(), questionId: question.id, choice, at: Date.now() };
     latest.current = mergeVowelHistory(latest.current, [entry]);
     unsaved.current = mergeVowelHistory(unsaved.current, [entry]);
     try { latest.current = writeVowelHistory(window.localStorage, unsaved.current); unsaved.current = []; }
