@@ -61,3 +61,12 @@ test("shared reference activity uses a neutral speed-round cancellation reason",
   assert.match(page, /cancelActiveSpeedRound\("已切换学习内容，本轮极速认读已取消。"\)/);
   assert.doesNotMatch(page, /已开始词句学习，本轮极速认读已取消/);
 });
+
+test("dictionary links that search by word look up the whole example word", async () => {
+  const catalog = JSON.parse(await readFile(new URL("../data/phrases.json", import.meta.url), "utf8"));
+  for (const item of BATCHIM_WORDS) {
+    const searched = new URL(item.source).searchParams.get("mainSearchWord");
+    if (searched === null) continue; // linked by dictionary entry number instead
+    assert.equal(searched, catalog.find((entry) => entry.id === item.id).korean, `${item.id} must not link to a fragment`);
+  }
+});
