@@ -499,7 +499,7 @@ test("renders the real Korean learning product", async () => {
 
   const html = await response.text();
   assert.match(html, /韩语 40 音｜中文闯关版/);
-  assert.match(html, /中文闯关版 · v41/);
+  assert.match(html, /中文闯关版 · v42/);
   assert.match(html, /用自己的韩文键盘作答/);
   assert.doesNotMatch(html, /v24 把零基础路线/);
   assert.match(html, /中文零基础 · 10 分钟起步/);
@@ -1061,7 +1061,7 @@ test("keeps one preferred target from every byte-identical blend group", async (
 test("versions every audio URL and evicts failed cache entries", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
 
-  assert.match(page, /const APP_VERSION = "41"/);
+  assert.match(page, /const APP_VERSION = "42"/);
   assert.match(page, /const AUDIO_ASSET_VERSION = "21"/);
   assert.match(page, /return `\$\{phraseSource\}\?v=\$\{AUDIO_ASSET_VERSION\}`/);
   assert.match(page, /\/audio\/hangul-natural\/s-\$\{syllable\.codePointAt\(0\)\?\.toString\(16\)\}\.mp3\?v=\$\{AUDIO_ASSET_VERSION\}/);

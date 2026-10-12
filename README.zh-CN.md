@@ -1,8 +1,10 @@
-# 韩语 40 音｜中文闯关版 v41
+# 韩语 40 音｜中文闯关版 v42
 
 面向中文学习者的韩语入门网站。现有线上入口：[韩语 40 音](https://hangul40-cn-eric0716.ericlll1.chatgpt.site/)。完整使用说明、版本变化和边界见 [README.md](README.md)；后续规划见 [LEARNING_ROADMAP_ZH.md](LEARNING_ROADMAP_ZH.md)。
 
-**v41 是应用版本**；`package.json` 中的 `0.1.0` 是私有 npm 项目的包版本，不代表线上功能仍为旧版。本项目没有发布为公共 npm 包。
+**v42 是应用版本**；`package.json` 中的 `0.1.0` 是私有 npm 项目的包版本，不代表线上功能仍为旧版。本项目没有发布为公共 npm 包。
+
+v42 修复声音中断后重播提示、录音结束状态、词典链接、备份本地日期和旧浏览器兼容性，新增 86 项 Chromium 浏览器回归测试。详见 [V42-RELEASE-NOTES.md](V42-RELEASE-NOTES.md)。音源、学习记录格式和既有学习功能保持不变。
 
 ## 当前功能
 

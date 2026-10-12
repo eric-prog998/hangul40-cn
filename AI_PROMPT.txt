@@ -1,4 +1,4 @@
-这是“韩语 40 音｜中文闯关版 v41”的可编辑源码。请先阅读 README.md、README.zh-CN.md、V41-FEATURE-NOTES.md、LEARNING_ROADMAP_ZH.md，再阅读与本次任务相关的源码以及 tests/、e2e/ 中的测试；以实际源码为准，不要按旧版说明重建项目。v41 是应用版本，package.json 的 0.1.0 是私有 npm 项目的包版本；不要仅为对齐应用版本而修改它。
+这是“韩语 40 音｜中文闯关版 v42”的可编辑源码。请先阅读 README.md、README.zh-CN.md、V42-RELEASE-NOTES.md、V41-FEATURE-NOTES.md、LEARNING_ROADMAP_ZH.md，再阅读与本次任务相关的源码以及 tests/、e2e/ 中的测试；以实际源码为准，不要按旧版说明重建项目。v42 是应用版本，package.json 的 0.1.0 是私有 npm 项目的包版本；不要仅为对齐应用版本而修改它。
 
 主要模块：
 - app/page.tsx、app/globals.css：主页面与六种训练（听音、跟读、配对、拼读、极速、地铁打字）。
