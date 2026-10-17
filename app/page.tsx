@@ -4679,7 +4679,7 @@ export default function Home() {
 
         <VowelPractice ref={vowelPracticeRef} onPrepare={prepareReferenceActivity} playSample={playSound} speed={audioSpeed} onSpeedChange={changeAudioSpeed} history={vowelHistory} autoAdvanceMs={autoAdvanceMs} onReturnToPlan={planActivity === "listening" ? returnToDailyPlan : undefined} />
 
-        <AudioGuide version={APP_VERSION} onPrepare={prepareReferenceActivity} onPlay={source => playAudioSourceToEnd(source, audioSpeed)} onStop={stopAudioPlayback} />
+        <AudioGuide version={APP_VERSION} onPrepare={prepareReferenceActivity} onPlay={path => playAudioSourceToEnd(`${path}?v=${AUDIO_ASSET_VERSION}`, 1)} onStop={stopAudioPlayback} />
 
         <BatchimLesson ref={batchimLessonRef} items={phraseItems} onPrepare={prepareReferenceActivity} playSample={playSound} autoAdvanceMs={autoAdvanceMs} />
 
