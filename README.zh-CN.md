@@ -1,10 +1,10 @@
-# 韩语 40 音｜中文闯关版 v46
+# 韩语 40 音｜中文闯关版 v47
 
 面向中文学习者的韩语入门网站。现有线上入口：[韩语 40 音](https://hangul40-cn-eric0716.ericlll1.chatgpt.site/)。完整使用说明、版本变化和边界见 [README.md](README.md)；后续规划见 [LEARNING_ROADMAP_ZH.md](LEARNING_ROADMAP_ZH.md)。
 
-本次仓库由 v42 累计同步至已上线的 v46，四个版本的功能摘要、验证范围和维护注意事项见 [GitHub v46 更新说明](GITHUB-V46-UPDATE.md)。
+本次 v47 基于已审查的 PR #5，修复今日路线短练退出、音源核对原速播放及缓存版本统一，详见 [V47-RELEASE-NOTES.md](V47-RELEASE-NOTES.md)。此前四个版本的累计同步记录见 [GitHub v46 更新说明](GITHUB-V46-UPDATE.md)。
 
-**v46 是应用版本**；`package.json` 中的 `0.1.0` 是私有 npm 项目的包版本，不代表线上功能仍为旧版。本项目没有发布为公共 npm 包。
+**v47 是应用版本**；`package.json` 中的 `0.1.0` 是私有 npm 项目的包版本，不代表线上功能仍为旧版。本项目没有发布为公共 npm 包。
 
 v46 新增本页有效的“连续键盘输入”与 R 遮住重写，自评后可直接输入下一张；重写不另算复习。修复旧卡片状态在日期返回后恢复并抢焦点的问题，保护长按评分键和异常输入法失焦。详见 [V46-RELEASE-NOTES.md](V46-RELEASE-NOTES.md)。
 
@@ -80,7 +80,7 @@ npm run test:e2e
 
 `npm run test:e2e` 是真浏览器测试：自动构建网站，在本机 Chromium 里像学习者一样操作六种训练、词句闯关、今日复习、收音课、发音对比、录音、新手路线、纯键盘操作、进度保存和备份导入导出，并检查浏览器有没有报错，全程需要几分钟。第一次在新电脑上运行前先执行 `npx playwright install chromium webkit`。它只访问本机 `127.0.0.1:4173`，不会碰线上网站和你的学习记录。
 
-v46 配置 140 项浏览器测试：113 项 Chromium 全站场景、27 项 WebKit 音频／今日路线／输入复习专项；每轮实际验证范围见版本说明。使用桌面浏览器内核（含手机尺寸的屏幕模拟）、Chromium 自带的模拟麦克风和模拟的输入法组合事件，不等同于 Safari、手机真机、实体 Mac 韩语输入法或音质验收，这些仍需人工确认。仓库的 GitHub Actions 会在每次推送和 Pull Request 时自动跑同样的检查。
+v47 配置 146 项浏览器测试：116 项 Chromium 全站场景、30 项 WebKit 音频／今日路线／输入复习专项；每轮实际验证范围见版本说明。使用桌面浏览器内核（含手机尺寸的屏幕模拟）、Chromium 自带的模拟麦克风和模拟的输入法组合事件，不等同于 Safari、手机真机、实体 Mac 韩语输入法或音质验收，这些仍需人工确认。仓库的 GitHub Actions 会在每次推送和 Pull Request 时自动跑同样的检查。
 
 这是 Vinext／Cloudflare Worker 项目，不是双击 HTML 即可运行的静态页面，也不能直接当作 GitHub Pages 目录上传。更新 GitHub 源码不等于发布网站；只有明确要求部署时才更新现有 Sites 项目，并保留原 `project_id`。不要提交 `.env*`、访问令牌、学习备份、录音、日志、构建目录或本地重复副本。
 

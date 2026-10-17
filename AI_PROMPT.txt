@@ -1,4 +1,6 @@
-这是“韩语 40 音｜中文闯关版 v46”的可编辑源码。请先阅读 README.md、README.zh-CN.md、V46-RELEASE-NOTES.md、V45-RELEASE-NOTES.md、V44-RELEASE-NOTES.md、V43-RELEASE-NOTES.md、V42-RELEASE-NOTES.md、V41-FEATURE-NOTES.md、LEARNING_ROADMAP_ZH.md，再阅读与本次任务相关的源码以及 tests/、e2e/ 中的测试；以实际源码为准，不要按旧版说明重建项目。v46 是应用版本，package.json 的 0.1.0 是私有 npm 项目的包版本；不要仅为对齐应用版本而修改它。
+这是“韩语 40 音｜中文闯关版 v47”的可编辑源码。请先阅读 README.md、README.zh-CN.md、V47-RELEASE-NOTES.md、V46-RELEASE-NOTES.md、V45-RELEASE-NOTES.md、V44-RELEASE-NOTES.md、V43-RELEASE-NOTES.md、V42-RELEASE-NOTES.md、V41-FEATURE-NOTES.md、LEARNING_ROADMAP_ZH.md，再阅读与本次任务相关的源码以及 tests/、e2e/ 中的测试；以实际源码为准，不要按旧版说明重建项目。v47 是应用版本，package.json 的 0.1.0 是私有 npm 项目的包版本；不要仅为对齐应用版本而修改它。
+
+v47 基于 PR #5：use-plan-activity.ts 管理路线短练的临时模式；点击其他区域或用区域导航快捷键离开后，普通复习恢复最多 10 项，快捷键帮助不结束短练。音源核对必须以原速播放，课程慢放偏好保持不变；路径版本由 page.tsx 的 AUDIO_ASSET_VERSION 统一添加。146 项浏览器场景包括 Chromium 全站与 WebKit 专项，不能把它们视为 Safari 真机或音质验收。
 
 v46 在 daily-review.tsx 加入仅本页有效的连续输入与 R 遮住重写。只有主动成功自评才允许聚焦下一张；外部更新不抢焦点。卡片身份变化清理临时输入、答案和重写标记，不能只隐藏后在旧 key 返回时复现。评分键长按不得串入下一输入框；失焦需清理 IME 标记。重写不写排期、不增完成量，必须保留“已看过答案”提示。
 
