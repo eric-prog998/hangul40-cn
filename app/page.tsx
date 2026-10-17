@@ -86,10 +86,14 @@ import KoreanKeyboard from "./korean-keyboard";
 import LetterKeyboardLab from "./letter-keyboard-lab";
 import VowelPractice, { type VowelPracticeHandle } from "./vowel-practice";
 import DailyReview, { type DailyReviewHandle } from "./daily-review";
+import DailyPlan from "./daily-plan";
+import { dailyPlanSummary } from "./daily-plan-logic";
 import { useDailyReview } from "./use-daily-review";
 import BatchimLesson, { type BatchimLessonHandle } from "./batchim-lesson";
 import { millisecondsUntilNextLocalMidnight } from "./date-logic";
 import LearningTools from "./learning-tools";
+import AudioGuide from "./audio-guide";
+import { AudioPlaybackController, type AudioPlaybackResult } from "./audio-playback";
 import { AUTO_ADVANCE_KEY, parseAutoAdvance, type AutoAdvanceDelay } from "./learning-settings";
 import { useVowelHistory } from "./use-vowel-history";
 import { writeVowelHistory } from "./vowel-history";
@@ -175,7 +179,6 @@ type BlockExample = {
   note: string;
 };
 
-type AudioPlaybackResult = "ended" | "interrupted" | "failed";
 type AudioActivity = "game" | "phrase-quiz" | "phrase-library" | "reference";
 
 const consonants: Letter[] = [
@@ -268,7 +271,7 @@ const blendVowelKeys = ["J", "K", "L", ";"];
 const matchKeys = ["Q", "W", "E", "R", "A", "S", "D", "F", "Z", "X", "C", "V"];
 const gameModes = ["listen", "shadow", "match", "blend", "speed", "typing"] as const;
 type GameMode = typeof gameModes[number];
-const APP_VERSION = "42";
+const APP_VERSION = "46";
 const KEYBOARD_MODE_KEY = "hangul-keyboard-mode-v33";
 const AUDIO_ASSET_VERSION = "21";
 const TYPING_BEST_KEY = "hangul-typing-best-v1";
@@ -299,8 +302,8 @@ const initialMatchDeck: MatchCard[] = initialMatchLetters.flatMap((letter) => [
   { uid: `${letter.char}-sound`, letter, type: "sound" as const },
 ]);
 
-let activeAudio: HTMLAudioElement | null = null;
-const audioCache = new Map<string, HTMLAudioElement>();
+const audioPlayback = new AudioPlaybackController();
+function stopAudioPlayback() { audioPlayback.stop(); }
 
 function createFreshPageProgressLedgerId() {
   const uuid = typeof globalThis.crypto?.randomUUID === "function"
@@ -759,52 +762,13 @@ function consonantReferenceSoundPath(letter: Letter) {
 
 function preloadAudioSource(source: string) {
   if (typeof window === "undefined") return;
-  if (!source || audioCache.has(source)) return;
-  const audio = new Audio(source);
-  audio.preload = "auto";
-  audio.addEventListener("error", () => audioCache.delete(source), { once: true });
-  audio.load();
-  audioCache.set(source, audio);
+  audioPlayback.preload(source);
 }
 
 async function playAudioSourceToEnd(source: string, speed = 1): Promise<AudioPlaybackResult> {
   if (typeof window === "undefined" || !source) return "failed";
   stopSpeechSynthesis();
-  preloadAudioSource(source);
-  activeAudio?.pause();
-  const audio = (audioCache.get(source)?.cloneNode(true) as HTMLAudioElement | undefined) ?? new Audio(source);
-  activeAudio = audio;
-  audio.volume = 1;
-  audio.preservesPitch = true;
-  audio.playbackRate = speed;
-
-  return new Promise<AudioPlaybackResult>((resolve) => {
-    let settled = false;
-    let timeout = 0;
-    const finish = (result: AudioPlaybackResult, invalidateCache = false) => {
-      if (settled) return;
-      settled = true;
-      window.clearTimeout(timeout);
-      audio.removeEventListener("ended", handleEnded);
-      audio.removeEventListener("error", handleError);
-      audio.removeEventListener("pause", handlePause);
-      if (invalidateCache) audioCache.delete(source);
-      if (activeAudio === audio) activeAudio = null;
-      resolve(result);
-    };
-    const handleEnded = () => finish("ended");
-    const handleError = () => finish("failed", true);
-    // Browsers may dispatch pause immediately before ended at natural completion.
-    const handlePause = () => finish(audio.ended ? "ended" : "interrupted");
-    audio.addEventListener("ended", handleEnded, { once: true });
-    audio.addEventListener("error", handleError, { once: true });
-    audio.addEventListener("pause", handlePause, { once: true });
-    timeout = window.setTimeout(() => {
-      finish("failed", true);
-      audio.pause();
-    }, 15_000);
-    void audio.play().catch(() => finish("failed", true));
-  });
+  return audioPlayback.play(source, speed);
 }
 
 function preloadKorean(text: string) {
@@ -946,6 +910,8 @@ export default function Home() {
   const [localToday, setLocalToday] = useState("");
   const dailyReview = useDailyReview(reviewPhraseIds);
   const vowelHistory = useVowelHistory();
+  const [planActivity, setPlanActivity] = useState<"review" | "listening" | null>(null);
+  const dailyPlan = useMemo(() => dailyPlanSummary(reviewPhraseIds, dailyReview.records, vowelHistory.records, dailyReview.today), [dailyReview.records, dailyReview.today, vowelHistory.records]);
   const [autoAdvanceMs, setAutoAdvanceMs] = useState<AutoAdvanceDelay>(3000);
   const [audioSpeed, setAudioSpeed] = useState<1 | 0.82>(1);
   const [showRomanization, setShowRomanization] = useState(true);
@@ -1174,7 +1140,7 @@ export default function Home() {
     speedCancelledRef.current = true;
     setSpeedCancelled(true);
     gamePlaybackRequestRef.current += 1;
-    activeAudio?.pause();
+    stopAudioPlayback();
     stopSpeechSynthesis();
     return true;
   }, []);
@@ -1205,7 +1171,7 @@ export default function Home() {
     typingReplayTokenRef.current += 1;
     setTypingAudioBusy(false);
     gamePlaybackRequestRef.current += 1;
-    if (audioActivityRef.current === "game") activeAudio?.pause();
+    if (audioActivityRef.current === "game") stopAudioPlayback();
     typingPhaseRef.current = "idle";
     typingStopIndexRef.current = 0;
     typingRunningSinceRef.current = 0;
@@ -1254,7 +1220,7 @@ export default function Home() {
     comparisonSequenceRef.current += 1;
     setComparisonBusy(false);
     if (wasActive) setComparisonStatus(interruptedStatus);
-    if (stopAudio) activeAudio?.pause();
+    if (stopAudio) stopAudioPlayback();
   }, []);
 
   const claimGameActivity = useCallback(() => {
@@ -1269,7 +1235,7 @@ export default function Home() {
     setPhraseAudioReady(false);
     setPhraseAudioFailed(false);
     if (shouldStopOtherAudio) {
-      activeAudio?.pause();
+      stopAudioPlayback();
       stopSpeechSynthesis();
     }
   }, []);
@@ -1298,7 +1264,7 @@ export default function Home() {
     setShadowAudioBusy(false);
     cancelComparisonSequence(false, "已切换学习内容，对照播放已停止；返回后可重新试听。");
     if (shouldStopOtherAudio) {
-      activeAudio?.pause();
+      stopAudioPlayback();
       stopSpeechSynthesis();
     }
   }, [cancelActiveSpeedRound, cancelComparisonSequence, cancelMatchInteraction, pauseTypingRun, resetKoreanInput]);
@@ -2056,7 +2022,7 @@ export default function Home() {
         shadowAudioBusyRef.current = false;
         setShadowAudioBusy(false);
         if (audioActivityRef.current === "game") {
-          activeAudio?.pause();
+          stopAudioPlayback();
           stopSpeechSynthesis();
         }
       }
@@ -2081,7 +2047,7 @@ export default function Home() {
         setPhraseAudioReady(false);
         setPhraseAudioFailed(false);
         if (audioActivityRef.current === "phrase-quiz") {
-          activeAudio?.pause();
+          stopAudioPlayback();
           stopSpeechSynthesis();
         }
       }
@@ -2126,7 +2092,7 @@ export default function Home() {
       if (shadowAudioBusyRef.current) setShadowAudioFailed(true);
       shadowAudioBusyRef.current = false;
       setShadowAudioBusy(false);
-      activeAudio?.pause();
+      stopAudioPlayback();
       stopSpeechSynthesis();
     };
     const frame = window.requestAnimationFrame(handleVisibilityChange);
@@ -2191,7 +2157,7 @@ export default function Home() {
     comparisonPlaybackActiveRef.current = false;
     shadowPlaybackRequestRef.current += 1;
     shadowAudioBusyRef.current = false;
-    activeAudio?.pause();
+    stopAudioPlayback();
     stopSpeechSynthesis();
   }, [sealOwnProgressLedger]);
 
@@ -2439,7 +2405,7 @@ export default function Home() {
         return;
       }
       // Independent learning panels own their keys, never game answers.
-      if (element?.closest('[data-keyboard-scope="pronunciation"], [data-keyboard-scope="daily-review"], [data-keyboard-scope="batchim"], [data-keyboard-scope="letters"], [data-keyboard-scope="settings"]')) return;
+      if (element?.closest('[data-keyboard-scope="pronunciation"], [data-keyboard-scope="daily-review"], [data-keyboard-scope="batchim"], [data-keyboard-scope="letters"], [data-keyboard-scope="settings"], [data-keyboard-scope="audio-guide"], [data-keyboard-scope="daily-plan"]')) return;
       const replayKey = key === " " || event.key === "F8" || (!(keyboardZone === "games" && directKoreanKeyboard) && key === "r");
       const focusedGameTab = element?.getAttribute("role") === "tab" && element.id.startsWith("game-tab-");
       const focusedPhraseTab = element?.id === "phrase-tab-word" || element?.id === "phrase-tab-sentence";
@@ -2943,7 +2909,7 @@ export default function Home() {
     const hadMistake = typingMissedIdsRef.current.includes(target.id);
     typingComboRef.current = hadMistake ? 0 : addSafeCount(typingComboRef.current, 1);
     awardXp(hadMistake ? 4 : 7, typingComboRef.current);
-    activeAudio?.pause();
+    stopAudioPlayback();
     stopSpeechSynthesis();
 
     const nextIndex = targetIndex + 1;
@@ -3100,7 +3066,7 @@ export default function Home() {
     cancelComparisonSequence(false);
     const source = consonantNameMap.has(letter.char) ? consonantReferenceSoundPath(letter) : audioPath(letter.sample);
     if (!source) {
-      activeAudio?.pause();
+      stopAudioPlayback();
       stopSpeechSynthesis();
       showNotice("ㅇ 作初声本来就是静音；放在收尾时才读 ng");
       return false;
@@ -3157,7 +3123,7 @@ export default function Home() {
     const request = ++comparisonSequenceRef.current;
     setComparisonBusy(false);
     if (comparisonConsonant === "ㅇ") {
-      activeAudio?.pause();
+      stopAudioPlayback();
       comparisonPlaybackActiveRef.current = false;
       setComparisonStatus("ㅇ 作初声时没有辅音声；右边完整音节从元音直接开始。");
       return;
@@ -3303,7 +3269,7 @@ export default function Home() {
     claimPhraseActivity();
     phrasePlaybackRequestRef.current += 1;
     phraseQuestionTokenRef.current += 1;
-    activeAudio?.pause();
+    stopAudioPlayback();
     stopSpeechSynthesis();
     setPhraseTab(tab);
     setPhraseFilter("all");
@@ -3339,6 +3305,32 @@ export default function Home() {
     else startFullReview();
   }
 
+  function returnToDailyPlan() {
+    prepareReferenceActivity();
+    setPlanActivity(null);
+    moveToSection("today-plan", "today-plan");
+  }
+
+  function openPlanReview() {
+    if (!dailyReview.ready || !dailyPlan || dailyPlan.review.target === 0) return;
+    prepareReferenceActivity();
+    setPlanActivity("review");
+    moveToSection("daily-review", "daily-review");
+  }
+
+  function openPlanListening() {
+    if (!vowelHistory.ready) return;
+    prepareReferenceActivity();
+    setPlanActivity("listening");
+    vowelPracticeRef.current?.openChallenge();
+    moveToSection("pronunciation-practice", "vowel-listening");
+  }
+
+  function openRegularReview() {
+    prepareReferenceActivity();
+    setPlanActivity(null);
+  }
+
   function openKeyboardHelp() {
     vowelPracticeRef.current?.stop();
     dailyReviewRef.current?.stop();
@@ -3353,7 +3345,7 @@ export default function Home() {
     gamePlaybackRequestRef.current += 1;
     phrasePlaybackRequestRef.current += 1;
     cancelComparisonSequence(false);
-    activeAudio?.pause();
+    stopAudioPlayback();
     stopSpeechSynthesis();
     cancelActiveSpeedRound("快捷键帮助已打开，本轮极速认读已取消。");
     setShowKeyboardHelp(true);
@@ -3451,7 +3443,7 @@ export default function Home() {
     setPhraseAutoAdvanceCancelled(true);
     setPhraseAudioFailed(false);
     setPhraseAudioReady(false);
-    activeAudio?.pause();
+    stopAudioPlayback();
     stopSpeechSynthesis();
     setPhraseTab(tab);
     setPhraseFilter("all");
@@ -3478,7 +3470,7 @@ export default function Home() {
     setPhraseAutoAdvanceCancelled(true);
     setPhraseAudioFailed(false);
     setPhraseAudioReady(false);
-    activeAudio?.pause();
+    stopAudioPlayback();
     stopSpeechSynthesis();
     setPhraseGroup(group);
     setExpandedPhraseId(null);
@@ -3495,7 +3487,7 @@ export default function Home() {
     setPhraseAutoAdvanceCancelled(true);
     setPhraseAudioFailed(false);
     setPhraseAudioReady(false);
-    activeAudio?.pause();
+    stopAudioPlayback();
     stopSpeechSynthesis();
     setPhraseReadFilter(filter);
     setExpandedPhraseId(null);
@@ -3569,7 +3561,7 @@ export default function Home() {
     setPhraseAudioReady(false);
     if (phraseQuizRound >= phraseQuizTotal) {
       phrasePlaybackRequestRef.current += 1;
-      activeAudio?.pause();
+      stopAudioPlayback();
       stopSpeechSynthesis();
       setPhraseQuizFinished(true);
       updateStats((current) => ({ ...current, games: addSafeCount(current.games, 1) }));
@@ -3653,7 +3645,7 @@ export default function Home() {
     listenQuestionTokenRef.current += 1;
     blendQuestionTokenRef.current += 1;
     cancelMatchInteraction();
-    activeAudio?.pause();
+    stopAudioPlayback();
     stopSpeechSynthesis();
     setGameAudioReady(false);
     setGameAudioFailed(false);
@@ -3682,7 +3674,7 @@ export default function Home() {
     claimPhraseActivity();
     phrasePlaybackRequestRef.current += 1;
     setPhraseAutoAdvanceCancelled(true);
-    activeAudio?.pause();
+    stopAudioPlayback();
     stopSpeechSynthesis();
     audioActivityRef.current = "reference";
   }
@@ -3858,7 +3850,7 @@ export default function Home() {
     setGameAudioFailed(false);
     if (listenRound >= 10 || listenHearts <= 0) {
       gamePlaybackRequestRef.current += 1;
-      activeAudio?.pause();
+      stopAudioPlayback();
       setListenFinished(true);
       if (listenQualifiesFullReview && listenScore >= 8) markFullReviewCompleted();
       updateStats((current) => ({ ...current, games: addSafeCount(current.games, 1) }));
@@ -4141,7 +4133,7 @@ export default function Home() {
     setGameAudioFailed(false);
     if (blendRound >= 8) {
       gamePlaybackRequestRef.current += 1;
-      activeAudio?.pause();
+      stopAudioPlayback();
       setBlendFinished(true);
       if (blendScope === "starter" && blendScore >= 6) markBeginnerBlendCompleted();
       updateStats((current) => ({ ...current, games: addSafeCount(current.games, 1) }));
@@ -4255,13 +4247,15 @@ export default function Home() {
           <span><strong>韩语 40 音</strong><small>{`中文闯关版 · v${APP_VERSION}`}</small></span>
         </a>
         <nav aria-label="主要导航">
+          <a href="#today-plan" onClick={returnToDailyPlan}>今日路线</a>
           <a href="#starter" onClick={prepareReferenceActivity}>新手路线</a>
           <a href="#games" onClick={prepareGameActivity}>闯关训练</a>
           <a href="#phrases" onClick={claimPhraseActivity}>词句背诵</a>
-          <a href="#daily-review" onClick={prepareReferenceActivity}>今日复习</a>
+          <a href="#daily-review" onClick={openRegularReview}>今日复习</a>
           <a href="#pronunciation-practice" onClick={prepareReferenceActivity}>发音对比</a>
           <a href="#learn" onClick={prepareReferenceActivity}>40 音表</a>
           <a href="#learning-tools" onClick={prepareReferenceActivity}>设置·备份</a>
+          <a href="#audio-guide" onClick={prepareReferenceActivity}>音源与反馈</a>
         </nav>
         <div className="topbar-actions">
           <button className="header-keyboard" type="button" onClick={openKeyboardHelp} aria-haspopup="dialog" aria-expanded={showKeyboardHelp} aria-label="打开键盘快捷键帮助"><span aria-hidden="true">⌨</span><b>快捷键</b></button>
@@ -4280,9 +4274,9 @@ export default function Home() {
             <h1 id="hero-title">别再硬背。<br />把 40 音玩熟。</h1>
             <p className="hero-lead">手放在键盘上，就能开始练习。听到 ㄱ 按 R，听到 ㅏ 按 K；紧音用 Shift，复合元音连按两键。韩文和英文输入法下都能玩。</p>
             <div className="hero-actions">
-              <a className="primary-action" href="#games" onClick={prepareGameActivity}>开始今日闯关 <span aria-hidden="true">↓</span></a>
+              <a className="primary-action" href="#today-plan" onClick={returnToDailyPlan}>开始今日 10 分钟 <span aria-hidden="true">↓</span></a>
               <a className="text-action" href="#learn" onClick={prepareReferenceActivity}>先听 40 音 <span aria-hidden="true">↗</span></a>
-              <a className="text-action" href="#daily-review" onClick={prepareReferenceActivity}>复习 10 个词句 <span aria-hidden="true">↗</span></a>
+              <a className="text-action" href="#daily-review" onClick={openRegularReview}>复习 10 个词句 <span aria-hidden="true">↗</span></a>
             </div>
             <p className="keyboard-entry-hint">电脑端按 <kbd>Enter</kbd> 进入训练场，再按一次开始；<kbd>F2</kbd> 随时返回训练场。</p>
             <nav className="keyboard-section-nav" aria-label="键盘练习快速入口">{["训练场", "40 音点读", "词句闯关", "收音练习"].map((label, index) => <button key={label} type="button" onClick={() => navigateKeyboardSection(index + 1)}><kbd>Shift + {index + 1}</kbd> {label}</button>)}</nav>
@@ -4316,6 +4310,8 @@ export default function Home() {
           <article><span className="principle-number">02</span><div><strong>六种训练轮换</strong><p>听音、跟读、配对、拼读、极速认读和生活词打字交替，避免单一题型产生假熟练。</p></div></article>
           <article><span className="principle-number">03</span><div><strong>只存本机进度</strong><p>XP、连胜和薄弱音保存在当前设备，不需要注册。</p></div></article>
         </section>
+
+        <DailyPlan summary={dailyPlan} ready={dailyReview.ready && vowelHistory.ready} nextLesson={beginnerNextLabel} beginner={coreVowelMastered < coreVowelChars.length} storageMessages={[dailyReview.storageMessage, vowelHistory.storageMessage]} onReview={openPlanReview} onListening={openPlanListening} onLesson={continueBeginnerPath} onPrepare={prepareReferenceActivity} />
 
         <section className="starter-section" id="starter" aria-labelledby="starter-title">
           <div className="starter-heading">
@@ -4544,7 +4540,7 @@ export default function Home() {
           </div>
         </section>
 
-        <DailyReview ref={dailyReviewRef} items={phraseItems} {...dailyReview} onPrepare={prepareReferenceActivity} playSample={playSound} />
+        <DailyReview ref={dailyReviewRef} items={phraseItems} {...dailyReview} target={planActivity === "review" ? dailyPlan?.review.target : 10} onReturnToPlan={planActivity === "review" ? returnToDailyPlan : undefined} onPrepare={prepareReferenceActivity} playSample={playSound} />
 
         <LearningTools autoAdvanceMs={autoAdvanceMs} onAutoAdvance={changeAutoAdvance} onPrepare={prepareReferenceActivity} onExport={exportLearningBackup} onParse={text => parsePortableBackup(text, backupValidation)} onImport={importLearningBackup} />
 
@@ -4672,7 +4668,9 @@ export default function Home() {
           <p className="pronunciation-note"><span className="pronunciation-note-icon" aria-hidden="true">♪</span><span className="pronunciation-note-copy"><strong>真人起音说明：</strong>18 条起音来自韩国母语者 호로조 的 CC0 原始 WAV，按声谱边界截去完整元音和词尾。ㄹ、ㄲ、ㄸ、ㅃ 的单次片段过短，因此清晰版只做“原片段 + 120ms 静音 + 同一原片段”；没有加入 ㅏ、没有拉伸，也没有合成长音。起音用于字母听辨；跟读统一使用完整音节。ㅇ 初声无声，已从盲听题排除。<a href="https://commons.wikimedia.org/wiki/Category:Lingua_Libre_pronunciation_by_%ED%98%B8%EB%A1%9C%EC%A1%B0" target="_blank" rel="noreferrer">查看真人音源</a><a href="https://www.korean.go.kr/front/onlineQna/onlineQnaView.do?mn_id=261&amp;pageIndex=1&amp;qna_seq=329921" target="_blank" rel="noreferrer">查看 ㅇ 官方说明</a></span></p>
         </section>
 
-        <VowelPractice ref={vowelPracticeRef} onPrepare={prepareReferenceActivity} playSample={playSound} speed={audioSpeed} onSpeedChange={changeAudioSpeed} history={vowelHistory} autoAdvanceMs={autoAdvanceMs} />
+        <VowelPractice ref={vowelPracticeRef} onPrepare={prepareReferenceActivity} playSample={playSound} speed={audioSpeed} onSpeedChange={changeAudioSpeed} history={vowelHistory} autoAdvanceMs={autoAdvanceMs} onReturnToPlan={planActivity === "listening" ? returnToDailyPlan : undefined} />
+
+        <AudioGuide version={APP_VERSION} onPrepare={prepareReferenceActivity} onPlay={source => playAudioSourceToEnd(source, audioSpeed)} onStop={stopAudioPlayback} />
 
         <BatchimLesson ref={batchimLessonRef} items={phraseItems} onPrepare={prepareReferenceActivity} playSample={playSound} autoAdvanceMs={autoAdvanceMs} />
 

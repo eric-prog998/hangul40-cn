@@ -75,7 +75,10 @@ test.describe("手机屏幕", () => {
     await expect(page.getByTestId("phrase-choice-0")).toBeEnabled();
     const clip = await lastAudio(page);
     if (clip.kind !== "phrase") throw new Error("expected a phrase clip");
-    await page.locator('[data-testid^="phrase-choice-"]').filter({ hasText: clip.phrase.chinese }).tap();
+    // Match the full meaning: e.g. 人 must not also select 中国人.
+    const meanings = await page.locator('[data-testid^="phrase-choice-"] span').allTextContents();
+    expect(meanings.filter((meaning) => meaning === clip.phrase.chinese)).toHaveLength(1);
+    await page.getByTestId(`phrase-choice-${meanings.indexOf(clip.phrase.chinese)}`).tap();
     await expectTotalXp(page, 52);
 
     await page.locator("#game-tab-typing").tap();

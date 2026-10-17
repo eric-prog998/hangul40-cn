@@ -236,13 +236,19 @@ export const test = base.extend<{ autoAdvance: "manual" | "site-default"; audioS
     if (autoAdvance === "manual") await disableAutoAdvance(context);
     await provide();
   }, { auto: true }],
-  // Any console error, uncaught exception or failed request fails the test.
+  // Catch transport failures too. Navigation/media cancellation is expected when
+  // the user changes sections; HTTP errors and other transport failures are not.
   browserProblems: [async ({ context }, provide) => {
     const problems: string[] = [];
     const watch = (page: Page) => {
       page.on("console", (message) => { if (message.type() === "error") problems.push(`console: ${message.text()}`); });
       page.on("pageerror", (error) => problems.push(`uncaught: ${error.message}`));
       page.on("response", (response) => { if (response.status() >= 400) problems.push(`HTTP ${response.status()}: ${response.url()}`); });
+      page.on("requestfailed", request => {
+        const error = request.failure()?.errorText ?? "unknown network failure";
+        if (/^(?:net::ERR_ABORTED|cancelled|Load request cancelled)$/.test(error)) return;
+        problems.push(`network: ${error}: ${request.url()}`);
+      });
     };
     context.pages().forEach(watch);
     context.on("page", watch);

@@ -1,4 +1,10 @@
-这是“韩语 40 音｜中文闯关版 v42”的可编辑源码。请先阅读 README.md、README.zh-CN.md、V42-RELEASE-NOTES.md、V41-FEATURE-NOTES.md、LEARNING_ROADMAP_ZH.md，再阅读与本次任务相关的源码以及 tests/、e2e/ 中的测试；以实际源码为准，不要按旧版说明重建项目。v42 是应用版本，package.json 的 0.1.0 是私有 npm 项目的包版本；不要仅为对齐应用版本而修改它。
+这是“韩语 40 音｜中文闯关版 v46”的可编辑源码。请先阅读 README.md、README.zh-CN.md、V46-RELEASE-NOTES.md、V45-RELEASE-NOTES.md、V44-RELEASE-NOTES.md、V43-RELEASE-NOTES.md、V42-RELEASE-NOTES.md、V41-FEATURE-NOTES.md、LEARNING_ROADMAP_ZH.md，再阅读与本次任务相关的源码以及 tests/、e2e/ 中的测试；以实际源码为准，不要按旧版说明重建项目。v46 是应用版本，package.json 的 0.1.0 是私有 npm 项目的包版本；不要仅为对齐应用版本而修改它。
+
+v46 在 daily-review.tsx 加入仅本页有效的连续输入与 R 遮住重写。只有主动成功自评才允许聚焦下一张；外部更新不抢焦点。卡片身份变化清理临时输入、答案和重写标记，不能只隐藏后在旧 key 返回时复现。评分键长按不得串入下一输入框；失焦需清理 IME 标记。重写不写排期、不增完成量，必须保留“已看过答案”提示。
+
+v45 在 daily-review.tsx 新增可选韩文输入，recall-logic.ts 仅作 NFC 参考文字对照，区分一致、格式差异与其他差异，不作翻译或发音判分。输入只在内存，不持久化或上传；仅主动自评才写复习排期。保留 T 入口、输入框数字／空格不触发快捷键、IME 组字／229／长按保护、跨日与换题隔离；不把不同表达直接标成错误。
+
+v44 的 app/daily-plan* 是今日路线：只读汇总现有每日复习与近 200 次盲听记录，5 项中文回忆和 8 次听辨为练习目标，下一小课仅建议、不计打卡。短练和普通复习共享数据；不增加持久存储键或改变备份格式。保持空队列、跨日、跨标签页、存储受限提示、IME 与按钮原生键盘操作、返回路线取消自动切题等行为。
 
 主要模块：
 - app/page.tsx、app/globals.css：主页面与六种训练（听音、跟读、配对、拼读、极速、地铁打字）。
@@ -27,7 +33,7 @@
 10. 不将 API 密钥、访问令牌、账号隐私、学习备份、录音或本机环境文件提交到仓库；排除构建产物、日志、node_modules 和本地重复副本。保留现有 LICENSE：Copyright (c) 2026 Eric D，代码采用 MIT；真人辅音起音的原始录音遵循 CC0 1.0，不把所有音频一概称为 MIT 或全部真人。保留 HUMAN_CONSONANT_AUDIO.md、data/consonant-human-clips.json 以及其他来源和许可说明，不擅自改变许可证。
 11. 测试与结构：改动任何玩法、键盘、音频、进度保存或备份后，两套测试都要运行并全部通过。修 bug 时先补一个能重现它的测试，再改代码。新测试必须检验实际行为（调用函数，或在 e2e/ 里像学习者一样操作页面），不要再新增用正则匹配源码文本的断言：这类断言在改名时误报，却发现不了真正的逻辑错误。新功能优先写成独立模块或组件（例如 app/vowel-*.ts、app/portable-backup.ts 的做法），不要继续把状态和逻辑堆进 app/page.tsx。e2e 测试靠页面实际播放的音频文件判断隐藏的正确答案；如果改了音频路径规则或题目界面的 id／data-testid，要同步更新 e2e/support/app.ts。
 
-运行环境为 Node.js >=22.13.0；用 npm ci 安装锁定依赖、npm run dev 本地运行，不需要为现有固定音频配置 API 密钥。当前 npm 脚本使用 POSIX 环境变量写法，Windows 可使用 WSL。修改后运行 npx tsc --noEmit、npm run lint、npm test（包含生产构建）和 npm run test:e2e（真浏览器测试，首次运行前执行 npx playwright install chromium），并按改动范围做真实浏览器检查；报告实际执行的检查和失败项，不把源码断言或模拟设备测试冒充真实交互／真人音质验收。
+运行环境为 Node.js >=22.13.0；用 npm ci 安装锁定依赖、npm run dev 本地运行，不需要为现有固定音频配置 API 密钥。当前 npm 脚本使用 POSIX 环境变量写法，Windows 可使用 WSL。修改后运行 npx tsc --noEmit、npm run lint、npm test（包含生产构建）和 npm run test:e2e（真浏览器测试，首次运行前执行 npx playwright install chromium webkit），并按改动范围做真实浏览器检查；报告实际执行的检查和失败项，不把源码断言或模拟设备测试冒充真实交互／真人音质验收。
 
 现有网站：https://hangul40-cn-eric0716.ericlll1.chatgpt.site/
 更新 GitHub 源码不等于部署网站。项目采用 Vinext／Cloudflare Worker，不是可双击运行或直接上传 GitHub Pages 的纯静态页面。只执行用户明确要求的操作；若要求部署，沿用 .openai/hosting.json 的现有 project_id，不创建重复站点，不擅自改变公开范围。该配置含项目标识而非部署凭据；任何临时发布凭据都不得写入代码、文档或命令行。

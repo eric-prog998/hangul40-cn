@@ -8,7 +8,7 @@ import { VOWEL_CONTRASTS, VOWEL_GUIDE_SOURCE, type VowelPracticeMode } from "./p
 import type { VowelHistoryModel } from "./use-vowel-history";
 import type { AutoAdvanceDelay } from "./learning-settings";
 
-export type VowelPracticeHandle = { stop: () => void };
+export type VowelPracticeHandle = { stop: () => void; openChallenge: () => void };
 type Props = {
   onPrepare: () => void;
   playSample: (text: string, speed: 1 | 0.82) => Promise<"ended" | "interrupted" | "failed">;
@@ -16,9 +16,10 @@ type Props = {
   onSpeedChange: (speed: 1 | 0.82) => void;
   history: VowelHistoryModel;
   autoAdvanceMs: AutoAdvanceDelay;
+  onReturnToPlan?: () => void;
 };
 
-const VowelPractice = forwardRef<VowelPracticeHandle, Props>(function VowelPractice({ onPrepare, playSample, speed, onSpeedChange, history, autoAdvanceMs }, ref) {
+const VowelPractice = forwardRef<VowelPracticeHandle, Props>(function VowelPractice({ onPrepare, playSample, speed, onSpeedChange, history, autoAdvanceMs, onReturnToPlan }, ref) {
   const [pairIndex, setPairIndex] = useState(0);
   const [view, setView] = useState<"compare" | "challenge">("compare");
   const [mode, setMode] = useState<VowelPracticeMode>("isolated");
@@ -43,7 +44,7 @@ const VowelPractice = forwardRef<VowelPracticeHandle, Props>(function VowelPract
     }
     playingRef.current = false;
   }, []);
-  useImperativeHandle(ref, () => ({ stop }), [stop]);
+  useImperativeHandle(ref, () => ({ stop, openChallenge: () => { stop(); setView("challenge"); } }), [stop]);
   useEffect(() => {
     mounted.current = true;
     return () => { mounted.current = false; stop(); };
@@ -96,6 +97,7 @@ const VowelPractice = forwardRef<VowelPracticeHandle, Props>(function VowelPract
   return <section id="pronunciation-practice" className="vowel-practice" aria-labelledby="vowel-practice-title" data-keyboard-scope="pronunciation" tabIndex={-1} onKeyDown={handleKeyboard}>
     <div className="vowel-practice-heading"><span className="section-kicker">听清差别，再听自己</span><h2 id="vowel-practice-title">嘴唇一变，<br />声音就不一样。</h2><p>先比较示范，再录音回听。不用汉语谐音硬套，也不把“听懂了”当成“已经发音准确”。</p><p>新：试试 8 题盲听挑战，找出自己还会混淆的元音，再单独练错题。</p></div>
     <div className="vowel-practice-workspace">
+      {onReturnToPlan && <div className="daily-plan-return"><p>今日路线 · 盲听作答与错题重练共用原有记录。</p><button type="button" onClick={onReturnToPlan}>返回今日路线</button></div>}
       <div className="vowel-practice-views" role="group" aria-label="元音练习方式"><button type="button" aria-pressed={view === "compare"} onClick={() => { if (view !== "compare") { onPrepare(); setView("compare"); } }}>口型对比与跟读</button><button type="button" aria-pressed={view === "challenge"} onClick={() => { if (view !== "challenge") { onPrepare(); setView("challenge"); } }}>盲听 8 题 · 新</button></div>
       {view === "challenge" ? <VowelListeningChallenge ref={challenge} onPrepare={onPrepare} playSample={playSample} speed={speed} onSpeedChange={onSpeedChange} history={history} autoAdvanceMs={autoAdvanceMs} /> : <>
       <div className="vowel-pair-picker" role="group" aria-label="选择元音对比组">{VOWEL_CONTRASTS.map((item, index) => <button type="button" key={item.id} aria-pressed={pairIndex === index} onClick={() => { onPrepare(); setPairIndex(index); setStatus("已切换对比组，先听两边，再跟读。"); }}><strong lang="ko">{item.title}</strong><span>{item.subtitle}</span></button>)}</div>

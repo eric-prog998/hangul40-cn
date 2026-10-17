@@ -1,0 +1,39 @@
+.audio-guide { margin: 52px 0; padding: 32px; border: 1px solid #dbd9d3; border-radius: 24px; background: #faf9f6; scroll-margin-top: 100px; }
+.audio-guide-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+.audio-guide-heading h2 { font-size: 28px; margin: 8px 0 12px; }
+.audio-guide p { line-height: 1.8; color: #62635d; font-size: 14px; }
+.audio-guide-heading p { max-width: 660px; margin: 0; }
+.audio-review-count { flex-shrink: 0; display: grid; gap: 6px; text-align: right; }
+.audio-review-count strong { font-size: 32px; color: #365747; }
+.audio-review-count span { font-size: 12px; color: #66675f; }
+.audio-review-notice { background: #f0ece1; border-radius: 14px; margin: 24px 0; padding: 16px 20px; }
+.audio-review-notice strong { font-size: 14px; color: #65512a; }
+.audio-review-notice p { margin: 6px 0 0; }
+.audio-guide-workspace { display: grid; grid-template-columns: minmax(210px, .8fr) minmax(0, 1.5fr); gap: 24px; }
+.audio-guide-picker { display: flex; flex-direction: column; align-items: stretch; }
+.audio-guide label { display: block; font-size: 13px; font-weight: 700; margin: 14px 0 7px; }
+.audio-guide label:first-child { margin-top: 0; }
+.audio-guide input, .audio-guide select, .audio-guide textarea { border: 1px solid #cbcfc4; border-radius: 10px; background: #fff; color: #292d28; width: 100%; min-width: 0; min-height: 44px; font: inherit; font-size: 14px; padding: 10px 12px; box-sizing: border-box; }
+.audio-guide textarea { resize: vertical; }
+.audio-guide button { background: #fff; color: #2f4b3a; border: 1px solid #c3cabe; border-radius: 10px; min-height: 44px; padding: 10px 15px; font: inherit; font-size: 13px; cursor: pointer; }
+.audio-guide button:disabled { opacity: .5; cursor: not-allowed; }
+.audio-guide :is(button, input, select, textarea, summary):focus-visible { outline: 3px solid #789583; outline-offset: 3px; }
+.audio-guide-detail { min-width: 0; border-radius: 18px; padding: 24px; background: #fff; border: 1px solid #e0e2d9; }
+.audio-guide-detail h3 { margin: 18px 0; font-size: 28px; line-height: 1.5; overflow-wrap: anywhere; }
+.audio-guide-badges { display: flex; flex-wrap: wrap; gap: 7px; }
+.audio-guide-badges span { border-radius: 20px; background: #eef2eb; padding: 5px 10px; font-size: 12px; color: #3f5845; }
+.audio-guide-badges span:last-child { background: #f8f1e4; color: #795d2c; }
+.audio-guide .audio-source-text { font-size: 12px; }
+.audio-guide a { color: #38664c; text-underline-offset: 3px; }
+.audio-guide-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+#audio-guide-play { background: #365b43; color: #fff; border-color: #365b43; }
+.audio-guide details { margin-top: 18px; font-size: 12px; }
+.audio-guide summary { cursor: pointer; padding: 10px 0; }
+.audio-guide dl { font-size: 12px; line-height: 1.6; }
+.audio-guide dt { color: #6e746b; margin-top: 8px; }
+.audio-guide dd { margin: 3px 0 0; overflow-wrap: anywhere; }
+.audio-guide-status { min-height: 28px; margin-bottom: 0; }
+.audio-feedback-form { margin-top: 18px; padding: 24px; border-top: 1px solid #d9ded3; }
+.audio-feedback-form h3 { margin-top: 0; }
+#audio-report { font: 12px/1.7 ui-monospace, monospace; background: #f3f5ef; }
+@media (max-width: 720px) { .audio-guide { padding: 20px 16px; margin: 32px 0; } .audio-guide-heading { display: block; } .audio-review-count { margin-top: 18px; text-align: left; } .audio-guide-workspace { grid-template-columns: minmax(0,1fr); gap: 18px; } .audio-guide-detail, .audio-feedback-form { padding: 18px 14px; } .audio-guide-detail h3 { font-size: 24px; } .audio-guide-actions button { flex: 1 1 auto; } }

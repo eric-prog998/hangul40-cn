@@ -1,0 +1,37 @@
+.daily-plan { width: min(1180px, calc(100% - 40px)); margin: 0 auto 100px; padding: 32px; background: var(--cream); border: 1px solid var(--line); border-radius: 26px; scroll-margin-top: 24px; }
+.daily-plan:focus-visible { outline: 3px solid var(--ink); outline-offset: 6px; }
+.daily-plan-heading { display: flex; justify-content: space-between; gap: 28px; align-items: center; margin-bottom: 24px; }
+.daily-plan .section-kicker { background: var(--lime); color: var(--ink); padding: 7px 10px; }
+.daily-plan h2 { font-size: clamp(30px, 4vw, 46px); margin: 18px 0 10px; letter-spacing: -.04em; }
+.daily-plan-heading p { color: var(--ink-soft); line-height: 1.8; margin: 0; font-size: 14px; }
+.daily-plan-count { display: flex; flex-direction: column; text-align: right; gap: 5px; flex-shrink: 0; }
+.daily-plan-count span { font-size: 12px; color: var(--ink-soft); }
+.daily-plan-count > strong { font-size: 44px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.daily-plan-count small { font-size: 20px; font-weight: 500; }
+.daily-plan-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.daily-plan article { display: flex; flex-direction: column; min-width: 0; padding: 22px; border: 1px solid var(--line); border-radius: 18px; background: var(--paper); }
+.daily-plan article.is-complete { background: #e8efda; }
+.daily-plan article.daily-plan-lesson { background: #ede8f5; }
+.daily-plan-step { display: flex; justify-content: space-between; align-items: center; font-size: 11px; gap: 8px; }
+.daily-plan kbd { font: inherit; font-size: 11px; border: 1px solid currentColor; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+.daily-plan h3 { font-size: 20px; margin: 20px 0 10px; line-height: 1.5; }
+.daily-plan article p { font-size: 13px; line-height: 1.85; color: var(--ink-soft); margin: 0 0 18px; }
+.daily-plan-metric { font-size: 22px; font-weight: 750; margin-top: auto; line-height: 1.6; font-variant-numeric: tabular-nums; }
+.daily-plan-next-lesson { font-size: 16px; font-weight: 750; line-height: 1.7; margin-top: auto; }
+.daily-plan article small { display: block; font-size: 12px; line-height: 1.7; color: var(--ink-soft); min-height: 60px; margin: 8px 0 16px; }
+.daily-plan button, .daily-plan-return button { min-height: 44px; border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px; background: white; color: var(--ink); cursor: pointer; font-size: 13px; font-weight: 700; }
+.daily-plan article button { display: flex; justify-content: space-between; gap: 8px; }
+.daily-plan button:disabled { cursor: not-allowed; opacity: .55; }
+.daily-plan-footer { display: flex; justify-content: space-between; align-items: center; gap: 24px; margin-top: 24px; }
+.daily-plan-footer strong { font-size: 16px; }
+.daily-plan-footer p { margin: 8px 0 0; color: var(--ink-soft); font-size: 12px; line-height: 1.8; max-width: 640px; }
+.daily-plan button.daily-plan-primary { background: var(--ink); color: white; flex-shrink: 0; display: flex; gap: 16px; align-items: center; }
+.daily-plan-notes { border-top: 1px solid var(--line); margin-top: 22px; padding-top: 12px; color: var(--ink-soft); font-size: 12px; line-height: 1.8; }
+.daily-plan-notes summary { cursor: pointer; min-height: 40px; padding: 8px 0; }
+.daily-plan-notes a { text-decoration: underline; }
+.daily-plan-storage { color: var(--ink-soft); font-size: 12px; line-height: 1.8; margin-top: 16px; }
+.daily-plan-storage p { margin: 4px 0; }
+.daily-plan-return { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: #eef3df; margin-bottom: 18px; font-size: 13px; line-height: 1.7; }
+.daily-plan-return p { margin: 0; }
+@media (max-width: 850px) { .daily-plan { padding: 24px; } .daily-plan-cards { grid-template-columns: 1fr; } .daily-plan article small { min-height: 0; } .daily-plan article { padding: 20px; } .daily-plan-footer { align-items: flex-start; flex-direction: column; gap: 16px; } }
+@media (max-width: 520px) { .daily-plan { width: calc(100% - 28px); padding: 20px 16px; margin-bottom: 70px; } .daily-plan-heading { flex-direction: column; align-items: flex-start; gap: 18px; } .daily-plan-count { text-align: left; } .daily-plan article { padding: 18px; } .daily-plan-footer button { width: 100%; justify-content: space-between; } }

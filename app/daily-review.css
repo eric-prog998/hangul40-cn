@@ -24,6 +24,21 @@
 .daily-review button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 .daily-review kbd { font-family: inherit; font-size: 11px; line-height: 1.4; border: 1px solid currentColor; border-radius: 4px; padding: 2px 5px; white-space: nowrap; opacity: .75; }
 .daily-review-reveal { width: 100%; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 12px; background: var(--ink); color: #fff; font-weight: 700 !important; }
+.daily-review-type, .daily-review-check { width: 100%; background: #e8ecdf; color: var(--ink); display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px; }
+.daily-review-input-box label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+.daily-review-input-box input { width: 100%; min-width: 0; box-sizing: border-box; min-height: 50px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: white; color: var(--ink); font: inherit; font-size: 22px; }
+.daily-review-input-box input:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.daily-review-input-box #daily-review-input-help { font-size: 12px; margin: 10px 0 14px; }
+.daily-review-comparison { background: #e8ecdf; padding: 12px; border-radius: 10px; margin-bottom: 18px; font-size: 13px; line-height: 1.8; overflow-wrap: anywhere; }
+.daily-review-comparison p { margin: 0 0 6px; }
+.daily-review-mode { display: flex; align-items: flex-start; gap: 11px; margin: 0 0 18px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; background: #fffdf8; }
+.daily-review-mode input { width: 20px; height: 20px; flex: 0 0 20px; margin: 2px 0 0; accent-color: var(--ink); }
+.daily-review-mode input:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.daily-review-mode strong, .daily-review-mode small { display: block; line-height: 1.7; }
+.daily-review-mode strong { font-size: 13px; }
+.daily-review-mode small { font-size: 11px; color: var(--ink-soft); }
+.daily-review-retry { width: 100%; margin-top: 12px; display: flex; justify-content: center; align-items: center; gap: 12px; color: var(--ink); background: #f2ede4; }
+.daily-review-retry-note { background: #f5e7c9; border-left: 3px solid #8c6b22; padding: 10px 12px; margin: 18px 0 0; color: var(--ink); font-size: 12px; line-height: 1.8; }
 .daily-review-answer { border-top: 1px dashed var(--line); margin-top: 23px; padding-top: 21px; }
 .daily-review-korean { margin: 0 0 17px; font-size: clamp(29px, 3.6vw, 42px); font-weight: 800; line-height: 1.5; overflow-wrap: anywhere; }
 .daily-review-listen { background: #fff; color: var(--ink); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; width: 100%; font-size: 13px !important; }

@@ -40,7 +40,7 @@ jobs:
         run: npm test
 
       - name: Install the test browser
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Real-browser tests
         run: npm run test:e2e

@@ -1,0 +1,1970 @@
+{
+  "/audio/consonant-human-clarity/rieul.wav": {
+    "sha256": "94bb3c29128a89e55bb99c433abc5dc594af9406f573d5ebf28c0a4b5cc66495",
+    "bytes": 25964
+  },
+  "/audio/consonant-human-clarity/ssang-bieup.wav": {
+    "sha256": "0bd9c684de2a884cc7620d421c18a0b0b2f1a656514763f88e94c13549efc4fd",
+    "bytes": 25580
+  },
+  "/audio/consonant-human-clarity/ssang-digeut.wav": {
+    "sha256": "69969f52994bf3f25cbafbf80ac6a7fafa1c4d23c91e8b6a107bb6a6c70f3f7c",
+    "bytes": 28268
+  },
+  "/audio/consonant-human-clarity/ssang-giyeok.wav": {
+    "sha256": "504f08c7ac57713d8f41614ae6060c0e71c8a01fff594dc0c2250c88f9ae3ffe",
+    "bytes": 28268
+  },
+  "/audio/consonant-human-onset/bieup.wav": {
+    "sha256": "5f01a3e5c72a1ad9c80b833dde889ba059aad29df327f4ffd0ad8ad1c6b0d5a6",
+    "bytes": 9932
+  },
+  "/audio/consonant-human-onset/chieut.wav": {
+    "sha256": "3a29b1f81044fdc4f36c5f015c34a9b6bcc1b7bd57caaa98effe69f756b912c6",
+    "bytes": 16172
+  },
+  "/audio/consonant-human-onset/digeut.wav": {
+    "sha256": "912ddadfd05c30ebde9c018bae7b3ba9fe4a0d02ea1beb6b34848b3b84f5c5ce",
+    "bytes": 9452
+  },
+  "/audio/consonant-human-onset/giyeok.wav": {
+    "sha256": "793526ccd6d19a5c7f5c92a6d1f2ac5ec50c0062cdaa0afea2ef7432dcc211e6",
+    "bytes": 14252
+  },
+  "/audio/consonant-human-onset/hieut.wav": {
+    "sha256": "4c85c3bbab9c5a30e2e0c931aed598f3956bc912f55cc5a3bacf59e816f97674",
+    "bytes": 9452
+  },
+  "/audio/consonant-human-onset/jieut.wav": {
+    "sha256": "ebe635cc798e920e576de97a0823deca0a6c6dba0fd43b67ce395eb3dc894ff2",
+    "bytes": 17132
+  },
+  "/audio/consonant-human-onset/kieuk.wav": {
+    "sha256": "63dd8606ba20500ee01fe239b6585596c1903146cbbdbb45f1da90bd1b54c615",
+    "bytes": 15212
+  },
+  "/audio/consonant-human-onset/mieum.wav": {
+    "sha256": "7b92041791ea03d63b8052bb7712db059dcde636df55405b9001939d3d302299",
+    "bytes": 11852
+  },
+  "/audio/consonant-human-onset/nieun.wav": {
+    "sha256": "6ea366e5c6b6a325f3c561c0732e9f9fb3ed8132a59930ca44560a9422fd4551",
+    "bytes": 8972
+  },
+  "/audio/consonant-human-onset/pieup.wav": {
+    "sha256": "e4cd35f507f8e0f2d5e5c8258157342abcc8be0f1c1708e09a8067d0def307f4",
+    "bytes": 13772
+  },
+  "/audio/consonant-human-onset/rieul.wav": {
+    "sha256": "a99c56c302863669108ab8af2d54e21829775cbaa2c63851486cfab8a82965a2",
+    "bytes": 7244
+  },
+  "/audio/consonant-human-onset/siot.wav": {
+    "sha256": "b5209a75ffa0a072dc5071150e6ae87cf1ca0853f4509d854c715da3fd3a9ac2",
+    "bytes": 18572
+  },
+  "/audio/consonant-human-onset/ssang-bieup.wav": {
+    "sha256": "5bc05ae3aa5836370405404275ef04fc77e8a158d2c2539cd86a201134cb5c8a",
+    "bytes": 7052
+  },
+  "/audio/consonant-human-onset/ssang-digeut.wav": {
+    "sha256": "87365fde3d8471f36d57c76a967002a6cc3a376070d14c5f174c66dff1868f42",
+    "bytes": 8396
+  },
+  "/audio/consonant-human-onset/ssang-giyeok.wav": {
+    "sha256": "41c45e5bd378d212096db3b5ef602b60cf4d96e58a32b9950ca2fc9332720aa9",
+    "bytes": 8396
+  },
+  "/audio/consonant-human-onset/ssang-jieut.wav": {
+    "sha256": "03df5535f5fedb804384b59ca263825ed7a916cfdcb863d7c4408ca9ab4f99e5",
+    "bytes": 10892
+  },
+  "/audio/consonant-human-onset/ssang-siot.wav": {
+    "sha256": "73d7cfebfe7d68bf06841e2893f0701cfcd07ee90b6429a6088eab1338e8d9d4",
+    "bytes": 27212
+  },
+  "/audio/consonant-human-onset/tieut.wav": {
+    "sha256": "997d4c6478bcce555dea8ef8fe0927895a78217ed699dd8f3606a5185e79c603",
+    "bytes": 16172
+  },
+  "/audio/consonant-names/bieup.mp3": {
+    "sha256": "e70b6870338a260202c44f3a811b7f886c02d292186f54ee220ba65696ee520a",
+    "bytes": 6336
+  },
+  "/audio/consonant-names/chieut.mp3": {
+    "sha256": "18d3818b0e14b7d656c8b27bcba5e27dcd59072659b3bccb89e91635da09b679",
+    "bytes": 6528
+  },
+  "/audio/consonant-names/digeut.mp3": {
+    "sha256": "90e525cdede8c748d2880b35d79b0adbcc95c629828a211270ceb4c8d62a8038",
+    "bytes": 6528
+  },
+  "/audio/consonant-names/giyeok.mp3": {
+    "sha256": "30c92e73dde9a76379ebabb99b90d942d2531187218d9d044223e15de9a0df58",
+    "bytes": 6528
+  },
+  "/audio/consonant-names/hieut.mp3": {
+    "sha256": "8ee6e49956d1c9fbd4780a13e25f3a3a317bb8d34d76e4248cb4e2f38bb83d68",
+    "bytes": 6336
+  },
+  "/audio/consonant-names/ieung.mp3": {
+    "sha256": "b4e596c044fa8274005b03dae433f8fee21126517b794c87a425de4756fb7df2",
+    "bytes": 7104
+  },
+  "/audio/consonant-names/jieut.mp3": {
+    "sha256": "cd11d997335f199424d55d41f352a061eb5d64d2f6ff3fb34bbde7218c135aeb",
+    "bytes": 6336
+  },
+  "/audio/consonant-names/kieuk.mp3": {
+    "sha256": "492e9738f94a01f096ddd0f446373369f2e57b8138d690f34c41bd79da48630b",
+    "bytes": 6336
+  },
+  "/audio/consonant-names/mieum.mp3": {
+    "sha256": "c7bcbc7e7dfa7ac37c5af4d9e1b08de51fdb474ff06c9952a34fcde5fb04a612",
+    "bytes": 7104
+  },
+  "/audio/consonant-names/nieun.mp3": {
+    "sha256": "b02617f4a9e13010321f8d1c0a63557cf82f4f47be3ea3c421fed9dc82e46bb3",
+    "bytes": 7680
+  },
+  "/audio/consonant-names/pieup.mp3": {
+    "sha256": "b508c6d06747bd50aa387a836c31737a6114aae026e7c0783999a202ce4c1979",
+    "bytes": 6336
+  },
+  "/audio/consonant-names/rieul.mp3": {
+    "sha256": "5ed3f2aa4e6f9238d85694da6f6ef02f8af1630ea838f1dc4363351138261f64",
+    "bytes": 7680
+  },
+  "/audio/consonant-names/siot.mp3": {
+    "sha256": "8e6bb30bc8e69cbbff05877678090e7246723eeb62c22c05bb2663d77068f01e",
+    "bytes": 7104
+  },
+  "/audio/consonant-names/ssang-bieup.mp3": {
+    "sha256": "c0bd441a99244c7a4932aeac93a62ad6ec125d29731ff73400d0149cd118ce20",
+    "bytes": 8064
+  },
+  "/audio/consonant-names/ssang-digeut.mp3": {
+    "sha256": "56bdd73146aa7c5060e4ddd14992435fcd5c676b5f129f5e87d7cffa8a285a21",
+    "bytes": 8448
+  },
+  "/audio/consonant-names/ssang-giyeok.mp3": {
+    "sha256": "f0707a7f7713365fe713129c817a9fed4366a1fa5f338facbb62e8103943cc50",
+    "bytes": 8256
+  },
+  "/audio/consonant-names/ssang-jieut.mp3": {
+    "sha256": "1c81717aa40bdf63f9f284a18bc4b598d4c9e7172fb6c80d2f89e5b817826687",
+    "bytes": 8064
+  },
+  "/audio/consonant-names/ssang-siot.mp3": {
+    "sha256": "e6a93170450c2c8c5fca6f8797b6a1db9b95800d101b4556907d951a420cee3c",
+    "bytes": 8448
+  },
+  "/audio/consonant-names/tieut.mp3": {
+    "sha256": "d0e9d84bf488b2b23f3f26f44585ceab2ccbe883d5c71aac7d542e622a43875d",
+    "bytes": 6144
+  },
+  "/audio/hangul-natural/s-ac00.mp3": {
+    "sha256": "5460939e84a853d3a71927bcf98f4cf0979798c0da250ba96476df97e0b7d05b",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-ac1c.mp3": {
+    "sha256": "5a5eed614ffdeb4a951404852f1381da057070d7bd6bc01cc8ed1323beca03e3",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-ac38.mp3": {
+    "sha256": "d1a9b7e3e8c8013eeb043e73e9e418ac302ee5a3570ad01f4e83bccebf691fb1",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-ac54.mp3": {
+    "sha256": "b898b469e74a66eb7f4f90251a4618b0a2cba0750f867c9200825c99495c3717",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-ac70.mp3": {
+    "sha256": "8d12019490dbcf2b0e38993b357409454bb7228bceb9dfa8f6a092779ffcf16a",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-ac8c.mp3": {
+    "sha256": "2ba0cf02e141d6395d3b34489580d80cfa2d20da14c33f44d0d02c205126662d",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-aca8.mp3": {
+    "sha256": "69cdbeba3aedbc0b643db97c3450215462112f0adaa9af0fbd74297a41e080f9",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-acc4.mp3": {
+    "sha256": "6dbd3f236934cc4413179c31c0352f75075e05857f57d46a3a692c47fd6e5cc8",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-ace0.mp3": {
+    "sha256": "f50722d0be274d4f9eaf834d7b454c3038a967a7fe4ae70c35f0fb74c795ac44",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-acfc.mp3": {
+    "sha256": "c7a8d0c4d3ec82efe685244f254df6baf907fc75fdd7b32a67b963f7030270b2",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-ad18.mp3": {
+    "sha256": "5ffe95420c81b5f4a2317408cbf2613facb8d48accbcb2f4ae97966026c675d6",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-ad34.mp3": {
+    "sha256": "f11f32460af55cda80d91e94a74944e705cd2a8a621acf3637cf7cc5748ff46d",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-ad50.mp3": {
+    "sha256": "b2ea057b808ddce74ead2580cbe371fba9d1eb7a658fd4babce1fa0548fc9a44",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-ad6c.mp3": {
+    "sha256": "44a74a2508f8a57397524592cb0f7740e7fc7bed9b3965008654c1a323ae8d59",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-ad88.mp3": {
+    "sha256": "3372d23c18269a5a6926fd73ddba9eb2bcd1a6f08a5438e22af8758e471c8358",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-ada4.mp3": {
+    "sha256": "c27337d8a2d154e78ea3f5f9c421b0527141bc5ace23afd20338247707a69f85",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-adc0.mp3": {
+    "sha256": "f55d3468c0aee58cb90d5085f3ed5f2f6e684a6e380493d01a056490dd0efa16",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-addc.mp3": {
+    "sha256": "0fb2ae427994762518aac6c0b0ad6576e817d4bb109b09ffdf6e5005e65d2d96",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-adf8.mp3": {
+    "sha256": "382204c4e143f6ea4b803c88d9a48d26eb71076055046f93daef3aea43c696dd",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-ae14.mp3": {
+    "sha256": "6bd0f0b8c437cd21eb5c71b3bf9b6dd18e9b3f5c9584ba7f2d349283393169fa",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-ae30.mp3": {
+    "sha256": "6bd0f0b8c437cd21eb5c71b3bf9b6dd18e9b3f5c9584ba7f2d349283393169fa",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-ae4c.mp3": {
+    "sha256": "bfce4e73ee1a64e87ecc2032ba021e8049cfcced3d2117f631236d2e9ad1f3db",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-ae68.mp3": {
+    "sha256": "b4104d5a510593490976cb18f2a730c8d35951ffa9c15061c8793bd6690cd641",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-ae84.mp3": {
+    "sha256": "1237e33d267ef197962b5526eb7123d813c977bd8240de6d4792021017104724",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-aea0.mp3": {
+    "sha256": "18bfbcb9f0f89f6f4a1d4bc91ee2ae9f641180f4009516349a93f30a6831ce07",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-aebc.mp3": {
+    "sha256": "6f64b647b148213f9202ac3d8951bd9deb747f3cfeba15e63fd5cf2ece478344",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-aed8.mp3": {
+    "sha256": "598cfba6c1aa3c6f24a26f3f1703d2e021545e573d583b0fc586a4b63738fe50",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-aef4.mp3": {
+    "sha256": "1b6705dd77a3acdd29c86bc3610c6047d7a88825eb05fb47778a5c57f78fe16e",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-af10.mp3": {
+    "sha256": "db5c00c77f981aeb5aac366706f7f228b7a48b34467db960b5439b729e59e7d8",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-af2c.mp3": {
+    "sha256": "c142a528e4249372e3fc929f6934e1c221f813d7c3330077cffa906ead31d9d6",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-af48.mp3": {
+    "sha256": "5508218f1e36b98a85ddf52ddb9903a6927b444d847381b741d8bc59459f01fc",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-af64.mp3": {
+    "sha256": "2a04bca6411988e8d353c1578695a8335d47c030234501aac19612f41db39278",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-af80.mp3": {
+    "sha256": "20cd49853f33d272db7dae6b56be14fc8b978639149a43d28bca11dadda48d0e",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-af9c.mp3": {
+    "sha256": "6b05a79c73d2cc42716468264887c31223c9afa78d87d67fefe47893356b60e4",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-afb8.mp3": {
+    "sha256": "3158011a185abf0ef7917e10f024fce3e4a065d4d3c3d44e65026d66cacbccae",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-afd4.mp3": {
+    "sha256": "1aeb64aa9f9b29901011c8fffd98323e0d444a7ac59b65809aad76a970cc9b42",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-aff0.mp3": {
+    "sha256": "1f2f1c0b224caebe8392779a55a883e362385f4bd5909835faea314c92772f88",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-b00c.mp3": {
+    "sha256": "785e1fad5c089881171d513acdaacaf7647b065a081dd060b62b075dfda81984",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b028.mp3": {
+    "sha256": "74ef5069285bca58556e126c34bb53d62be852235831bc6b5ace24369c527fce",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b044.mp3": {
+    "sha256": "68fc74b5f511020473048dd479b02b54002fe645241087473ae2c7e0869f7d9e",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-b060.mp3": {
+    "sha256": "371866cefcc3000b2c025514e4ca7c508c5fc057e1cdcef98c8270c6dec44106",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-b07c.mp3": {
+    "sha256": "371866cefcc3000b2c025514e4ca7c508c5fc057e1cdcef98c8270c6dec44106",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-b098.mp3": {
+    "sha256": "d8f85bd3976d8d785697b81d7d920385f53e96f6537ee2c85144387b5712164f",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b0b4.mp3": {
+    "sha256": "7627a482a6c7a1410866d1ba54932cd85ab8b814527b0ef760eeb294d7ffd62b",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b0d0.mp3": {
+    "sha256": "e855db2f7eee209bcab26563dafa3b11a5b3de3e4354761710128d45a1c1e200",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b0ec.mp3": {
+    "sha256": "bd0af3f2bf831da2030f06b480ddcf85231f53c0a02836523b03f2ad24c20369",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b108.mp3": {
+    "sha256": "f06bd1a4b10fee5b71ed30a79e37f3999eb40fc87cd4450cc3a645b07c64e168",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b124.mp3": {
+    "sha256": "43b01d64dacc03489ada42881a7aeb3e38cccdc3e9b9956f197e6f31057a11e1",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b140.mp3": {
+    "sha256": "64a97fe8e69a7601b772ac560440a679b01d6aae1007767598c933c135d7a65b",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b15c.mp3": {
+    "sha256": "971c438713d0fc242aa71f47bcd38c7d931862e28ab9be327f9222b87316e25a",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b178.mp3": {
+    "sha256": "0c0442442a523886d92668109d1aa962eef2ecabb88e5e400373225bab5344dc",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b194.mp3": {
+    "sha256": "9fa13fdec66b165afb655dd360d1b7cc086da16ec65b0c27b698f66d048a714a",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b1b0.mp3": {
+    "sha256": "cdeb741fdf50dcf092ac38142487c7692d7e30b54d47ace3d7887bc6972d8e51",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b1cc.mp3": {
+    "sha256": "4d981c682732aca25e5e3cf0940eae0226d20f2642ad00377c08ddb40231712d",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b1e8.mp3": {
+    "sha256": "0d365c11fe724ae9a907786bc440ef6cfa70b31a0ef37db00745cf8ea78e6d76",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-b204.mp3": {
+    "sha256": "6ff23e1001e884114451cd350df1526b00a4f43e280f994c3f23401e68e2d56b",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-b220.mp3": {
+    "sha256": "e811f7fd5b7370128aa6dead25efd9e1d5bbc8d88e03da6cd5525ed8cf9efd5b",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-b23c.mp3": {
+    "sha256": "41a1e1b7490e1f7b06858732e015c9d70b8ea09b1f68e4d51d7aa3fb9149f36b",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b258.mp3": {
+    "sha256": "8b8e7f7d5ff839e7b3d3dd4d572b491b9eb73ed05e1d7c7b311a0792cb0edbc7",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b274.mp3": {
+    "sha256": "a154266eb465a12ca00dee502e0ceddf76093f35c1756b2723d254aa0ca05be6",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-b290.mp3": {
+    "sha256": "1a149afd60e740baadd88d24ca0e313fdd919c16d9048e1cf1a46aea6b0c1a78",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b2ac.mp3": {
+    "sha256": "0713ef112e38e1328e2f068d55227b8268993b62c2f1e90349e56789c93df38d",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-b2c8.mp3": {
+    "sha256": "0713ef112e38e1328e2f068d55227b8268993b62c2f1e90349e56789c93df38d",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-b2e4.mp3": {
+    "sha256": "d5f7dc9c2c29de51da5f32182b840133d9669df0f77c06cdde25e8f6bba91ec6",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b300.mp3": {
+    "sha256": "ae292cc7eb1d855462e0275f9f267d129f78dde4762303cb83635f4e5038bb3a",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-b31c.mp3": {
+    "sha256": "38ce77003238080a65ee45253f8103e463dc6ea111316cc85ede922f09035bc2",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b338.mp3": {
+    "sha256": "9fa701b8bbf70829d5d54de1b28abe5b7ee9994ebe4fa61bd9e1280f4b58d03c",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b354.mp3": {
+    "sha256": "b15d2875088941cf965f6606f93c95605c0227747a7e2f19cca76c7903e28e83",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-b370.mp3": {
+    "sha256": "8bb6537a10e7397411528ed5b36c365941d775115574ce319fe92172fae38913",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b38c.mp3": {
+    "sha256": "a48fd9b50edc8b6c1914b66222b6e456e5a52ae9d31cdbe4ef60d3876f847ed5",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-b3a8.mp3": {
+    "sha256": "b4495c6b85193f14f64a1bb39e744a9d2b925dd36026a3c6919de6b149ed1537",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b3c4.mp3": {
+    "sha256": "32924b357ac5f86b3dad6086370e9149f1c2b86e4689ae081d6e03597224b909",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b3e0.mp3": {
+    "sha256": "d14a4e5336a60ff0e4a0dec51081c25b8f12ac2752970c2d8a2a65d148717a20",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-b3fc.mp3": {
+    "sha256": "8c872ffe4fde47c3c64d7fc633ed94a80717b53439723d24639e7e517891674d",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b418.mp3": {
+    "sha256": "992ecca3eca967577fc1f72c292d4ec39ef5a2e17a869f173ea056ef6a80a65c",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b434.mp3": {
+    "sha256": "626ab9fcb487135a023ee71b8c0fcc9e42b9a79c08f3a7787f37c8c5dd4e2730",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-b450.mp3": {
+    "sha256": "8af84864f491d3d72b4e0096f7b482e5656328d6aafe6d042af3875ff471defb",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b46c.mp3": {
+    "sha256": "dbd4eb227e1978dd7856e0a98122914441ae1e97dd5a0a763d1022188546a0be",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b488.mp3": {
+    "sha256": "38bc8c5bac9de1ad7a8e160171b5f62b61ae28326cd8f9a51a8a39a2a7c6b2fd",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b4a4.mp3": {
+    "sha256": "49682cfc04ca43fa54311649e43321b11455b9bba59376ae0fe0848348aa0f02",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b4c0.mp3": {
+    "sha256": "2f285d280f52918e14f7306498c99201124cf61ccfb791abcb61abc3839a750e",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-b4dc.mp3": {
+    "sha256": "8a4e1e4642a2902d21b9d2099afe4b4ef03ca495c46549919961c487394e6b60",
+    "bytes": 7920
+  },
+  "/audio/hangul-natural/s-b4f8.mp3": {
+    "sha256": "45b1e5f790c811ea8d6258213690e21e73fedb2b38f999d9cd409774abe4f6bc",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b514.mp3": {
+    "sha256": "735b5ccba221327ad890bba2e55c64a11357678c9f2ff59f9a092ec8499406f2",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b530.mp3": {
+    "sha256": "b2f0234ad69418212a0f67e476ef53c66810a05288da3d88628423001f15a652",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-b54c.mp3": {
+    "sha256": "313e617db1b7c9dbaf29f22e7a319726380a80361c3a51ecddc9df3326740e49",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-b568.mp3": {
+    "sha256": "c04420f005eccf74cb121a87301936674e6522f7576c26fa42019c546c20e3f4",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-b584.mp3": {
+    "sha256": "dc027f0c99e36335ca57a2c58cab9ce114168194f8027ccf73086693bc45e1a0",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-b5a0.mp3": {
+    "sha256": "fa5df6c3bf77b9c291dc2b96e81cbfdbecf51a4d4b88e4674dc36bd5eb46365b",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-b5bc.mp3": {
+    "sha256": "8721b853561c31c22ee04708514039b0590d912b51816741f0ebc61fb533835f",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-b5d8.mp3": {
+    "sha256": "656f096ab4c098e7b0f421f38ffb28758910f795df0e775e093556323e62ff16",
+    "bytes": 7920
+  },
+  "/audio/hangul-natural/s-b5f4.mp3": {
+    "sha256": "59dd06abf1fabef961c001dfe4f2aa268304cc5f4a713084454faa30c9f30b7c",
+    "bytes": 7920
+  },
+  "/audio/hangul-natural/s-b610.mp3": {
+    "sha256": "1edb91f8d0b567c0b05a97ebbb357973ebd86fce456073a829faf78e3c3d98d3",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b62c.mp3": {
+    "sha256": "67e12544eaaf502f6f7a5b07b37ab988338ea8e9ad1d287c08b2804d5b1e62d2",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b648.mp3": {
+    "sha256": "dd94a74f925089599d6bf43af300b905b32e3517aad0354939569f10125fee80",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-b664.mp3": {
+    "sha256": "edbf3b63fd2bb39c120c9d5aee53ec859f7830e9d78207a3f24057b410cdfcc6",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-b680.mp3": {
+    "sha256": "b18c45860af2050b3bf6976088fb579db6f9a4c2120a319c306f81e5fc137373",
+    "bytes": 7920
+  },
+  "/audio/hangul-natural/s-b69c.mp3": {
+    "sha256": "3fbb7610b520e4903cba5bb03f5db29cf543a110e86c8502159cd9a1fa96214b",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b6b8.mp3": {
+    "sha256": "4ba1bda7050591515feea9bf8233cbf81b485b7298ef136055c6f310ae760514",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-b6d4.mp3": {
+    "sha256": "ecaa4bf7eedacd402a190c12385dc27a69bf6b73bb305e6138fb41a0fefd5bbb",
+    "bytes": 7920
+  },
+  "/audio/hangul-natural/s-b6f0.mp3": {
+    "sha256": "cf01ef1647137bacaf9131609c6d21b1d17a019705e400468db3c4b634eebb3c",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-b70c.mp3": {
+    "sha256": "585f7e5c62a2d508770f6a0f1244201aaaf6c186a92ba4efa0f18d8eb4785944",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b728.mp3": {
+    "sha256": "1fb133bfcf8973968f9b0850a69c59374f8c670ce81090baf142ba00e846c7ce",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-b744.mp3": {
+    "sha256": "62824f877ccdae27ac1156535d52a843acce1f20ba2635255f7a38fd115c9704",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-b760.mp3": {
+    "sha256": "62824f877ccdae27ac1156535d52a843acce1f20ba2635255f7a38fd115c9704",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-b77c.mp3": {
+    "sha256": "c9c2c28753219e0e9a16b85b599beaf6c5bd47928af02cdebf1a818cabcfd799",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b798.mp3": {
+    "sha256": "31e3d1f927451fb0f3304a409a49016d277b81356a2c4f3b80285d60f141be19",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b7b4.mp3": {
+    "sha256": "5898736237f088ccba2e09522370c63a4643bd6a110e1a35d74cd5d49cef7860",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-b7d0.mp3": {
+    "sha256": "7640707f808117cea973f03d6c10a5220fa881b02726fdb76b199ab59825e227",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b7ec.mp3": {
+    "sha256": "7c34df94178b06b16c4f0b5151f486faab6c08a861d83873ac08235cb57a697b",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-b808.mp3": {
+    "sha256": "830b30146532be3971dde40b266b0fcfb374f92fcfda2b96f5b0edca100acf71",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b824.mp3": {
+    "sha256": "55247086fc27b8b801ec526ebe0c0baee2ae2cd9570219388a2de11899c268ec",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-b840.mp3": {
+    "sha256": "e389ed0c9bd11eab44b07ff378d0b91777b22b0f9a88467b067fce9d3b4b0408",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b85c.mp3": {
+    "sha256": "2a268ec90d3ecbe23652a00eeec7ef545ea70abad991e9cf08eb84c680cf71c6",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b878.mp3": {
+    "sha256": "02e43fe192fd277220e477188b57b9c2bfa55c4edad0e79148a92e32b120748d",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b894.mp3": {
+    "sha256": "870ece4c8ff6cb90cf5db0605e485ed0da79b942a19d5d961e7fe9d95f29beb3",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-b8b0.mp3": {
+    "sha256": "2a433a0a47e0dbe7db368e2d434517590545d2206bb2e26038e42dedbe05aa4f",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b8cc.mp3": {
+    "sha256": "73bb946d8eaa505b384675137bfd140c811fc250d59dd3e86d307b5d5bb5b8ca",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b8e8.mp3": {
+    "sha256": "01c7b50f0efddcfd2d874be140699352b02cdf15bb91bdc92b9cb36c199a48f4",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-b904.mp3": {
+    "sha256": "2b47970ddb4f630d64bb2d52ea5f57f0c0dc8f972b9e7c90b6f9678f3af49bb1",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-b920.mp3": {
+    "sha256": "df168490cc6b232f9679fd58ff862054cacb0dd3e26a6527b2cd96e4d34dc910",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b93c.mp3": {
+    "sha256": "f8d2503c022952c282a81744778fddfc2c0e45aa8dacece56e4a3749361d0d99",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b958.mp3": {
+    "sha256": "20ab47db79bbb41130657c94de42f35d2080a768b2976f682dbd4c0a7c0b4069",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-b974.mp3": {
+    "sha256": "a0b38f4650f19895aee7a4074c7d6aea3121ced1b275633807b5f3b548fff812",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b990.mp3": {
+    "sha256": "402049ae32f94e01ed259bcca5459876079f27d47e1adfb61cd1c1ee743f90df",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-b9ac.mp3": {
+    "sha256": "94047efc456fa7c7007e31ff6e8d4dcbdf460fe8ca83a26733163a50cef4ac80",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-b9c8.mp3": {
+    "sha256": "defed19cf17db19770ef05dce402dabd1cc22aca4acb8757865198c2570a1b13",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-b9e4.mp3": {
+    "sha256": "39e86ec4d6cabc9a4907ad32d04a6a84c509aaee77e5164864f375908d4ba89b",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-ba00.mp3": {
+    "sha256": "3cd786c2260357fb5d7fc98d6f62e106a033b8d5f784c00d1a69b52943dfe52e",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-ba1c.mp3": {
+    "sha256": "9536f101737f0833e6a0be113dbae4e0201d0802488dc2ce4408458ff2c7a205",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-ba38.mp3": {
+    "sha256": "f171cae5d0a4d46ab24f596957820ec1aa0651b07cc65ae4b6c7d2b76a72ba81",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-ba54.mp3": {
+    "sha256": "d991a04520a8c1797a60624a01c8f701a48f09654a63f7912dd5ee04c8139c6a",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-ba70.mp3": {
+    "sha256": "3b19c5a469bf7e1e364974da273d2a207250ad01bc045d6f67bd4d8457211b36",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-ba8c.mp3": {
+    "sha256": "7d2451ad17a3ff09409a3f0942b44b92442501896c5371ccf299c2ed374c4c25",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-baa8.mp3": {
+    "sha256": "23cf768bf5dfc90e731a203adbd8e4792e637d022c8c4ecaf8123620b852dec7",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-bac4.mp3": {
+    "sha256": "133579a849b868a0e4b7a9057fc84bb959732ac055a5370c877ad635266d5253",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-bae0.mp3": {
+    "sha256": "f590bb81e059cb8e14f4e069e10d2408da7666928a29152e1ba5b93d39a6bbf7",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-bafc.mp3": {
+    "sha256": "11ed71e08b19c8bb5541ce41fcf22cc52848dccf8c8513dd0e61caaaeaeec3e6",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-bb18.mp3": {
+    "sha256": "77f87c21aa5a83ea9c4933c977e999b126af65b0fe8200e80896342f811a18c5",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-bb34.mp3": {
+    "sha256": "975258155ab7aacfec84d54a6c7e8e32135d09ab5b3d36604c45284c0eeade2c",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-bb50.mp3": {
+    "sha256": "da485b5a28acf90eb2aa79b236ba8b52bc6da8701055ad9322616a7be6e76ef5",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-bb6c.mp3": {
+    "sha256": "1baf75ee59c432f65df12919d55cad402edd9dee74f92e782ac80a3262ae2078",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-bb88.mp3": {
+    "sha256": "b763879d9e0f73d928e00b76b3ca924dc9091565c266e9f75ef338adc46d3817",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-bba4.mp3": {
+    "sha256": "27757178bb449fa0d48655c1b3103e6075610339a9bebc903a737570aa7db4af",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-bbc0.mp3": {
+    "sha256": "22363eca7f178284f345f566edbdab96f960e0095d923e3b8542a05b145333e4",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-bbdc.mp3": {
+    "sha256": "6f181669ce718eca01c852ec15ea7490aa6b65f0204bb56fbd5803689db0f4cc",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-bbf8.mp3": {
+    "sha256": "6f181669ce718eca01c852ec15ea7490aa6b65f0204bb56fbd5803689db0f4cc",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-bc14.mp3": {
+    "sha256": "a481e3901b7c4ff1aea540e99ee152c984ae63dfbb91799e4de1ae96557526d6",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-bc30.mp3": {
+    "sha256": "8ae5e04781be3113125db31a8802d609dad55b8e4ab3d3e4aadd1027b537721a",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-bc4c.mp3": {
+    "sha256": "57841c6d19449e2779755451c36fec8a5a97c887741b5f318d45c42f9c075cdb",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-bc68.mp3": {
+    "sha256": "8075c4cbaf0a007a8637266ab4ca5ea473b1501155728935af67a0f9b426a5c8",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-bc84.mp3": {
+    "sha256": "89736136c16a85bf30427e5c30de86a7ef5e619c1c5dbd6da76495111419cd18",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-bca0.mp3": {
+    "sha256": "8ad5d4ddcef89840279fb32abe8b6ffe836de14280ae9a6bab3ae8a271185d6d",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-bcbc.mp3": {
+    "sha256": "b0ee000e47e3bef0d0a808f950cf6505eae7797c123b6047cda6c0f7d7d0d74d",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-bcd8.mp3": {
+    "sha256": "ef3b21ed13691761f5ca94ccde7b3fe042ffeb100bba4a823516531d9f63e7f0",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-bcf4.mp3": {
+    "sha256": "b8526b602b39305b5d96274adcc7d34135164dd235092adbb845d351ff066f54",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-bd10.mp3": {
+    "sha256": "4e0348c881e4429c0a0b245a1bc8713c1d806271168518ea4f826b8b89051773",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-bd2c.mp3": {
+    "sha256": "659c28345ad0df603a757934f565015eca5825d7d32d773ab137ebd3be367580",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-bd48.mp3": {
+    "sha256": "8a0e5074fd03f94beb9bc9f3e7a846d4754ff87bb2b7a49762a8cdac50190e0a",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-bd64.mp3": {
+    "sha256": "397c64f84a46ce4f8a0367f85bc7d72ab7493e748da5ee2a1fce08dff5d36e56",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-bd80.mp3": {
+    "sha256": "45596bf4b4ffdf6fbc09582e3a0afa88ba6ccdb343d4f6358d2b23888e811593",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-bd9c.mp3": {
+    "sha256": "7c23dca04a15eecf0dd7e54d4d3e43249fbcc5f55e6eb325fd7840547d85bb03",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-bdb8.mp3": {
+    "sha256": "a13513fa0f724c6c360d1bd02c13f7e0912f9d8865d4bf565efb153e8e341111",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-bdd4.mp3": {
+    "sha256": "0f6a29901292fff08f68506550492e217357fe02ad8e8b64542e2febd9657862",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-bdf0.mp3": {
+    "sha256": "560195225f5929a1ed84fef402ffb2a6adcea5e2476aba7eff34e59b36b0e293",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-be0c.mp3": {
+    "sha256": "66571a9f77b7e67fef885b676a4730ebc530b0b9174c378cdbfb939ba247e017",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-be28.mp3": {
+    "sha256": "06911be0f2648225b3128f409c5f8bcae152514b9455bf704bd532a81a5b8320",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-be44.mp3": {
+    "sha256": "06911be0f2648225b3128f409c5f8bcae152514b9455bf704bd532a81a5b8320",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-be60.mp3": {
+    "sha256": "4c90cb12c7119397222bc09c6b03cdeacdbc75bb5348d51452ba0059635f75c3",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-be7c.mp3": {
+    "sha256": "a024d90d703ad26df8980ae736fbe74f7a80232f95a0575ca34d60e39e4676d1",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-be98.mp3": {
+    "sha256": "7385b3ea9882e7c581727ba768e1df9289795423daef7913986a1cb826a9bdcd",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-beb4.mp3": {
+    "sha256": "b7ab4bf9d2982529eb02a4500722762c873aa69daafa9ae66aea41a7e97a6bab",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-bed0.mp3": {
+    "sha256": "170c58ecc24c5679bec10922c3349d666f591620df77cc4db068eb3ec5c6778b",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-beec.mp3": {
+    "sha256": "6d4d7f2222e93368f4ec7c8ca0397ea8b0610795a04b59d0ad54d0d063b59eeb",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-bf08.mp3": {
+    "sha256": "6b18b2f1ada0e30e0ffdacd48e2a89d91e17c4d8f5ef12a7bb6925b0cd5bea80",
+    "bytes": 7920
+  },
+  "/audio/hangul-natural/s-bf24.mp3": {
+    "sha256": "e2efe7bb83c75aad4472541f9e4b1afa5dddfbd60795d188e7bdb1941b1a4620",
+    "bytes": 7920
+  },
+  "/audio/hangul-natural/s-bf40.mp3": {
+    "sha256": "e0226acc293f37647ef1697422d419305c11d8f424a1fd9e21771433ac3fdde5",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-bf5c.mp3": {
+    "sha256": "0e17842aaed76f744a624c94dbd8c30cfa35fc5b54ae4cea1d9ebf808662c222",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-bf78.mp3": {
+    "sha256": "628ed69112cc4a1d559ac3b67a16bc4d8776014db7f6a489d44507a3f9985160",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-bf94.mp3": {
+    "sha256": "71c9351d50bea64b3b040e5791d343467c8e3afa3890b9c3ebdabbcf06ccdbf1",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-bfb0.mp3": {
+    "sha256": "bb4ba4762bbfe3c7df0e706916b5d86faaea054a9ea11fd3c733ff24cff373f2",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-bfcc.mp3": {
+    "sha256": "9a4a5cb795e20cb447ef90908aaa8b8f21b6065153dbc4b4f789bbbbbce9fbdd",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-bfe8.mp3": {
+    "sha256": "22b7cb0dea8d734dde16d425a9083ffd821b791ef95b196074a9263f066302cb",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-c004.mp3": {
+    "sha256": "25039c30729fefd4618a1ec48c4675b93fd057436baa77d38919d0f2007dbf57",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-c020.mp3": {
+    "sha256": "f7d6d8bdab7dd9b2439ec7e1f1e68591b5bbb7534d7bfee58faa66bf38d72bb6",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-c03c.mp3": {
+    "sha256": "14947f70361ca0229804b1f8d58eecc5e2e69e0dc0dec5eac20245935f29c571",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-c058.mp3": {
+    "sha256": "83679c566ccc9f828dde550dd6b9f126e0aa969f305f71292fadca331b1ce709",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-c074.mp3": {
+    "sha256": "fd0d2da96e42269eac8c472c589f7282f363b51a0693c8534763cb2adbc36094",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-c090.mp3": {
+    "sha256": "43a53cf3045523e1e26c622fe841006495859ae2407218cecb92be356168d242",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-c0ac.mp3": {
+    "sha256": "35bf237d61b82df314c872ba754bee1a8fc9de449b8f3c6a95d9efb1dbd3a3f0",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-c0c8.mp3": {
+    "sha256": "821cdd1dd51928c0f6aeee3a152c0415a61ae997af6c471ee641d9eee60d62b6",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-c0e4.mp3": {
+    "sha256": "d362eaacb1738abd819ad192e8ac5cae9eb977deda7fd6d8abffa07cb6e1291b",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-c100.mp3": {
+    "sha256": "28295cf83d8a785efda107fb322db54ebb98e23946d3964eaaa21a62cbf9971c",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-c11c.mp3": {
+    "sha256": "ed45fd3620e1a27b63dbd6a5091140b435ef9393f7d5b393a75559048c84e836",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-c138.mp3": {
+    "sha256": "8951542d399eeb573312218cc53caf5aca825ae150043d5a4d9b1e478c3f0078",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-c154.mp3": {
+    "sha256": "2499d6bb636d2278913d9c517dd1e89417e893b7b5eae83e1914bc79480eaa98",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-c170.mp3": {
+    "sha256": "23c6430f1323f569a69016a75fa18187f5afcc92efad2fa63718b509c13744e0",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-c18c.mp3": {
+    "sha256": "d809e5eee9b037b81c76f8b703a9beaf94c92db9edb8548bf3cb3cbd484cc62b",
+    "bytes": 8928
+  },
+  "/audio/hangul-natural/s-c1a8.mp3": {
+    "sha256": "019d5a5a7df7b28ccc593b841fd8f5cfb5d18b68abcdd705d70ac84a55c3bb6c",
+    "bytes": 8928
+  },
+  "/audio/hangul-natural/s-c1c4.mp3": {
+    "sha256": "c5f89334078c194f9eeb5b5a9c23544c2b18503a263a5dabee01b43353a3bf8e",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-c1e0.mp3": {
+    "sha256": "fc952c58d781e91ff1e24f2e7ee818b33090b32c97690db46040911789c89bd3",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-c1fc.mp3": {
+    "sha256": "d015acb600f93dffb7dc326ba61dcfac43348fc842e7c7d5db61f912d744df85",
+    "bytes": 9216
+  },
+  "/audio/hangul-natural/s-c218.mp3": {
+    "sha256": "5a9eb7576484fd64724ef3fc04c2d611678a240775f66fe215880973a926cdc6",
+    "bytes": 9216
+  },
+  "/audio/hangul-natural/s-c234.mp3": {
+    "sha256": "6a1ee755738bbf56c782a1560ee082019eca5b69b6df75a1b0de2e50c04511b4",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-c250.mp3": {
+    "sha256": "fa94e36408f35d2a316182e6b915cc1d284af006211ff930149ae3374fa81a64",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-c26c.mp3": {
+    "sha256": "1c4c65dd5e64cb788d1b0d3cbe8a35d37b7d31ca94acefa0d8b16470578d6c5c",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-c288.mp3": {
+    "sha256": "17fbe433b1aef518fda2334ddd50395d6a6725839f15a9d6a644620ef8e3a504",
+    "bytes": 9216
+  },
+  "/audio/hangul-natural/s-c2a4.mp3": {
+    "sha256": "33aa9f67a7d7e843ead6b78349f55a52d028ce671232cf12d087e4b04aeea5a6",
+    "bytes": 9072
+  },
+  "/audio/hangul-natural/s-c2c0.mp3": {
+    "sha256": "bfbefb7a518ebb4051bb1c3a4f3d136132b51260b93683c96e51ba7f52f2cb25",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-c2dc.mp3": {
+    "sha256": "baf11935bc3e6b5d1022d788df9eb9efb2655545d3a9020da7cfbafafeef61d5",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-c2f8.mp3": {
+    "sha256": "8583b24737ddc29964ee3383956dce4d5e21451987b6609455574b0cd46e5387",
+    "bytes": 8928
+  },
+  "/audio/hangul-natural/s-c314.mp3": {
+    "sha256": "2f7a02a767ef858432fc241184723142a2e695badefc41c98e923f811495afad",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-c330.mp3": {
+    "sha256": "e4484aa4ccd40bb0965d5a6835b0604063dc5b1a571d0b0c0a151bdecc5d0bf6",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-c34c.mp3": {
+    "sha256": "90e1086c7631efdcfe61e937e5284a10ccb2b90ab78dc58d756bbe570b760276",
+    "bytes": 8928
+  },
+  "/audio/hangul-natural/s-c368.mp3": {
+    "sha256": "e3b9b133629db5598614145c647afe086925a17f381837205dc6472fed9a839a",
+    "bytes": 8928
+  },
+  "/audio/hangul-natural/s-c384.mp3": {
+    "sha256": "aa1d26e115dc27b3f0b6dad96ede9a0417a2fef2d235989281e7291e44bf2656",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-c3a0.mp3": {
+    "sha256": "36dfee133cda760af526a4900156689155daebbc54731af9fd7a5d38444b2ac2",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-c3bc.mp3": {
+    "sha256": "d19f0531a22dd0de61b172312403b5cbcb874ea17ddeca81a7688698f4f13050",
+    "bytes": 8928
+  },
+  "/audio/hangul-natural/s-c3d8.mp3": {
+    "sha256": "e67f983450de4797a5a381735116aa6cacf6b4a2cc46e10bbb8999fdb3a2aeff",
+    "bytes": 8928
+  },
+  "/audio/hangul-natural/s-c3f4.mp3": {
+    "sha256": "0c55c5c24e2328c51bdad8318d1ebc4aefac77c18550bcfa2f6fbe5559b833c1",
+    "bytes": 8928
+  },
+  "/audio/hangul-natural/s-c410.mp3": {
+    "sha256": "8efaadc0e44666c526c6cf21261c1d7e34db7778700c315721d48f7df914bdb9",
+    "bytes": 9072
+  },
+  "/audio/hangul-natural/s-c42c.mp3": {
+    "sha256": "783b10ba4a014d49c0219ef1c2f292f03aabe4e021190c92c2ac400e03430cba",
+    "bytes": 8928
+  },
+  "/audio/hangul-natural/s-c448.mp3": {
+    "sha256": "d015acb600f93dffb7dc326ba61dcfac43348fc842e7c7d5db61f912d744df85",
+    "bytes": 9216
+  },
+  "/audio/hangul-natural/s-c464.mp3": {
+    "sha256": "89df1ff1953a22fb25203a5cc3df2e590847dfdd9813736ec4cbecc74e225417",
+    "bytes": 9216
+  },
+  "/audio/hangul-natural/s-c480.mp3": {
+    "sha256": "8541464f83fc0d03c54af916dc14f4bdfad6a8ef97b87b22873ebc735dd21cf8",
+    "bytes": 8928
+  },
+  "/audio/hangul-natural/s-c49c.mp3": {
+    "sha256": "55a993f2803666ab1260e6c85398717b4822c8ccbb6939878bee0173ff7fda18",
+    "bytes": 9072
+  },
+  "/audio/hangul-natural/s-c4b8.mp3": {
+    "sha256": "50818aaa05a608aba8243fee79b6d446a0db89ddb83f335ea98c5c6835ba0c89",
+    "bytes": 8928
+  },
+  "/audio/hangul-natural/s-c4d4.mp3": {
+    "sha256": "092dd98d51f9b001df2d078f49104fbcaa6b799f7dd946cdefb4085ed77152d2",
+    "bytes": 9648
+  },
+  "/audio/hangul-natural/s-c4f0.mp3": {
+    "sha256": "1dc017a07027738fae75ca475500e3b304df05f01a1d9e1a1f5b7d0ffbe08961",
+    "bytes": 9072
+  },
+  "/audio/hangul-natural/s-c50c.mp3": {
+    "sha256": "658aeaa32cef9b80d8fa21c3c8ffc993da246872bd50adfa937e50a4b0c40ba1",
+    "bytes": 8928
+  },
+  "/audio/hangul-natural/s-c528.mp3": {
+    "sha256": "658aeaa32cef9b80d8fa21c3c8ffc993da246872bd50adfa937e50a4b0c40ba1",
+    "bytes": 8928
+  },
+  "/audio/hangul-natural/s-c544.mp3": {
+    "sha256": "b8b72fd5a72be5b5602df921765b8741551b4a0600dcd149a3475af17bcb21b5",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-c560.mp3": {
+    "sha256": "68c28f768b03b120623c965c29e26e37f764c07aaf71a4d7104d6d5a1b914728",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-c57c.mp3": {
+    "sha256": "1e2da4f3a0be6ef92977233dea3305d630e5fa4505576d8fb29836fcf6ebde53",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-c598.mp3": {
+    "sha256": "b8f1e07a4d82de7c06628984d53a938ab9b5a2f94d38f1ce5ded6664b709c8e0",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-c5b4.mp3": {
+    "sha256": "761643261c01da2288174c00448acd64259c3133dcd8a8068c814f71fe333287",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-c5d0.mp3": {
+    "sha256": "3a266a013f906bba51a1b159787dfa94d119aa3c909e8a62a190a8471858615a",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-c5ec.mp3": {
+    "sha256": "172e7e37e4b5e8c3d19dd17990191d64aee09fcc811eeec57c5f5cc0e0e0ff5a",
+    "bytes": 7920
+  },
+  "/audio/hangul-natural/s-c608.mp3": {
+    "sha256": "df510562572d559c8adbb1b332cc92febf1610e84387a54e9b8c9e01660ad481",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-c624.mp3": {
+    "sha256": "0c288b7565a2381f4043c2d2773ae91b0f613dd12dfa6fddec9981c6c3e99c3e",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-c640.mp3": {
+    "sha256": "4a7760ac12ca472bfdff1ade78c2c0728e259090b428c1c4800c36dff0dc0f18",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-c65c.mp3": {
+    "sha256": "ca5aa4c7d94a5b77d5dd0e07d1a689027aa41be70ded34df9b0a50340b7c00be",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-c678.mp3": {
+    "sha256": "3e9b3a3afa5e252ac6af13386c81ccc71e6523997804f4697c5915fd7cac58da",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-c694.mp3": {
+    "sha256": "71e0d79201a2907fea595564fb9f95c5cadfb2ec9ef76df9b6a7211a5b40f740",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-c6b0.mp3": {
+    "sha256": "512f4a4f7e7b2c673c9d14554c0fe9a4bec01b5772b2118c0a65b6098b57a1af",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-c6cc.mp3": {
+    "sha256": "b55a15a7d7b02bfaa0643277638fca5ab89524a0d7183c359805f64e25ae368a",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-c6e8.mp3": {
+    "sha256": "81ad182d1d5e3f366e565ecd3237e55adf0c84754381e59ccacace38c6b9543d",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-c704.mp3": {
+    "sha256": "daccfeedd96294c8a18697a2422800362fb414f3b6e20f2c24c297660c0ae135",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-c720.mp3": {
+    "sha256": "985316287e85430b84e1109b2f7adeea328291ef06dbb452e6f75db659b7f657",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-c73c.mp3": {
+    "sha256": "5a23e9ed13f3cc75f8cd845347ec42e1827df2a35466e9d8881c08c429d450f4",
+    "bytes": 8064
+  },
+  "/audio/hangul-natural/s-c758.mp3": {
+    "sha256": "fa81c80fef0616300f2951aa98341427db6eafc0f69a5ce417644839539039bb",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-c774.mp3": {
+    "sha256": "7d16c52360ec78d16d6e1cfc2432bfc7505277f4304a4518e7916b67dbe0c0c3",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-c790.mp3": {
+    "sha256": "0a22a0917391b4e927d86af65fc69a4ca16e2ca7645ca4695e8b158abadee242",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-c7ac.mp3": {
+    "sha256": "cc451ad2c1ed287f2bf02b9d9366a6900da8bfb8a2fc32a56739bf3d7b19c036",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-c7c8.mp3": {
+    "sha256": "5537b3ff7f4902ba37ca25361b709ecb27cbcdb977fb85eb20107beaaa08c25d",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-c7e4.mp3": {
+    "sha256": "a1bba0fc827d8ead8b71840227f1e9d055780baabc87bf46f0492bf17250c491",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-c800.mp3": {
+    "sha256": "72c66410a96638a9ff4ccb6127b6b3f302a40fdf5cc6c75e87ca4311b46e4130",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-c81c.mp3": {
+    "sha256": "3fe49a171a0c5766e1328f1beb85ec9ce40a3f7495333df99e7d2d47c1079eef",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-c838.mp3": {
+    "sha256": "72c66410a96638a9ff4ccb6127b6b3f302a40fdf5cc6c75e87ca4311b46e4130",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-c854.mp3": {
+    "sha256": "748b12e81b6ceb9a51a2925dc788f316a9b7e14684c8dc3c328842a25e45f52e",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-c870.mp3": {
+    "sha256": "9882f3129f533b19627bf4588ebde402f384290d0a6a09b827763522ff426aa9",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-c88c.mp3": {
+    "sha256": "562302bf0d97da483bfb6465eb92fbf79463d56b222aa2508b849b547dfdc417",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-c8a8.mp3": {
+    "sha256": "582e9f08b31fa2de675f43894e59240b1e5b8bf15c27c91bba5ec3b3ad5fd8cb",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-c8c4.mp3": {
+    "sha256": "a10826dd98eb4a82df925947c34b5540fb7a4d1adaff919cd8647a36c251ba10",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-c8e0.mp3": {
+    "sha256": "f645a5bca114fc6aaf8644630e71f60370aca05585c61dde63b4d6d9340af63e",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-c8fc.mp3": {
+    "sha256": "deb4ca2cfd17af92d664d5cf19525bb970250f1a7b71cbb86d1d807369c5033c",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-c918.mp3": {
+    "sha256": "08bb2499937e69f8e21bdface3d9834a75a0b40bd793e82c3b3ac64972ddcb20",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-c934.mp3": {
+    "sha256": "45020a89992735703218acf7d4d2280d2936b51bb19d93e2e92d50718f1533c1",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-c950.mp3": {
+    "sha256": "c780cd71d6465864d4fd73582fc8a7a0ef108653bf988596fccd533dfb5acd2c",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-c96c.mp3": {
+    "sha256": "d96ccf209887a81265cf033e6c5ffb46fdb8f92ef6bb1e1df1d58eb28f57f9a0",
+    "bytes": 9072
+  },
+  "/audio/hangul-natural/s-c988.mp3": {
+    "sha256": "9c4fc6df42869046239c4437e3aa534ca439be098b7a366fa2737e9288de8cc3",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-c9a4.mp3": {
+    "sha256": "9708a2813ab4a6ac98d09ccec3d2cbac7611703c29dca5378c111bdd1e65226a",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-c9c0.mp3": {
+    "sha256": "9708a2813ab4a6ac98d09ccec3d2cbac7611703c29dca5378c111bdd1e65226a",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-c9dc.mp3": {
+    "sha256": "eb8b11dcf00e043da2419381ee40fa458f232b32615c49641ea2d789cb921e33",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-c9f8.mp3": {
+    "sha256": "dda0bffc5954c38a7cec3a50cdbeb293097564fd5030dcb6e69a397776cd6abe",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-ca14.mp3": {
+    "sha256": "380a5b278784fe4ea63542df4593707ebe46795e1ed43b85ed6c73d6ce66472d",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-ca30.mp3": {
+    "sha256": "9fc04f03abddf3bd24c11d264be097b2c3249def90042925820b981f6506e6f4",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-ca4c.mp3": {
+    "sha256": "8c8dd4eecd73a087f84ce1fca5841310d61c3ccc37b6bad66c548ae10ca25b7c",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-ca68.mp3": {
+    "sha256": "dbfc28fce15541fc98777730e405e8df289e92fd60693ac2803e59b9a8f624f2",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-ca84.mp3": {
+    "sha256": "d560754d1a30fee22f7e03831080581cb53e919fdab35de7e33ab359104fed71",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-caa0.mp3": {
+    "sha256": "80f25c23e822c6829fe2ad5147ecbd0950e330e118278f6dee1a60af842d3236",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-cabc.mp3": {
+    "sha256": "738e0a372829d042be03bf7583153690040100d2b67e81ce51ac0deb9f1c7e47",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-cad8.mp3": {
+    "sha256": "4f9cd5039967fa6dfe184556b4383eeb86c96c754b383e3a17290a7e608a5248",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-caf4.mp3": {
+    "sha256": "abb1d5aab96d744cab0980c257ffa5b1088c6b8b9bd77ebef0ef956b29b7ce2b",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-cb10.mp3": {
+    "sha256": "22789ea901d0c7fd72c9423bd65795a699797aee3feb421dee39d766e85a2aa0",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-cb2c.mp3": {
+    "sha256": "9ee2d7179dd54064df33a0734db58a05b4008506f7f7f3f88b7ddc48ae355838",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-cb48.mp3": {
+    "sha256": "cd8827bca7790b5860ba5d79e2e815a32b918ca37a2564c10666be55087c1849",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-cb64.mp3": {
+    "sha256": "c310e70fbc31f44957d03ffeaa941f9c0382232d7785c70c1c99db84748d3e68",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-cb80.mp3": {
+    "sha256": "fcd9d8bee846a935e39ce943a6541e047b2fb738f91f9be3aecc8403ca7a762d",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-cb9c.mp3": {
+    "sha256": "22a81578e8d9b0aa4d4a0349532dfd90bb84e08e3b92e2b718db8c2049104f9e",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-cbb8.mp3": {
+    "sha256": "6f35c90e62a1a6d624f31b1158ed81eb232f441c547793044e96db72e22e8263",
+    "bytes": 8928
+  },
+  "/audio/hangul-natural/s-cbd4.mp3": {
+    "sha256": "ea0f627ff407e76879ef43d30c3b6b337ab7ded1ff7618d837824b71c0993576",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-cbf0.mp3": {
+    "sha256": "0fb40d66d84143537fa0ad2c79dbf990658765d6be96ea33993febbde0b86c8e",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-cc0c.mp3": {
+    "sha256": "0fb40d66d84143537fa0ad2c79dbf990658765d6be96ea33993febbde0b86c8e",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-cc28.mp3": {
+    "sha256": "c7054e8408c5510e13e4a3ce6d1205a8c28b2050648420c26a5ba360ccdc6ba7",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-cc44.mp3": {
+    "sha256": "65efc2abc537b490dff657885cc2538311e303f78c176e7d2173ebfd467c848e",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-cc60.mp3": {
+    "sha256": "a1f40665c757321824e4a91a900cfd961940c45c1d73bf8d8df3871935335c69",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-cc7c.mp3": {
+    "sha256": "be08eb4024e266478750a99f85c8cf0387088cba3e49ce085b9df18e9f0ae97f",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-cc98.mp3": {
+    "sha256": "686af74839da75ee3210eec7045d68535524577a12e215cc6f223f9984ee5875",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-ccb4.mp3": {
+    "sha256": "3d2b1b7f06deb20335126d990b4ad6e68a69cbf812642cdd6a194bbba0df6bfd",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-ccd0.mp3": {
+    "sha256": "eed32dda71d3cdd39909004373160dabe2854ff05db25606afb7b4e7c7341178",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-ccec.mp3": {
+    "sha256": "3e4ff2d9805340a4cd274ab1f2849d309157cb73f2ba8f979065b20d0240cdd2",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-cd08.mp3": {
+    "sha256": "5ad4fbbfacd073e4193579f41d2076bc0a55b649345ecd57eff29eefe42dc56b",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-cd24.mp3": {
+    "sha256": "7b2fa4dfd41b5f5d5567e3f9cdddc1053e80cce717ff5e14342f0804baa44ddc",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-cd40.mp3": {
+    "sha256": "56d861d95abce688775f1c612a85dea3ce5f284afd884cf6c2d7455fb200a424",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-cd5c.mp3": {
+    "sha256": "6d813ec65cac273ec64a91034905b4e0c46024e665388e19bf9b7fc70fd516c3",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-cd78.mp3": {
+    "sha256": "7463edab2e75ae39f674487fceee81df84eee54c4ea71c88d63c3ff0ea3a072c",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-cd94.mp3": {
+    "sha256": "caceb388efd40b46e384a42b0a68030f546913429adae30a33b85e197ab788e7",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-cdb0.mp3": {
+    "sha256": "03a94b6825cd31326e19e9766111f8599ae6fdb8d2834adea79e2951bbcfdfbf",
+    "bytes": 8928
+  },
+  "/audio/hangul-natural/s-cdcc.mp3": {
+    "sha256": "235679e20cfea04bae319407ede933ff70dc8e7ce5020893d7df99bd99da7c51",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-cde8.mp3": {
+    "sha256": "aee841b6c641f13e1f091d9dbf4023d23dd895e9f7efd0cdcfbd57a0b7727b1a",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-ce04.mp3": {
+    "sha256": "029f49c34158a71b5babbb96b02bb078d9051df53b012add1729d36d7610e62e",
+    "bytes": 9072
+  },
+  "/audio/hangul-natural/s-ce20.mp3": {
+    "sha256": "ed9f5463044c4d743706791bd7caaef34ec8cf178874129322c57e781d4be97f",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-ce3c.mp3": {
+    "sha256": "32aa8097161ed53912cbe98c50f7122866c5061ec7c3dc1e6921e9ae17615bd7",
+    "bytes": 8928
+  },
+  "/audio/hangul-natural/s-ce58.mp3": {
+    "sha256": "89c3db04c259f1915d72d495076af61523c14e2b954d263fb95297a0b1fea7a1",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-ce74.mp3": {
+    "sha256": "e37adc6289727d9d5301f49ecc82608a80443c5b292d2d6883de1764d0f5091a",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-ce90.mp3": {
+    "sha256": "b9f7dc64368b6714255104c81de5e83e83c1ddd16bf0c177ea29c6acd2ffe1dd",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-ceac.mp3": {
+    "sha256": "44c9162245fce184d14f7b2f18228cab33a412bb00597fd79ab9ddde5b72d670",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-cec8.mp3": {
+    "sha256": "fc430c1b4ef48e5a2c328beb764997e4ccadf07c8c4c895159821905e9d3c2a8",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-cee4.mp3": {
+    "sha256": "9212e76c6325cc6301e6996ee8c85c1fa65907e23f821b16a9ba0236c198d231",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-cf00.mp3": {
+    "sha256": "e26dd642700a1f87f5a98235bd388c1825f3f2d02393eed592fad4e8f3cdfb78",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-cf1c.mp3": {
+    "sha256": "ef11b15c47372c44b0ebc347f39e973858376e44205b1ab0996d27766895e587",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-cf38.mp3": {
+    "sha256": "0d300b2d6c4c426d865e9ab3d3717d2df10caf0766439cdbcd8ffeb87f4ef2d3",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-cf54.mp3": {
+    "sha256": "6b5e8cf8936c91f6637b98447bb5c4fd2d48544f07a8f8c671983e3fc674b1ec",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-cf70.mp3": {
+    "sha256": "93eb91005251463f0210dc4bc65cf3c0bdef34ef6148f6007c7e46ad5a9392d5",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-cf8c.mp3": {
+    "sha256": "96001330fc1b998772061b38b423fae3aa1b1cb495d116eae6964178ecbeff34",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-cfa8.mp3": {
+    "sha256": "34b9a827e19bfffcb3788df50c6f95f267c794232e56d5649c0149ae9a5506a6",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-cfc4.mp3": {
+    "sha256": "bb71d24ad08cd55d03bef082251054cc329c64db728dd9754080db2c6efa1bd4",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-cfe0.mp3": {
+    "sha256": "e49adda06a94b28d4f6ce22e53f5ba380ad57ecaef46607644d35a6ccd12823e",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-cffc.mp3": {
+    "sha256": "aa7fb4e1360d5ad16d441b68cdc9d5f9ccd5c873020ee625effda8367e92f17f",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-d018.mp3": {
+    "sha256": "5afc1255bd0485787665f094c7d29152632213af9a54e3b675d3477d95e32e88",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d034.mp3": {
+    "sha256": "04a5b8ca824b3702bb8f77f68a2782ee916b275c9e7ad7b090c7bac1121fd345",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-d050.mp3": {
+    "sha256": "cb904f37b5fe561f339c3584eee0ff924c1dd8f65ba380b1df67708e69d17026",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-d06c.mp3": {
+    "sha256": "dc0f0fbabf4c4752b47fd35da92096dfd56f8a765ebf6d53d0bf3f932c966919",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d088.mp3": {
+    "sha256": "7923f08830027b2cd5cc6814e3afe8975425c0a5bf1afc42d93f674d3d56064e",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d0a4.mp3": {
+    "sha256": "7923f08830027b2cd5cc6814e3afe8975425c0a5bf1afc42d93f674d3d56064e",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d0c0.mp3": {
+    "sha256": "942afe0c7dbfe89128a6f56758adeb0bf1aab8c4b653b02f52d78f596bc8f1e9",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-d0dc.mp3": {
+    "sha256": "a0647a64e0b991d2816b705d773ccc247c9ed18081f31e7dc57e3ca198993068",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d0f8.mp3": {
+    "sha256": "ba63ec3b4fd6b0b20de84a06c77ed38347bd43eec15c28982a2697252f429c73",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d114.mp3": {
+    "sha256": "2595731585162c09437e36db5eb649e58d3578392b8d433500ba571fa2326366",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-d130.mp3": {
+    "sha256": "2b29e7ff99604b0fcee2b2945564cb9d32364ea84a5f082ac69a751f830ce9bb",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-d14c.mp3": {
+    "sha256": "1a2390b53cb8a61b33d61dd9f3f3e983a4f7dd3f6de77cd8d8a2e31c06558ff9",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d168.mp3": {
+    "sha256": "a5fed4bd10082bdc394b4b4b6084c1ffbd2bf52d519547242c4d2b8c4997fbf7",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-d184.mp3": {
+    "sha256": "4e49a8903ed3f4f250bfbcb454773c158ef393aafaee15fb9c05292a5e18a7de",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-d1a0.mp3": {
+    "sha256": "667255006231aef2d1593b7616200ca95acf2c1a85e5d0fec9f89b7e43977f72",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-d1bc.mp3": {
+    "sha256": "9c791a55e4ababa6dea1424bada89407ff6993c6a85235bc6a4bf6b164c8b5f7",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d1d8.mp3": {
+    "sha256": "629e5ff30b641a2c7e494ddf171f4f908d2b38977949da9a65f34935c2779c94",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-d1f4.mp3": {
+    "sha256": "df619a2566da88b818c3cd5b129622ba5da32f1c45f51b91d5d80fe36fc5ac9f",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-d210.mp3": {
+    "sha256": "e57747e1cfe9ee4bc21d94067bcc11a60671d2811d463ae591a2089b9280f008",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-d22c.mp3": {
+    "sha256": "81ac10f38e1be7f9a6f0b137381de1866993f0b4dc085f16c055568d5a254ff7",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-d248.mp3": {
+    "sha256": "adb720fb9609cea909c1751ef78f01d41491825a3dca46440b9b650e8ca8a709",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-d264.mp3": {
+    "sha256": "d0fe34b23ee31fd42928ceda6d15b32cd91b9b9d1746aa229c93ee37f71bef5e",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-d280.mp3": {
+    "sha256": "2fac8b3cb9eba7169613616e7b66b6cf55a3122e73f9294eab3ad7f6b1413a84",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-d29c.mp3": {
+    "sha256": "22d7944c6cd6f6ce192622e15368d1f940cb398626d53269aed12b17de62a94b",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-d2b8.mp3": {
+    "sha256": "163b9fd6fd17d3b3eef03c9a3b32f09089da208251d1af3d7416848049905cb1",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-d2d4.mp3": {
+    "sha256": "8ac76c821c565da4cf426a168690fa73872cdcc862fddb576259f92ac97941b5",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d2f0.mp3": {
+    "sha256": "8ac76c821c565da4cf426a168690fa73872cdcc862fddb576259f92ac97941b5",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d30c.mp3": {
+    "sha256": "858eb6cee2cfbb97118f27fa24a955ff9028abb128db112528076933fce5f86b",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d328.mp3": {
+    "sha256": "f4af677c14c555c7a3ef728056a9f2b442a4caa76fc728ddb20de761b53ca93d",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-d344.mp3": {
+    "sha256": "28f597fcd1f73a8a8a603d4603f81b7577c6c3724d9250fbd1593d471e22e302",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-d360.mp3": {
+    "sha256": "544e891bb59ff08968cd26f758c35ad00d19e53936c570dfbbbe1f9ffefbc71e",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d37c.mp3": {
+    "sha256": "bfda74aa39be29c44da8370bbb87d462f839c30632dfd621b6e5863b4bc2551e",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-d398.mp3": {
+    "sha256": "e0daea0f3775eff01ed4b14f3005e9c81771443e35a2258529afa6c633774da0",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d3b4.mp3": {
+    "sha256": "10a281cf5c105a3fc5b2db18383dbb4f931d4bf68a04322dad7b4ec98ce02a3c",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-d3d0.mp3": {
+    "sha256": "e0daea0f3775eff01ed4b14f3005e9c81771443e35a2258529afa6c633774da0",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d3ec.mp3": {
+    "sha256": "24a95b0f7ce4233ec1ac9d2dba2e532c43fcbe0ffb700d3c759c3114d8c2f2b5",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-d408.mp3": {
+    "sha256": "97ff61bc4847754fb439557c647e6a77e56ec7176946eec7f1af0c51b5354ad9",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d424.mp3": {
+    "sha256": "e85c649d5a5e4911f41f107284834c5dc1b582b9717a0d26491a31be76eb9269",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-d440.mp3": {
+    "sha256": "a07a14b05cb174f4ae452e84772ddbd7a34764052460e0c41ef8f31736cbe924",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-d45c.mp3": {
+    "sha256": "702574820ea72671f6af499f5cdd05f35f12d9020c5bb2303c558323f88837e3",
+    "bytes": 8208
+  },
+  "/audio/hangul-natural/s-d478.mp3": {
+    "sha256": "58cfde65c39ecb01a5c560e5f1cfe931ea9d1c8a69059a7ff4fbf9e53c88fcd7",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-d494.mp3": {
+    "sha256": "97d2b7cf100923cece16405612696e36cf214b422c6d7fbeeab8b03714a66760",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-d4b0.mp3": {
+    "sha256": "a330e678fc757a5ba9393ea77c4323bba2befb9dd5d05b6061f7c51a30f488e6",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d4cc.mp3": {
+    "sha256": "9da3f33585303d6d673a31a901630b3cf247e3ee05e9f7fc6ff9d6aa68fe43a1",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d4e8.mp3": {
+    "sha256": "dd2546602a979076f1f66edbacdeaba00a930ed5d8ec10fc4bc9570287384985",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-d504.mp3": {
+    "sha256": "c4e0f0e8b5768433fb257f06113298253e41eaa2877b8f2923ce08cd212f48c4",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-d520.mp3": {
+    "sha256": "20a6e34f22c6153d0876172a1bfee82b561ed55fc39e36eb995807017ccb7eb4",
+    "bytes": 10656
+  },
+  "/audio/hangul-natural/s-d53c.mp3": {
+    "sha256": "cfd6c5103dd2d235ac35120467499c6d3e36bcdd495f9413059944ec77e77efb",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-d558.mp3": {
+    "sha256": "824275e26370a837765f32c3a1b7483cf2908b6207b75aecc7a7f3f46df2be15",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-d574.mp3": {
+    "sha256": "e858031c1306c321e76db3660d7de2a64a73da4bce4a935f04887b08dd3f0817",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d590.mp3": {
+    "sha256": "23efce68cfd4f6f40c69d8ce915e371c93a9d3826fa56d08b7088685da0ffcac",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-d5ac.mp3": {
+    "sha256": "4f2f58c6ec15c3ea2d19d3cd48ffacb429ae061fdfe78119ec432b97b11ddb8e",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-d5c8.mp3": {
+    "sha256": "43d6917b588a16b2e066eeedd10040facb08df684e660255a9af28c289589cf8",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-d5e4.mp3": {
+    "sha256": "a8816e46d2902c8d0de6f96f9df4fe07252173d2f7ff5fa85a5ccbf574c4924f",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d600.mp3": {
+    "sha256": "85b7678957f24e48dfe1373f1dbe7fb7f19f693acc420b218f6a77aaaa685429",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-d61c.mp3": {
+    "sha256": "a822b4cfa7cd131d024be57e6d4e20f99126b41ac7733509455035958071c0fd",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d638.mp3": {
+    "sha256": "98c00468d824a9cb14741eafb2b608f862119f2163c5075fe6a835b48739618c",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d654.mp3": {
+    "sha256": "b59730f4e4f4e8ce4579babbeebf20d4e5762027367566f56ccb37033605ff25",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-d670.mp3": {
+    "sha256": "f337caeed98f0887491975b92e174079fd83bcd5771bffb05dcaae858257f4c5",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-d68c.mp3": {
+    "sha256": "a317d751216b289d465004d4006d634b6c647ebf321fb986142063f6f98765eb",
+    "bytes": 8352
+  },
+  "/audio/hangul-natural/s-d6a8.mp3": {
+    "sha256": "e5b431b5ccdca045990667205f74e426a68e95c7ef5f3c8a95d76d279c97b692",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-d6c4.mp3": {
+    "sha256": "37844c32b5a28c79b8033fd4b8185bea18af37725db73a265e1c6be2a24dcf7b",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d6e0.mp3": {
+    "sha256": "56bb291ccf65fb96e5adf6e28fd755ed9de557b0cf12826457ee29fc4476f795",
+    "bytes": 8784
+  },
+  "/audio/hangul-natural/s-d6fc.mp3": {
+    "sha256": "754a0ea8aa08d351ad2d966b0d28bfccadda65671e57c258db9c8bdfdc7ad4d0",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d718.mp3": {
+    "sha256": "5d297056bfe9930be483c8c5098f468e1f6f19a912baa57025879e73df6d05f0",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-d734.mp3": {
+    "sha256": "f73afb8e08c8d3942b0e764202feb9c97593ade5839e2889aa503ee6fbec0873",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-d750.mp3": {
+    "sha256": "29fc4e7a1c856f879b53ae8b41e569c6648b458989dad61b64357c536e65450d",
+    "bytes": 8496
+  },
+  "/audio/hangul-natural/s-d76c.mp3": {
+    "sha256": "f1b4719238b841aef2ff272710652f42f553bf2d86b589f211eaf456994f001e",
+    "bytes": 8640
+  },
+  "/audio/hangul-natural/s-d788.mp3": {
+    "sha256": "f1b4719238b841aef2ff272710652f42f553bf2d86b589f211eaf456994f001e",
+    "bytes": 8640
+  },
+  "/audio/phrases/sentence-again.mp3": {
+    "sha256": "f7e7edc96e2c428850bb904c73adaeedc249f40f90658ad7ce3a2cdf60844eab",
+    "bytes": 13104
+  },
+  "/audio/phrases/sentence-bill.mp3": {
+    "sha256": "9486f4cdbc3aff9f3866b6733a51fc2478120c4e87794031a4bffd42e271c73f",
+    "bytes": 12288
+  },
+  "/audio/phrases/sentence-card.mp3": {
+    "sha256": "0a11d3942d0c29f0de1769ad99ebf99e8c2503dd096e5af27b958dc24cc3190c",
+    "bytes": 10368
+  },
+  "/audio/phrases/sentence-chinese.mp3": {
+    "sha256": "89a46832eb2212eca47f3037065ba45b8dd46015ef811d45d2ac2a4b6af8ef85",
+    "bytes": 14688
+  },
+  "/audio/phrases/sentence-dontknow.mp3": {
+    "sha256": "6c61533ebd99e757cc347faefcbb303c363d70d3b0fc66f0e03f789ed0452594",
+    "bytes": 13248
+  },
+  "/audio/phrases/sentence-get-off.mp3": {
+    "sha256": "6e578de502738b98c210417795cd8daceb72db95e3be859d1a02d9b646e0fe3c",
+    "bytes": 14976
+  },
+  "/audio/phrases/sentence-help.mp3": {
+    "sha256": "4d222dcde65d9150e08aa1460d26dee29a2ebc1bef533b20cf97055ca76ca3cc",
+    "bytes": 10944
+  },
+  "/audio/phrases/sentence-meet.mp3": {
+    "sha256": "dc2ebbdbc7d2098060c6646bd207b26cd5e1ab136a74eb933af1048a7c93cf22",
+    "bytes": 13536
+  },
+  "/audio/phrases/sentence-menu.mp3": {
+    "sha256": "3155c2666ecacc3b7f9f53aa7ea9e5fc373150f41a840cce1a31741da09d0105",
+    "bytes": 17664
+  },
+  "/audio/phrases/sentence-name.mp3": {
+    "sha256": "07ae7862180ed7e28c651c12719a11760ecffac10ac000c7751c45131fd6cfb8",
+    "bytes": 11664
+  },
+  "/audio/phrases/sentence-price.mp3": {
+    "sha256": "e3afc134ac8d2bbe4bbd420c9f9c3c5229ea71d60c860ece0a423077f330eee7",
+    "bytes": 10800
+  },
+  "/audio/phrases/sentence-slow.mp3": {
+    "sha256": "6ebaa3202197adbd6972b3adf45fb0ff956a7f4bed92e4f2a23591133bd1a1d6",
+    "bytes": 14256
+  },
+  "/audio/phrases/sentence-study.mp3": {
+    "sha256": "d53be63f96af141ab50952c296e0f71aeca18f5a0b6c37d205e6d7a0c7a4505d",
+    "bytes": 16416
+  },
+  "/audio/phrases/sentence-subway.mp3": {
+    "sha256": "4fa79ed1e17ef7310f4a7fa9aa123acb877fa2c7cd4e2ab4517781427e1718cd",
+    "bytes": 16320
+  },
+  "/audio/phrases/sentence-takeout.mp3": {
+    "sha256": "03bd3228d9e875dbc12296c62f4e1a671a5b28b8a9b73b2fb28d550159657903",
+    "bytes": 12096
+  },
+  "/audio/phrases/sentence-this.mp3": {
+    "sha256": "8e476938d8bb2d089e4486567b973fb5d9661b92fc74f85614e216754c8ca411",
+    "bytes": 11088
+  },
+  "/audio/phrases/sentence-time.mp3": {
+    "sha256": "2c77abdbc8fe83ff587a5d66c8bbcc2ac7e69cfd94bf980824030df61311af6d",
+    "bytes": 12864
+  },
+  "/audio/phrases/sentence-toilet.mp3": {
+    "sha256": "0270bf1019f7100a4024377e7a34d5f96a53763858316e07c6999b6252128c0c",
+    "bytes": 13824
+  },
+  "/audio/phrases/sentence-tomorrow.mp3": {
+    "sha256": "d2569dc61909f231e766f3921bec3d67d5c9b1bbc50c556ff01c68534f19c862",
+    "bytes": 13536
+  },
+  "/audio/phrases/sentence-weather.mp3": {
+    "sha256": "51682bf77e713dee238b07514164f509913d899b02ec78c5d60cedbac22146ff",
+    "bytes": 14544
+  },
+  "/audio/phrases/word-bus.mp3": {
+    "sha256": "704bd6bed0453b79dc5ad11c7f8124112c392b0e00b2fc2e517f6fd2c2eddaa8",
+    "bytes": 7872
+  },
+  "/audio/phrases/word-card.mp3": {
+    "sha256": "bece6844bc581f812533b6036f7ab7fbcfc29445c28ed38dc9bf0bf3413f3bc2",
+    "bytes": 7296
+  },
+  "/audio/phrases/word-cash.mp3": {
+    "sha256": "7906961360c7ad22452df34ad132696aefddc77f364dd22d46e124ff4ac74d82",
+    "bytes": 7680
+  },
+  "/audio/phrases/word-coffee.mp3": {
+    "sha256": "86ff5d3a9384254490eed58a94e82df8456dce677e44cf84d4c386371c19b350",
+    "bytes": 9936
+  },
+  "/audio/phrases/word-company.mp3": {
+    "sha256": "2dfc4be5fe2a0b320deb547cd3dd433eda63c874ba13dcf218f631ed3b009bdc",
+    "bytes": 9648
+  },
+  "/audio/phrases/word-family.mp3": {
+    "sha256": "7f30fc082ab515f90f013ac8443c1dedd68d312aa7d37d5fa91f9908c51a8f10",
+    "bytes": 8928
+  },
+  "/audio/phrases/word-friend.mp3": {
+    "sha256": "d5eebc72827afd89733cba323da0026b7a5fde27d85fce26426395f587dbccc3",
+    "bytes": 10080
+  },
+  "/audio/phrases/word-good.mp3": {
+    "sha256": "9ee0bcefc015b3de0c5cfe81b9750440ce1ec325e1d6bfc6081d64c14121c922",
+    "bytes": 10080
+  },
+  "/audio/phrases/word-hello.mp3": {
+    "sha256": "65a15472a7de767bbd2944b6f46dafb57fe1a20f54a0a16802e33e2b356bf4dc",
+    "bytes": 11376
+  },
+  "/audio/phrases/word-home.mp3": {
+    "sha256": "4f8be4d4dde05f2cb20a020ae4ce5cffb093b9207bb29264adc1490a6c5bcbe3",
+    "bytes": 8064
+  },
+  "/audio/phrases/word-howmuch.mp3": {
+    "sha256": "7890ec45960183c014b175808bb8b04912409f7863395873d2daedc6b7c421c2",
+    "bytes": 9792
+  },
+  "/audio/phrases/word-meal.mp3": {
+    "sha256": "aa7f678313a4af7f915eade3fb350e1573725c83b9c29878b2d11cf1bcedd348",
+    "bytes": 7920
+  },
+  "/audio/phrases/word-menu.mp3": {
+    "sha256": "1ff4f55baa702dd1131fd99043f0b078c30d23a7abde3451b64fd5bb02725477",
+    "bytes": 7296
+  },
+  "/audio/phrases/word-no.mp3": {
+    "sha256": "30b15c7b39c8449ae64d21a85416915fe3961cf2ecb7902b414cd0dc1e55a588",
+    "bytes": 9504
+  },
+  "/audio/phrases/word-now.mp3": {
+    "sha256": "78f293768311b4da54b90a8488970732b981238048f3d27744e4b6a71125dd36",
+    "bytes": 9216
+  },
+  "/audio/phrases/word-okay.mp3": {
+    "sha256": "0eedb66711fbe114688debd28efe018994f55b03c52697de9de53dcbedf0ed2d",
+    "bytes": 10944
+  },
+  "/audio/phrases/word-person.mp3": {
+    "sha256": "b4ab0fa8b6e4db98a934c19c46119ba7259924059a861089adf22e18e494adda",
+    "bytes": 9936
+  },
+  "/audio/phrases/word-pharmacy.mp3": {
+    "sha256": "12b4f7ea4802ca762c66603c1bb1b02995c5a23e9b52a16db6a44d47f5ef634d",
+    "bytes": 6912
+  },
+  "/audio/phrases/word-please.mp3": {
+    "sha256": "944674bd06b851bcc55b69eb5d186b7f6aba7ae768cbcd7d053438960699fb66",
+    "bytes": 9936
+  },
+  "/audio/phrases/word-receipt.mp3": {
+    "sha256": "2eee7d3a4e3dca6f617c030d87f6530d73933c4afcdae92a902c2c643f4b2557",
+    "bytes": 8832
+  },
+  "/audio/phrases/word-school.mp3": {
+    "sha256": "7e358a56e23dc2aa6839f8759b2018fb13cebb3b763cc7c46e133271785e5b2b",
+    "bytes": 9360
+  },
+  "/audio/phrases/word-sorry-formal.mp3": {
+    "sha256": "3b07ed284b25e007578075108427c29753478c7942f24197947f2cec8553ca2a",
+    "bytes": 10368
+  },
+  "/audio/phrases/word-sorry.mp3": {
+    "sha256": "b6dbaeaa67ea894dad4b8cab37efa56c338783ab1ade3c28e4d127770cfaf1cd",
+    "bytes": 10944
+  },
+  "/audio/phrases/word-subway.mp3": {
+    "sha256": "b66810485859610c19a3f9c2bd9fd4ed3e10375c5b75d0aa48d7e49bdae55818",
+    "bytes": 9024
+  },
+  "/audio/phrases/word-thanks.mp3": {
+    "sha256": "694847abc2ab34f4d4f5d60f8aee40277bf2f302c287e34014ba2cb5bfd52304",
+    "bytes": 12816
+  },
+  "/audio/phrases/word-today.mp3": {
+    "sha256": "ce3eee09d1f02a9b8855da3ee7e7d74c3a1db4759a06496de8dc2f97344fcf89",
+    "bytes": 9360
+  },
+  "/audio/phrases/word-toilet.mp3": {
+    "sha256": "5175522bf54c7379f99ea33e653e9d17a5eddeafaa87a93dc408cb842cd826e5",
+    "bytes": 10800
+  },
+  "/audio/phrases/word-tomorrow.mp3": {
+    "sha256": "7424a7a725c730dca88483496c749c57543e284c4fb18355e0db66d3a07b0bfc",
+    "bytes": 10656
+  },
+  "/audio/phrases/word-water.mp3": {
+    "sha256": "b7365be9507f895069c3bd617680c079b22281d252f25a382b7efaf3a2aa6679",
+    "bytes": 10656
+  },
+  "/audio/phrases/word-what.mp3": {
+    "sha256": "da485b5a28acf90eb2aa79b236ba8b52bc6da8701055ad9322616a7be6e76ef5",
+    "bytes": 8496
+  },
+  "/audio/phrases/word-where.mp3": {
+    "sha256": "d3fbed030a0aeca13c95af90cc2a7c8d18e2235a47f2390e7898a287528a9424",
+    "bytes": 9216
+  },
+  "/audio/phrases/word-yes.mp3": {
+    "sha256": "63438134c7407421ac4ee55df6cfad54909087e3f461c35218c17c861a772712",
+    "bytes": 10656
+  }
+}

@@ -499,7 +499,7 @@ test("renders the real Korean learning product", async () => {
 
   const html = await response.text();
   assert.match(html, /韩语 40 音｜中文闯关版/);
-  assert.match(html, /中文闯关版 · v42/);
+  assert.match(html, /中文闯关版 · v46/);
   assert.match(html, /用自己的韩文键盘作答/);
   assert.doesNotMatch(html, /v24 把零基础路线/);
   assert.match(html, /中文零基础 · 10 分钟起步/);
@@ -584,7 +584,7 @@ test("ships four complete typing lines with IME-safe mobile controls", async () 
   assert.match(page, /pauseTypingRun\("页面切到后台/);
   assert.match(page, /pauseTypingRun\("训练区已离开画面/);
   assert.match(page, /pauseTypingRun\("快捷键帮助已打开/);
-  assert.match(page, /if \(audioActivityRef\.current === "game"\) activeAudio\?\.pause\(\)/,
+  assert.match(page, /if \(audioActivityRef\.current === "game"\) stopAudioPlayback\(\)/,
     "resetting a route must stop old route audio");
   const submitSource = page.match(/function submitTypingStop\b[\s\S]*?\n  }/)?.[0] ?? "";
   assert.doesNotMatch(submitSource, /playGameAudio\(/,
@@ -1058,10 +1058,10 @@ test("keeps one preferred target from every byte-identical blend group", async (
   assert.match(page, /同音组合会自动跳过/);
 });
 
-test("versions every audio URL and evicts failed cache entries", async () => {
+test("versions every audio URL and keeps question gating", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
 
-  assert.match(page, /const APP_VERSION = "42"/);
+  assert.match(page, /const APP_VERSION = "46"/);
   assert.match(page, /const AUDIO_ASSET_VERSION = "21"/);
   assert.match(page, /return `\$\{phraseSource\}\?v=\$\{AUDIO_ASSET_VERSION\}`/);
   assert.match(page, /\/audio\/hangul-natural\/s-\$\{syllable\.codePointAt\(0\)\?\.toString\(16\)\}\.mp3\?v=\$\{AUDIO_ASSET_VERSION\}/);
@@ -1069,12 +1069,8 @@ test("versions every audio URL and evicts failed cache entries", async () => {
   assert.match(page, /function consonantReferenceSoundPath[\s\S]*?const directory = clarityReplayConsonants\.has\(letter\.char\) \? "consonant-human-clarity" : "consonant-human-onset"/);
   assert.match(page, /\/audio\/\$\{directory\}\/\$\{audioFile\}\?v=\$\{AUDIO_ASSET_VERSION\}/);
   assert.match(page, /\/audio\/consonant-names\/\$\{item\.id\}\.mp3/);
-  assert.match(page, /audio\.addEventListener\("error", \(\) => audioCache\.delete\(source\), \{ once: true \}\)/);
-  assert.ok((page.match(/audioCache\.delete\(source\)/g) ?? []).length >= 2, "preload and playback failures must evict the cached source");
-  assert.match(page, /async function playAudioSourceToEnd/);
-  assert.match(page, /if \(invalidateCache\) audioCache\.delete\(source\)/);
-  assert.match(page, /const handlePause = \(\) => finish\(audio\.ended \? "ended" : "interrupted"\)/);
-  assert.match(page, /void audio\.play\(\)\.catch\(\(\) => finish\("failed", true\)\)/);
+  // Cache eviction, natural completion, cancellation and retries are now exercised
+  // as actual controller behavior in audio-playback.test.mjs, not source regexes.
   assert.match(page, /async function playGameAudio[\s\S]*?const played = result === "ended"[\s\S]*?setGameAudioReady\(played\)[\s\S]*?setGameAudioFailed\(result === "failed"\)/);
   assert.match(page, /音频未能播放，请点重播；本题不会自动跳过/);
 });
@@ -1191,8 +1187,7 @@ test("prevents ambiguous mixed-category questions and advances only after playab
   assert.match(page, /setTimeout\(\(\) => nextListenQuestion\(token\), autoAdvanceMs\)/);
   assert.equal(page.match(/setTimeout\(\(\) => (nextListenQuestion|nextPhraseQuestion|nextBlendQuestion)\(token\), autoAdvanceMs\)/g)?.length, 3);
   assert.match(page, /useState<AutoAdvanceDelay>\(3000\)/);
-  assert.match(page, /const handleEnded = \(\) => finish\("ended"\)/);
-  assert.match(page, /const handleError = \(\) => finish\("failed", true\)/);
+  // Completion/error transitions are tested against AudioPlaybackController directly.
   assert.doesNotMatch(page, /pickPreferredKoreanVoice|noveltyKoreanVoiceNames|SpeechSynthesisUtterance/);
   assert.match(page, /const replayKey = key === " " \|\| event\.key === "F8"/);
   assert.match(page, /!\(keyboardZone === "games" && directKoreanKeyboard\) && key === "r"/);
@@ -1259,7 +1254,7 @@ test("protects saved progress, timed scoring, phrase automation, and Korean acce
   assert.match(page, /音频未能播放，已暂停自动下一题/);
   assert.match(page, /replayPhraseQuizAudio/);
   assert.match(page, /function playPhraseItemWithNotice[\s\S]*?setPhraseAutoAdvanceCancelled\(true\)[\s\S]*?已暂停本题自动推进/);
-  assert.match(page, /function nextPhraseQuestion[\s\S]*?phraseQuizRound >= phraseQuizTotal[\s\S]*?activeAudio\?\.pause\(\)[\s\S]*?stopSpeechSynthesis\(\)/);
+  assert.match(page, /function nextPhraseQuestion[\s\S]*?phraseQuizRound >= phraseQuizTotal[\s\S]*?stopAudioPlayback\(\)[\s\S]*?stopSpeechSynthesis\(\)/);
   assert.match(page, /function playConsonantName[\s\S]*?consonantNameAudioPaths\.get\(name\)[\s\S]*?playAudioSourceToEnd/);
   assert.match(page, /async function playLetterName[\s\S]*?正式名称音频未能播放/);
   assert.doesNotMatch(page, /koreanVoice/);
@@ -1421,7 +1416,7 @@ test("v25 guards beginner flow, fair games, playback, focus, and responsive choi
   assert.match(claimGameSource, /const shouldStopOtherAudio = audioActivityRef\.current !== "game"/);
   assert.match(claimGameSource, /phraseQuestionTokenRef\.current \+= 1/,
     "claiming the game must invalidate an already queued phrase advance");
-  assert.match(claimGameSource, /if \(shouldStopOtherAudio\) \{[\s\S]*?activeAudio\?\.pause\(\)[\s\S]*?stopSpeechSynthesis\(\)[\s\S]*?\}/,
+  assert.match(claimGameSource, /if \(shouldStopOtherAudio\) \{[\s\S]*?stopAudioPlayback\(\)[\s\S]*?stopSpeechSynthesis\(\)[\s\S]*?\}/,
     "claiming the game must not interrupt audio already owned by the same game region");
   assert.match(claimPhraseSource, /const shouldStopOtherAudio = !audioActivityRef\.current\.startsWith\("phrase-"\)/);
   assert.match(claimPhraseSource, /cancelMatchInteraction\(\)/,
@@ -1430,7 +1425,7 @@ test("v25 guards beginner flow, fair games, playback, focus, and responsive choi
     assert.match(claimPhraseSource, new RegExp(`${tokenRef}\\.current \\+= 1`),
       `claiming phrase activity must invalidate queued ${tokenRef.replace("QuestionTokenRef", "")} advancement`);
   }
-  assert.match(claimPhraseSource, /if \(shouldStopOtherAudio\) \{[\s\S]*?activeAudio\?\.pause\(\)[\s\S]*?stopSpeechSynthesis\(\)[\s\S]*?\}/,
+  assert.match(claimPhraseSource, /if \(shouldStopOtherAudio\) \{[\s\S]*?stopAudioPlayback\(\)[\s\S]*?stopSpeechSynthesis\(\)[\s\S]*?\}/,
     "claiming phrase controls must preserve both quiz and library audio owned by the phrase region");
   assert.match(page, /ref=\{gameSectionRef\} className="game-console" onMouseDown=\{claimGameActivity\} onFocusCapture=\{claimGameActivity\}/);
   assert.match(page, /className="phrase-section" id="phrases"[\s\S]{0,180}onMouseDown=\{claimPhraseActivity\} onFocusCapture=\{claimPhraseActivity\}/);
@@ -1449,7 +1444,7 @@ test("v25 guards beginner flow, fair games, playback, focus, and responsive choi
   assert.match(cancelMatchSource, /setMatchSelected\(\[\]\)[\s\S]*?setMatchFeedback\(feedback\)/,
     "every interrupted match must clear its cards and stale instruction together");
   assert.match(gameObserverSource, /setGameAudioReady\(false\)/);
-  assert.match(gameObserverSource, /if \(audioActivityRef\.current === "game"\) \{[\s\S]*?activeAudio\?\.pause\(\)[\s\S]*?\}/,
+  assert.match(gameObserverSource, /if \(audioActivityRef\.current === "game"\) \{[\s\S]*?stopAudioPlayback\(\)[\s\S]*?\}/,
     "an offscreen game must invalidate game work but pause only game-owned audio");
 
   const phraseObserverSource = page.match(/const section = phraseSectionRef\.current;[\s\S]*?\n  }, \[\]\);/)?.[0] ?? "";
@@ -1457,7 +1452,7 @@ test("v25 guards beginner flow, fair games, playback, focus, and responsive choi
   assert.match(phraseObserverSource, /phraseQuestionTokenRef\.current \+= 1/);
   assert.match(phraseObserverSource, /phrasePlaybackRequestRef\.current \+= 1/);
   assert.match(phraseObserverSource, /setPhraseAudioReady\(false\)/);
-  assert.match(phraseObserverSource, /if \(audioActivityRef\.current === "phrase-quiz"\) \{[\s\S]*?activeAudio\?\.pause\(\)[\s\S]*?\}/,
+  assert.match(phraseObserverSource, /if \(audioActivityRef\.current === "phrase-quiz"\) \{[\s\S]*?stopAudioPlayback\(\)[\s\S]*?\}/,
     "an offscreen quiz must invalidate quiz playback without stopping a phrase-library recording");
 
   const visibilityStart = page.indexOf("const handleVisibilityChange = () => {");
@@ -1473,7 +1468,7 @@ test("v25 guards beginner flow, fair games, playback, focus, and responsive choi
   assert.match(stopPlaybackSource, /gamePlaybackRequestRef\.current \+= 1/);
   assert.match(stopPlaybackSource, /listenQuestionTokenRef\.current \+= 1/);
   assert.match(stopPlaybackSource, /blendQuestionTokenRef\.current \+= 1/);
-  assert.match(stopPlaybackSource, /activeAudio\?\.pause\(\)/);
+  assert.match(stopPlaybackSource, /stopAudioPlayback\(\)/);
   assert.match(stopPlaybackSource, /stopSpeechSynthesis\(\)/);
   const replayLetterSource = page.match(/function replayGameLetter\b[\s\S]*?\n  }/)?.[0] ?? "";
   const replaySyllableSource = page.match(/function replayGameSyllable\b[\s\S]*?\n  }/)?.[0] ?? "";

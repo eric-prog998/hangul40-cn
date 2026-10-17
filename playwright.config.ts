@@ -26,17 +26,12 @@ export default defineConfig({
     // The site jumps instead of gliding to a section when the visitor asks for less motion.
     // Tests use that so a click never lands on a button that is still moving.
     contextOptions: { reducedMotion: "reduce" },
-    launchOptions: {
-      args: [
-        "--autoplay-policy=no-user-gesture-required",
-        // The voice recorder is tested against Chromium's built-in fake microphone;
-        // the site still only asks for it when the learner presses "开始录音".
-        "--use-fake-device-for-media-stream",
-        "--use-fake-ui-for-media-stream",
-      ],
-    },
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"], launchOptions: { args: ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"] } } },
+    // Targeted WebKit coverage is not a claim of real Safari/device/IME acceptance.
+    { name: "webkit-audio", testMatch: /(?:audio-guide|media-compat|daily-plan|recall)\.spec\.ts/, use: { ...devices["Desktop Safari"] } },
+  ],
   webServer: {
     command: `npm run build && npx vinext start -p ${PORT} -H 127.0.0.1`,
     url: BASE_URL,
