@@ -17,7 +17,10 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moves to Ubuntu 26.04 between 2026-10-19 and 2026-11-19, and
+    # Playwright 1.56 has no browser builds for it, so "Install the test browser" would fail.
+    # Move to a newer image together with a Playwright upgrade that supports it.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
