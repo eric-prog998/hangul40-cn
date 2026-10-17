@@ -4,7 +4,7 @@ v46 在 daily-review.tsx 加入仅本页有效的连续输入与 R 遮住重写�
 
 v45 在 daily-review.tsx 新增可选韩文输入，recall-logic.ts 仅作 NFC 参考文字对照，区分一致、格式差异与其他差异，不作翻译或发音判分。输入只在内存，不持久化或上传；仅主动自评才写复习排期。保留 T 入口、输入框数字／空格不触发快捷键、IME 组字／229／长按保护、跨日与换题隔离；不把不同表达直接标成错误。
 
-v44 的 app/daily-plan* 是今日路线：只读汇总现有每日复习与近 200 次盲听记录，5 项中文回忆和 8 次听辨为练习目标，下一小课仅建议、不计打卡。短练和普通复习共享数据；不增加持久存储键或改变备份格式。保持空队列、跨日、跨标签页、存储受限提示、IME 与按钮原生键盘操作、返回路线取消自动切题等行为。
+v44 的 app/daily-plan* 是今日路线：只读汇总现有每日复习与近 200 次盲听记录，5 项中文回忆和 8 次听辨为练习目标，下一小课仅建议、不计打卡。短练和普通复习共享数据；不增加持久存储键或改变备份格式。保持空队列、跨日、跨标签页、存储受限提示、IME 与按钮原生键盘操作、返回路线取消自动切题等行为。路线短练（5 项回忆、盲听）是临时模式，由 app/use-plan-activity.ts 管理：在打开的区域内操作或打开快捷键帮助时保持；点击其他地方（导航、其他区域、路线卡本身）、F2／Shift + 数字跳转或路线第 3 步即结束，再回到该区域显示普通形式。新增跨区域跳转时要同样结束它。
 
 主要模块：
 - app/page.tsx、app/globals.css：主页面与六种训练（听音、跟读、配对、拼读、极速、地铁打字）。
@@ -16,6 +16,7 @@ v44 的 app/daily-plan* 是今日路线：只读汇总现有每日复习与近 2
 - app/vowel-history.ts、app/use-vowel-history.ts：长期作答历史、去重、保留上限与错题巩固。
 - app/learning-tools.tsx、app/learning-settings.ts、app/portable-backup.ts：自动切题设置、JSON 备份界面、格式校验及合并；app/page.tsx 协调各类记录的恢复。
 - app/review-logic.ts、app/review-storage.ts、app/use-daily-review.ts、app/daily-review.tsx、app/date-logic.ts：今日复习、排期、存储与跨日更新。
+- app/audio-catalog.ts、app/audio-guide.tsx、app/audio-playback.ts：音源目录、核对与反馈、统一播放控制。核对区一律原速播放，播放地址的版本号与课程共用 page.tsx 的 AUDIO_ASSET_VERSION；更新音频文件时只改这一处。
 - app/batchim-data.ts、app/batchim-lesson.tsx、app/batchim-lesson.css：收音入门第一课。
 - data/、public/audio/、HUMAN_CONSONANT_AUDIO.md：题库、音频、来源与许可。
 - tests/：逻辑测试（npm test）。e2e/、playwright.config.ts：真浏览器测试（npm run test:e2e），构建网站后在 Chromium 里实际操作各玩法。
