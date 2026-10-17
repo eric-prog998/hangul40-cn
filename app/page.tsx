@@ -89,6 +89,7 @@ import DailyReview, { type DailyReviewHandle } from "./daily-review";
 import DailyPlan from "./daily-plan";
 import { dailyPlanSummary } from "./daily-plan-logic";
 import { useDailyReview } from "./use-daily-review";
+import { usePlanActivity } from "./use-plan-activity";
 import BatchimLesson, { type BatchimLessonHandle } from "./batchim-lesson";
 import { millisecondsUntilNextLocalMidnight } from "./date-logic";
 import LearningTools from "./learning-tools";
@@ -910,7 +911,7 @@ export default function Home() {
   const [localToday, setLocalToday] = useState("");
   const dailyReview = useDailyReview(reviewPhraseIds);
   const vowelHistory = useVowelHistory();
-  const [planActivity, setPlanActivity] = useState<"review" | "listening" | null>(null);
+  const { activity: planActivity, start: startPlanActivity, end: endPlanActivity } = usePlanActivity();
   const dailyPlan = useMemo(() => dailyPlanSummary(reviewPhraseIds, dailyReview.records, vowelHistory.records, dailyReview.today), [dailyReview.records, dailyReview.today, vowelHistory.records]);
   const [autoAdvanceMs, setAutoAdvanceMs] = useState<AutoAdvanceDelay>(3000);
   const [audioSpeed, setAudioSpeed] = useState<1 | 0.82>(1);
@@ -2194,6 +2195,7 @@ export default function Home() {
   }
 
   function enterKeyboardTraining() {
+    endPlanActivity();
     claimGameActivity();
     gameSectionRef.current?.scrollIntoView({ behavior: "instant", block: "start" });
     focusGameKeyboard();
@@ -2201,6 +2203,7 @@ export default function Home() {
 
   function navigateKeyboardSection(index: number) {
     if (index === 1) { enterKeyboardTraining(); return; }
+    endPlanActivity();
     prepareReferenceActivity();
     if (index === 3) claimPhraseActivity();
     const id = index === 2 ? "letter-keyboard-console" : index === 3 ? "phrase-quiz-panel" : "batchim-lesson";
@@ -3307,28 +3310,34 @@ export default function Home() {
 
   function returnToDailyPlan() {
     prepareReferenceActivity();
-    setPlanActivity(null);
+    endPlanActivity();
     moveToSection("today-plan", "today-plan");
   }
 
   function openPlanReview() {
     if (!dailyReview.ready || !dailyPlan || dailyPlan.review.target === 0) return;
     prepareReferenceActivity();
-    setPlanActivity("review");
+    startPlanActivity("review");
     moveToSection("daily-review", "daily-review");
   }
 
   function openPlanListening() {
     if (!vowelHistory.ready) return;
     prepareReferenceActivity();
-    setPlanActivity("listening");
+    startPlanActivity("listening");
     vowelPracticeRef.current?.openChallenge();
     moveToSection("pronunciation-practice", "vowel-listening");
   }
 
   function openRegularReview() {
     prepareReferenceActivity();
-    setPlanActivity(null);
+    endPlanActivity();
+  }
+
+  /** The route's third step is an ordinary lesson, not a short practice. */
+  function openPlanLesson() {
+    endPlanActivity();
+    continueBeginnerPath();
   }
 
   function openKeyboardHelp() {
@@ -4311,7 +4320,7 @@ export default function Home() {
           <article><span className="principle-number">03</span><div><strong>只存本机进度</strong><p>XP、连胜和薄弱音保存在当前设备，不需要注册。</p></div></article>
         </section>
 
-        <DailyPlan summary={dailyPlan} ready={dailyReview.ready && vowelHistory.ready} nextLesson={beginnerNextLabel} beginner={coreVowelMastered < coreVowelChars.length} storageMessages={[dailyReview.storageMessage, vowelHistory.storageMessage]} onReview={openPlanReview} onListening={openPlanListening} onLesson={continueBeginnerPath} onPrepare={prepareReferenceActivity} />
+        <DailyPlan summary={dailyPlan} ready={dailyReview.ready && vowelHistory.ready} nextLesson={beginnerNextLabel} beginner={coreVowelMastered < coreVowelChars.length} storageMessages={[dailyReview.storageMessage, vowelHistory.storageMessage]} onReview={openPlanReview} onListening={openPlanListening} onLesson={openPlanLesson} onPrepare={prepareReferenceActivity} />
 
         <section className="starter-section" id="starter" aria-labelledby="starter-title">
           <div className="starter-heading">
