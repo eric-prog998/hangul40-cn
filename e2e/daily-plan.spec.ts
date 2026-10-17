@@ -9,6 +9,11 @@ const review = (page: Page) => page.locator("#daily-review");
 const listening = (page: Page) => page.locator("#vowel-listening");
 const reviewCount = (page: Page) => page.getByTestId("plan-review-progress");
 const listenCount = (page: Page) => page.getByTestId("plan-listening-progress");
+/** "done / goal" in the review section itself: the goal is 5 in the route's short practice, 10 otherwise. */
+const reviewGoal = (page: Page) => review(page).locator(".daily-review-progress-heading strong span");
+const reviewBackToPlan = (page: Page) => review(page).getByRole("button", { name: "返回今日路线" });
+const listeningBackToPlan = (page: Page) => page.locator("#pronunciation-practice").getByRole("button", { name: "返回今日路线" });
+const mainNav = (page: Page) => page.getByRole("navigation", { name: "主要导航" });
 
 async function enterReview(page: Page) {
   await plan(page).focus();
@@ -186,5 +191,79 @@ test.describe("今日路线 · 中止自动切题", () => {
     expect((await audioLog(page)).length).toBe(played);
     await expect(listening(page).locator(".vowel-challenge-header > span")).toHaveText("盲听 1 / 8");
     await expect(listenCount(page)).toHaveText("1 / 8 次已作答");
+  });
+});
+
+test.describe("今日路线 · 离开短练", () => {
+  test("a click outside the short practice ends it, so coming back shows the regular review and listening", async ({ page }) => {
+    await openApp(page);
+    await enterReview(page);
+    await rateOne(page);
+    await expect(reviewGoal(page)).toHaveText("1 / 5");
+    await expect(reviewBackToPlan(page)).toBeVisible();
+    // Working inside the practice keeps it.
+    await review(page).locator(".daily-review-notes summary").click();
+    await expect(reviewGoal(page)).toHaveText("1 / 5");
+    await expect(reviewBackToPlan(page)).toBeVisible();
+
+    // Leave through the main navigation, then scroll back instead of using a route or review link.
+    await mainNav(page).getByRole("link", { name: "40 音表", exact: true }).click();
+    await review(page).scrollIntoViewIfNeeded();
+    await expect(reviewGoal(page)).toHaveText("1 / 10");
+    await expect(reviewBackToPlan(page)).toHaveCount(0);
+    await expect(review(page).locator(".daily-review-reveal")).toBeVisible();
+
+    await plan(page).getByRole("button", { name: "进入盲听／错题" }).click();
+    await expect(listening(page)).toBeFocused();
+    await expect(listeningBackToPlan(page)).toBeVisible();
+    // Any other section counts as leaving, not only the navigation bar.
+    await page.locator("#audio-guide-title").click();
+    await page.locator("#pronunciation-practice").scrollIntoViewIfNeeded();
+    await expect(listeningBackToPlan(page)).toHaveCount(0);
+    await expect(reviewCount(page)).toHaveText("1 / 5 项已回忆");
+    expect(await audioLog(page)).toHaveLength(0);
+  });
+
+  test("keyboard jumps to another section end it; the shortcut help shown over it does not", async ({ page }) => {
+    await openApp(page);
+    await enterReview(page);
+    const dialog = page.getByRole("dialog");
+    await page.keyboard.press("Shift+Slash");
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "关闭快捷键帮助" }).click();
+    await expect(dialog).toHaveCount(0);
+    await expect(review(page)).toBeFocused();
+    await page.getByRole("button", { name: "打开键盘快捷键帮助" }).click();
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    await expect(reviewGoal(page)).toHaveText("0 / 5");
+    await expect(reviewBackToPlan(page)).toBeVisible();
+
+    await review(page).focus();
+    await page.keyboard.press("F2");
+    await expect(page.locator("#keyboard-game-console")).toBeFocused();
+    await expect(reviewGoal(page)).toHaveText("0 / 10");
+    await expect(reviewBackToPlan(page)).toHaveCount(0);
+
+    await plan(page).focus();
+    await page.keyboard.press("Digit2");
+    await expect(listening(page)).toBeFocused();
+    await expect(listeningBackToPlan(page)).toBeVisible();
+    await page.keyboard.press("Shift+Digit4");
+    await expect(page.locator("#batchim-lesson")).toBeFocused();
+    await expect(listeningBackToPlan(page)).toHaveCount(0);
+
+    // From the route card, "learn the next step" is not part of a short practice either.
+    await plan(page).focus();
+    await page.keyboard.press("Digit1");
+    await expect(review(page)).toBeFocused();
+    await expect(reviewBackToPlan(page)).toBeVisible();
+    await plan(page).focus();
+    await page.keyboard.press("Digit3");
+    await expect(page.locator("#letter-master-ㅏ")).toBeFocused();
+    await expect(reviewGoal(page)).toHaveText("0 / 10");
+    await expect(reviewBackToPlan(page)).toHaveCount(0);
+    expect(await audioLog(page)).toHaveLength(0);
   });
 });

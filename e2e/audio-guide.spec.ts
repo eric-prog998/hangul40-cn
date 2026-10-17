@@ -1,11 +1,14 @@
 import { readFile } from "node:fs/promises";
-import { expect, openApp, test, audioLog, audibleClips } from "./support/app.ts";
+import { expect, openApp, test, audioLog, audibleClips, lastAudioRate, consonantNames, phrases } from "./support/app.ts";
+import { createAudioCatalog } from "../app/audio-catalog.ts";
+
+const catalog = createAudioCatalog(consonantNames, phrases);
 
 test.describe("音源与反馈", () => {
   test("shows honest provenance, explains repeated onsets and never invents silent ㅇ", async ({ page }, testInfo) => {
     await openApp(page, "/#audio-guide");
     const panel = page.locator("#audio-guide");
-    await expect(panel).toContainText("492");
+    await expect(panel.locator(".audio-review-count strong")).toHaveText(String(catalog.length));
     await expect(panel).toContainText("没有新增母语教师逐条听审记录");
     await panel.screenshot({ path: testInfo.outputPath("audio-guide-desktop.png") });
     await page.locator("#audio-category").selectOption("clarity");
@@ -37,6 +40,31 @@ test.describe("音源与反馈", () => {
     await page.keyboard.press("Escape");
     await expect(page.locator("#audio-guide-status")).toContainText("已停止");
     expect(await audibleClips(page)).toBe(0);
+  });
+
+  test("checking a recording plays it at its original speed and the same file version as the lessons", async ({ page }) => {
+    await openApp(page);
+    const slow = page.locator(".audio-speed-toggle").getByRole("button", { name: "慢放" });
+    await slow.click();
+    await page.locator(".syllable-result").click();
+    await expect.poll(() => lastAudioRate(page)).toBe(0.82);
+    const lesson = new URL((await audioLog(page)).at(-1)!);
+    const before = (await audioLog(page)).length;
+
+    await page.locator("#audio-category").selectOption("phrase");
+    await page.locator("#audio-search").fill("收据");
+    await page.locator("#audio-guide-play").click();
+    await expect(page.locator("#audio-guide-status")).toContainText("播放结束");
+    const log = await audioLog(page);
+    expect(log).toHaveLength(before + 1);
+    const checked = new URL(log.at(-1)!);
+    expect(checked.pathname).toBe("/audio/phrases/word-receipt.mp3");
+    expect(checked.searchParams.get("v"), "the guide must not keep an older cached copy than the lessons").toBe(lesson.searchParams.get("v"));
+    expect(await lastAudioRate(page), "a slowed-down copy is not the recording being checked").toBe(1);
+    // The learner's own slow-playback choice still applies to the lessons.
+    await expect(slow).toHaveAttribute("aria-pressed", "true");
+    await page.locator(".syllable-result").click();
+    await expect.poll(() => lastAudioRate(page)).toBe(0.82);
   });
 
   test("feedback contains the chosen file and never sends it; changing the selection clears the draft", async ({ page }) => {
