@@ -1,3 +1,4 @@
+import { visitView } from "./support/views.ts";
 import { expect, lastAudio, openApp, phrases, test, audioLog, expectTotalXp } from "./support/app.ts";
 import type { Page } from "@playwright/test";
 import { rateReview, reviewStorageKey } from "../app/review-logic.ts";
@@ -16,6 +17,7 @@ const listeningBackToPlan = (page: Page) => page.locator("#pronunciation-practic
 const mainNav = (page: Page) => page.getByRole("navigation", { name: "主要导航" });
 
 async function enterReview(page: Page) {
+  await visitView(page, "today-plan");
   await plan(page).focus();
   await page.keyboard.press("Digit1");
   await expect(review(page)).toBeFocused();
@@ -48,6 +50,7 @@ test.describe("今日 10 分钟路线", () => {
     });
     expect(contrast, "small badge text must remain readable on its background").toBeGreaterThanOrEqual(4.5);
     await plan(page).screenshot({ path: testInfo.outputPath("daily-plan-desktop.png") });
+    await visitView(page, "today-plan");
     await plan(page).focus();
     await page.keyboard.press("Enter");
     await expect(page.locator("#letter-panel .letter-card")).toHaveCount(6);
@@ -58,7 +61,7 @@ test.describe("今日 10 分钟路线", () => {
   });
 
   test("five keyboard ratings end the short session; regular review and reload share the same count", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#today-plan");
     await enterReview(page);
     for (let count = 1; count <= 5; count += 1) {
       await rateOne(page, count === 1 ? "Digit1" : "Digit2");
@@ -69,7 +72,7 @@ test.describe("今日 10 分钟路线", () => {
     await review(page).getByRole("button", { name: "返回今日路线" }).click();
     await expect(plan(page)).toBeFocused();
     await expect(plan(page).locator(".daily-plan-count strong")).toHaveText("1 / 2");
-    await page.getByRole("navigation", { name: "主要导航" }).getByRole("link", { name: "今日复习", exact: true }).click();
+    await page.getByRole("navigation", { name: "主要导航" }).getByRole("link", { name: "复习", exact: true }).click();
     await expect(review(page).locator(".daily-review-progress-heading strong span")).toHaveText("5 / 10");
     await page.reload();
     await expect(reviewCount(page)).toHaveText("5 / 5 项已回忆");
@@ -78,7 +81,7 @@ test.describe("今日 10 分钟路线", () => {
   });
 
   test("keyboard navigation opens blind listening without playing; actual answers including mistakes fill the goal", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#today-plan");
     await plan(page).focus();
     await page.keyboard.press("Digit2");
     await expect(listening(page)).toBeFocused();
@@ -105,10 +108,10 @@ test.describe("今日 10 分钟路线", () => {
 
   test("cross-tab reviews update the plan and a new local day clears today's goals without erasing history", async ({ page, context }) => {
     await page.clock.install({ time: new Date("2026-10-16T10:00:00+09:00") });
-    await openApp(page);
+    await openApp(page, "/#today-plan");
     const other = await context.newPage();
     await other.clock.install({ time: new Date("2026-10-16T10:00:00+09:00") });
-    await openApp(other);
+    await openApp(other, "/#today-plan");
     await enterReview(other);
     await rateOne(other);
     await expect(reviewCount(page)).toHaveText("1 / 5 项已回忆");
@@ -129,13 +132,14 @@ test.describe("今日 10 分钟路线", () => {
     }
     await context.addInitScript(values => { for (const [key, value] of values) localStorage.setItem(key, value); }, entries);
     await page.clock.install({ time: new Date(at) });
-    await openApp(page);
+    await openApp(page, "/#today-plan");
     await expect(reviewCount(page)).toHaveText("今天暂不用复习");
     await expect(plan(page).getByRole("button", { name: "查看短练结果" })).toBeDisabled();
     await expect(plan(page)).toContainText("下次到期：2026-10-18");
     await expect(plan(page)).toContainText("今天的两项练习已完成，可以休息了。");
     await expect(plan(page).locator(".daily-plan-primary")).toHaveCount(0);
     const before = await page.evaluate(() => JSON.stringify(localStorage));
+    await visitView(page, "today-plan");
     await plan(page).focus(); await page.keyboard.press("Enter"); await page.keyboard.press("Digit1");
     await expect(plan(page)).toBeFocused();
     expect(await page.evaluate(() => JSON.stringify(localStorage))).toBe(before);
@@ -143,7 +147,7 @@ test.describe("今日 10 分钟路线", () => {
   });
 
   test("native button Enter, composition and held keys do not invoke a second route", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#today-plan");
     await plan(page).focus();
     for (const event of [{ key: "1", code: "Digit1", repeat: true }, { key: "Enter", code: "Enter", isComposing: true }, { key: "Enter", code: "Enter", keyCode: 229 }, { key: "1", code: "Digit1", ctrlKey: true }]) {
       await plan(page).dispatchEvent("keydown", event);
@@ -178,7 +182,7 @@ test.describe("今日 10 分钟路线", () => {
 test.describe("今日路线 · 中止自动切题", () => {
   test.use({ autoAdvance: "site-default" });
   test("returning to the route cancels pending audio and automatic advancement", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#today-plan");
     await plan(page).getByRole("button", { name: "进入盲听／错题" }).click();
     await page.keyboard.press("Enter");
     await expect(listening(page).locator(".vowel-challenge-choices button").first()).toBeEnabled();
@@ -196,7 +200,7 @@ test.describe("今日路线 · 中止自动切题", () => {
 
 test.describe("今日路线 · 离开短练", () => {
   test("a click outside the short practice ends it, so coming back shows the regular review and listening", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#today-plan");
     await enterReview(page);
     await rateOne(page);
     await expect(reviewGoal(page)).toHaveText("1 / 5");
@@ -206,26 +210,27 @@ test.describe("今日路线 · 离开短练", () => {
     await expect(reviewGoal(page)).toHaveText("1 / 5");
     await expect(reviewBackToPlan(page)).toBeVisible();
 
-    // Leave through the main navigation, then scroll back instead of using a route or review link.
-    await mainNav(page).getByRole("link", { name: "40 音表", exact: true }).click();
-    await review(page).scrollIntoViewIfNeeded();
+    // Leave through the main navigation and return to regular review.
+    await mainNav(page).getByRole("link", { name: "40 音", exact: true }).click();
+    await mainNav(page).getByRole("link", { name: "复习", exact: true }).click();
     await expect(reviewGoal(page)).toHaveText("1 / 10");
     await expect(reviewBackToPlan(page)).toHaveCount(0);
     await expect(review(page).locator(".daily-review-reveal")).toBeVisible();
 
+    await visitView(page, "today-plan");
     await plan(page).getByRole("button", { name: "进入盲听／错题" }).click();
     await expect(listening(page)).toBeFocused();
     await expect(listeningBackToPlan(page)).toBeVisible();
     // Any other section counts as leaving, not only the navigation bar.
-    await page.locator("#audio-guide-title").click();
-    await page.locator("#pronunciation-practice").scrollIntoViewIfNeeded();
+    await visitView(page, "audio-guide");
+    await visitView(page, "pronunciation-practice");
     await expect(listeningBackToPlan(page)).toHaveCount(0);
     await expect(reviewCount(page)).toHaveText("1 / 5 项已回忆");
     expect(await audioLog(page)).toHaveLength(0);
   });
 
   test("keyboard jumps to another section end it; the shortcut help shown over it does not", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#today-plan");
     await enterReview(page);
     const dialog = page.getByRole("dialog");
     await page.keyboard.press("Shift+Slash");
@@ -246,6 +251,7 @@ test.describe("今日路线 · 离开短练", () => {
     await expect(reviewGoal(page)).toHaveText("0 / 10");
     await expect(reviewBackToPlan(page)).toHaveCount(0);
 
+    await visitView(page, "today-plan");
     await plan(page).focus();
     await page.keyboard.press("Digit2");
     await expect(listening(page)).toBeFocused();
@@ -255,10 +261,12 @@ test.describe("今日路线 · 离开短练", () => {
     await expect(listeningBackToPlan(page)).toHaveCount(0);
 
     // From the route card, "learn the next step" is not part of a short practice either.
+    await visitView(page, "today-plan");
     await plan(page).focus();
     await page.keyboard.press("Digit1");
     await expect(review(page)).toBeFocused();
     await expect(reviewBackToPlan(page)).toBeVisible();
+    await visitView(page, "today-plan");
     await plan(page).focus();
     await page.keyboard.press("Digit3");
     await expect(page.locator("#letter-master-ㅏ")).toBeFocused();

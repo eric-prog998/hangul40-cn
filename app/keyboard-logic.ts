@@ -46,6 +46,15 @@ export const COMPOUND_VOWELS: Record<string, string> = {
   "ㅗㅏ": "ㅘ", "ㅗㅐ": "ㅙ", "ㅗㅣ": "ㅚ", "ㅜㅓ": "ㅝ", "ㅜㅔ": "ㅞ", "ㅜㅣ": "ㅟ", "ㅡㅣ": "ㅢ",
 };
 
+// Build the reverse index once. Key input and the labels on quiz choices use
+// the same mapping, including tense letters and all seven two-key vowels.
+const byJamo = new Map<string, { physical: string; label: string }>();
+for (const [physical, char] of Object.entries(KOREAN_KEY_MAP)) byJamo.set(char, { physical, label: physical });
+for (const [physical, char] of Object.entries(KOREAN_SHIFT_MAP)) byJamo.set(char, { physical, label: "Shift+" + physical });
+for (const [parts, char] of Object.entries(COMPOUND_VOWELS)) {
+  byJamo.set(char, { physical: "", label: [...parts].map(part => byJamo.get(part)!.label).join(" → ") });
+}
+
 export function koreanKeyInput(key: string, code: string, shiftKey = false) {
   if (key === "Dead") return null;
   const physical = /^Key([A-Z])$/.exec(code)?.[1];
@@ -57,21 +66,12 @@ export function koreanKeyInput(key: string, code: string, shiftKey = false) {
   if (latin && KOREAN_KEY_MAP[latin]) {
     return { physical: latin, char: (shiftKey && KOREAN_SHIFT_MAP[latin]) || KOREAN_KEY_MAP[latin] };
   }
-  for (const map of [KOREAN_KEY_MAP, KOREAN_SHIFT_MAP]) {
-    const entry = Object.entries(map).find(([, char]) => char === key);
-    if (entry) return { physical: entry[0], char: key };
-  }
-  if (Object.values(COMPOUND_VOWELS).includes(key)) return { physical: "", char: key };
-  return null;
+  const entry = byJamo.get(key);
+  return entry ? { physical: entry.physical, char: key } : null;
 }
 
 export function koreanKeyLabel(char: string): string {
-  const normal = Object.entries(KOREAN_KEY_MAP).find(([, value]) => value === char);
-  if (normal) return normal[0];
-  const shifted = Object.entries(KOREAN_SHIFT_MAP).find(([, value]) => value === char);
-  if (shifted) return `Shift+${shifted[0]}`;
-  const compound = Object.entries(COMPOUND_VOWELS).find(([, value]) => value === char);
-  return compound ? [...compound[0]].map(koreanKeyLabel).join(" → ") : char;
+  return byJamo.get(char)?.label ?? char;
 }
 
 /** Do not submit ㅗ/ㅜ/ㅡ early when a compound vowel is also an answer choice. */
@@ -90,4 +90,10 @@ export function keyboardSectionIndex(code: string, shiftKey: boolean) {
 /** keyCode 229 also covers browsers reporting compositionend before keydown. */
 export function isImeConfirmation(isComposing: boolean, keyCode: number, trackedComposition: boolean) {
   return isComposing || keyCode === 229 || trackedComposition;
+}
+
+/** For a non-text learning panel only. Some Korean keyboards emit Process for
+ * an ordinary physical letter even though no text composition is in progress. */
+export function imeOwnsPanelKey(event: { isComposing: boolean; keyCode: number; key: string; code: string }) {
+  return event.isComposing || (event.keyCode === 229 && !(event.key === "Process" && /^Key[A-Z]$/.test(event.code)));
 }

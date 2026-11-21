@@ -499,7 +499,9 @@ test("renders the real Korean learning product", async () => {
 
   const html = await response.text();
   assert.match(html, /韩语 40 音｜中文闯关版/);
-  assert.match(html, /中文闯关版 · v47/);
+  assert.match(html, /中文闯关版 · v51/);
+  assert.match(html, /id="home-day"/);
+  assert.match(html, /id="home-continue"/, "free-study bookmarks keep their separate entry");
   assert.match(html, /用自己的韩文键盘作答/);
   assert.doesNotMatch(html, /v24 把零基础路线/);
   assert.match(html, /中文零基础 · 10 分钟起步/);
@@ -508,13 +510,13 @@ test("renders the real Korean learning product", async () => {
   assert.match(html, /어디 · 버스/);
   assert.match(html, /生存 6 句/);
   assert.match(html, /先播放，再作答/);
-  assert.match(html, /韩国真人起音/);
+  assert.match(html, /合成示范和真人片段均待教师逐条核听/);
   assert.match(html, /真人起音 ↔ 完整音节对照器/);
   assert.match(html, /顺序播放：起音 → 完整音节/);
   assert.match(html, /当前范围专项闯关/);
-  assert.match(html, /ㄹ、ㄲ、ㄸ、ㅃ 以同一裸起音原样重复两次/);
-  assert.match(html, /韩语 40 音表 · 真人起音版/);
-  assert.match(html, /韩国母语者真人起音 · 已截去完整元音/);
+  assert.match(html, /两个按钮各播一次，不会连读/);
+  assert.match(html, /韩语 40 音表/);
+  assert.match(html, /听名称 · AI/);
   assert.match(html, /生活词语/);
   assert.match(html, /지하철/);
   assert.match(html, /영수증/);
@@ -1061,13 +1063,13 @@ test("keeps one preferred target from every byte-identical blend group", async (
 test("versions every audio URL and keeps question gating", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
 
-  assert.match(page, /const APP_VERSION = "47"/);
+  assert.match(page, /const APP_VERSION = "51"/);
   assert.match(page, /const AUDIO_ASSET_VERSION = "21"/);
   assert.match(page, /return `\$\{phraseSource\}\?v=\$\{AUDIO_ASSET_VERSION\}`/);
   assert.match(page, /\/audio\/hangul-natural\/s-\$\{syllable\.codePointAt\(0\)\?\.toString\(16\)\}\.mp3\?v=\$\{AUDIO_ASSET_VERSION\}/);
   assert.match(page, /function consonantOnsetPath[\s\S]*?`\/audio\/consonant-human-onset\/\$\{audioFile\}\?v=\$\{AUDIO_ASSET_VERSION\}`/);
-  assert.match(page, /function consonantReferenceSoundPath[\s\S]*?const directory = clarityReplayConsonants\.has\(letter\.char\) \? "consonant-human-clarity" : "consonant-human-onset"/);
-  assert.match(page, /\/audio\/\$\{directory\}\/\$\{audioFile\}\?v=\$\{AUDIO_ASSET_VERSION\}/);
+  assert.doesNotMatch(page, /consonant-human-clarity/);
+  assert.match(page, /function playReferenceLetterExampleAudio[\s\S]*?consonantOnsetPath\(letter\)/);
   assert.match(page, /\/audio\/consonant-names\/\$\{item\.id\}\.mp3/);
   // Cache eviction, natural completion, cancellation and retries are now exercised
   // as actual controller behavior in audio-playback.test.mjs, not source regexes.
@@ -1125,7 +1127,7 @@ test("implements the v15 onset comparator and scoped review drills", async () =>
   assert.match(page, /async function playComparisonOnset/);
   assert.match(page, /async function playComparisonSyllable/);
   assert.match(page, /async function playComparisonSequence/);
-  assert.match(page, /playAudioSourceToEnd\(consonantReferenceSoundPath\(comparisonLetter\), audioSpeed\)/);
+  assert.match(page, /playAudioSourceToEnd\(consonantOnsetPath\(comparisonLetter\), audioSpeed\)/);
   assert.match(page, /playAudioSourceToEnd\(audioPath\(comparisonSyllable\), audioSpeed\)/);
   assert.match(page, /comparisonConsonant === "ㅇ" \? 650 : 420/);
   assert.match(page, /ㅇ 作初声时没有辅音声；右边完整音节从元音直接开始/);
@@ -1160,22 +1162,22 @@ test("prevents ambiguous mixed-category questions and advances only after playab
   assert.match(listenChoicesSource, /areBlindLettersConfusable\(target\.char, item\.char\)/);
   assert.match(page, /selectFairBlindLetters\(candidates, 6\)/);
   assert.match(page, /function consonantOnsetPath/);
-  assert.match(page, /function consonantReferenceSoundPath/);
+  assert.doesNotMatch(page, /function consonantReferenceSoundPath/);
   const blindAudioSource = page.match(/function playGameLetterExampleAudio\b[\s\S]*?\n}/)?.[0] ?? "";
-  assert.match(blindAudioSource, /consonantOnsetPath\(letter\)/);
+  assert.match(blindAudioSource, /playKorean\(letter\.sample, speed\)/);
   assert.doesNotMatch(blindAudioSource, /clarityReplayConsonants|consonantReferenceSoundPath|consonant-human-clarity/,
     "blind games must never reveal a consonant through the double-replay teaching asset");
   const referenceAudioSource = page.match(/function playReferenceLetterExampleAudio\b[\s\S]*?\n}/)?.[0] ?? "";
-  assert.match(referenceAudioSource, /consonantReferenceSoundPath\(letter\)/);
+  assert.match(referenceAudioSource, /consonantOnsetPath\(letter\)/);
   const visibleLetterAudioSource = page.match(/async function playLetterExample\b[\s\S]*?\n  }/)?.[0] ?? "";
   assert.match(visibleLetterAudioSource, /activity === "reference"[\s\S]*?playReferenceLetterExampleAudio\(letter, speed\)[\s\S]*?: playGameLetterExampleAudio\(letter, speed\)/,
-    "only explicit reference teaching controls may use a double-replay clarity asset");
+    "the explicit reference control uses a single onset; the graded game uses a syllable");
   const sidebarLetterAudioSource = page.match(/function playSidebarLetterExample\b[\s\S]*?\n  }/)?.[0] ?? "";
   assert.match(sidebarLetterAudioSource, /playLetterExample\(letter, audioSpeed, "game"\)/,
-    "the visible weak-letter shortcut must still use a single game onset unless it labels clarity replay");
+    "the weak-letter shortcut must match the practice game audio");
   assert.match(page, /function playGameLetter\(letter: Letter\) \{\s*return playGameAudio\(\(\) => playGameLetterExampleAudio\(letter, audioSpeed\)\)/);
   assert.match(page, /void playGameLetter\(listenTarget\)/);
-  assert.match(page, /listenAnswer === null \? "韩国真人起音" : `真人起音/);
+  assert.match(page, /listenAnswer === null \? "完整音节 · AI" : `完整音节/);
   assert.match(page, /playShadowExample\(shadowCurrent\)/);
   assert.match(page, /card\.type === "sound"\)[\s\S]*?const played = await playGameLetter\(card\.letter\)/);
   assert.match(page, /const answeredTarget = speedTarget[\s\S]{0,160}const playback = playGameLetter\(answeredTarget\)/);
@@ -1245,8 +1247,8 @@ test("protects saved progress, timed scoring, phrase automation, and Korean acce
   assert.match(page, /visibilitychange/);
   assert.match(page, /const visible = document\.visibilityState === "visible"/);
   assert.match(page, /setPageVisible\(visible\)/);
-  assert.match(page, /if \(keyboardZone === "games" && !gameSectionVisible\) return/);
-  assert.match(page, /if \(keyboardZone === "phrases" && !phraseSectionVisible\) return/);
+  assert.match(page, /if \(keyboardZone === "games" && !gameKeysActive\) return/);
+  assert.match(page, /if \(keyboardZone === "phrases" && !phraseKeysActive\) return/);
   assert.match(page, /function openKeyboardHelp\(\)[\s\S]*?setGameAutoAdvanceCancelled\(true\)[\s\S]*?setPhraseAutoAdvanceCancelled\(true\)[\s\S]*?cancelActiveSpeedRound\(/);
   assert.match(page, /function changeActiveSet[\s\S]*?cancelComparisonSequence\(\)/);
   assert.match(page, /phraseAutoAdvanceCancelled/);
@@ -1342,7 +1344,9 @@ test("v25 guards beginner flow, fair games, playback, focus, and responsive choi
   }
 
   assert.match(page, /function switchGameMode[\s\S]*?if \(mode === gameMode\)[\s\S]*?return;/);
-  assert.match(page, /function handleKeyboard\(event: KeyboardEvent\) \{\s*if \(event\.defaultPrevented\) return;/);
+  const keyboardEntry = page.slice(page.indexOf("function handleKeyboard(event: KeyboardEvent)"), page.indexOf("function handleKeyboard(event: KeyboardEvent)") + 550);
+  assert.match(keyboardEntry, /if \(event\.defaultPrevented \|\| imeOwnsPanelKey\(event\)\) return;/,
+    "native/IME-owned input must not reach the game's shortcuts");
   assert.match(page, /const focusedGameTab = element\?\.getAttribute\("role"\) === "tab"/);
   assert.match(page, /const nativeInteractive = Boolean\(element\?\.closest\("button, a\[href\], summary"\)\)/);
   assert.match(page, /nativeInteractive && \(event\.key === "Enter" \|\| event\.key === " "\)\) return/);
@@ -1575,23 +1579,26 @@ test("v25 guards beginner flow, fair games, playback, focus, and responsive choi
   assert.match(keyboardSource, /if \(focusedPhraseTab && \["ArrowLeft", "ArrowRight", "Home", "End"\]\.includes\(event\.key\)\) \{[\s\S]*?changePhraseTab\(nextTab, true\)[\s\S]*?return;/,
     "focused phrase tabs must retain arrow-key navigation while the stacked mobile quiz is offscreen");
   const phraseTabNavigationIndex = keyboardSource.indexOf("if (focusedPhraseTab &&");
-  const gameVisibilityGuardIndex = keyboardSource.indexOf('if (keyboardZone === "games" && !gameSectionVisible) return');
-  const phraseVisibilityGuardIndex = keyboardSource.indexOf('if (keyboardZone === "phrases" && !phraseSectionVisible) return');
+  const gameVisibilityGuardIndex = keyboardSource.indexOf('if (keyboardZone === "games" && !gameKeysActive) return');
+  const phraseVisibilityGuardIndex = keyboardSource.indexOf('if (keyboardZone === "phrases" && !phraseKeysActive) return');
   assert.ok(phraseTabNavigationIndex >= 0 && phraseTabNavigationIndex < gameVisibilityGuardIndex && phraseTabNavigationIndex < phraseVisibilityGuardIndex,
     "phrase-tab arrow handling must run before either stale keyboard-zone visibility guard");
   assert.match(page, /id="letter-tab-consonants"[\s\S]{0,300}tabIndex=\{activeSet === "consonants" \? 0 : -1\}[\s\S]{0,100}onKeyDown=\{handleLetterTabKeyDown\}/);
-  assert.match(page, /prefers-reduced-motion: reduce/);
-  assert.match(page, /game-tab-listen"\)\?\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)\s*\{\s*html\s*\{\s*scroll-behavior: auto;/);
+  assert.match(page, /moveToSection\("games", "game-tab-listen"\)/);
   assert.match(page, /const fallbackId = fallback\.keyboardZone === "games" \? `game-tab-\$\{fallback\.gameMode\}` : `phrase-tab-\$\{fallback\.phraseTab\}`/);
   assert.match(page, /if \(previous\?\.isConnected\) previous\.focus\(\);\s*else document\.getElementById\(fallbackId\)\?\.focus\(\)/);
   assert.match(page, /可听 39 音（不含初声静音 ㅇ）/);
   assert.doesNotMatch(page, /全部 40 音/);
   assert.match(page, /\{phraseItems\.length\} 条高频内容/);
   assert.match(page, /\{phraseItems\.length\} 条词句现在全部使用网站内置完整韩语合成音频/);
-  const moveToSectionSource = page.match(/function moveToSection\b[\s\S]*?\n  }/)?.[0] ?? "";
-  assert.match(moveToSectionSource, /document\.getElementById\(focusId\)\?\.focus\(\)/);
-  assert.doesNotMatch(moveToSectionSource, /preventScroll/,
-    "cross-section route focus must remain visually aligned on stacked mobile layouts");
+  const routeFocusSource = page.match(/useLayoutEffect\(\(\) => \{\s*if \(!destination\) return;[\s\S]*?\}, \[scene, destination\]\)/)?.[0] ?? "";
+  assert.doesNotMatch(routeFocusSource, /requestAnimationFrame|setTimeout/, "routing must not defer focus beyond the scene's DOM commit");
+  assert.match(routeFocusSource, /document\.getElementById\(destination\.focus \|\| destination\.id\)/);
+  assert.match(routeFocusSource, /focus\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(routeFocusSource, /target\.scrollIntoView\(\{ behavior: "instant", block: "nearest" \}\)/);
+  assert.match(routeFocusSource, /window\.scrollTo\(\{ top: 0, behavior: "instant" \}\)/,
+    "switching scenes moves focus and viewport together without animating");
 
   const mobileCss = css.slice(css.indexOf("@media (max-width: 520px)"));
   assert.ok(mobileCss.length > 0, "the 520px mobile media query must exist");
@@ -1740,7 +1747,7 @@ test("v25 completes the 40-letter route, phrase block lens, mastery handoff, and
     "matched cards must not leak romanization in direct-reading mode");
   assert.match(page, /matched\s*\? `\$\{card\.letter\.char\} 已配对`/,
     "a completed match must keep the paired letter in its accessible name");
-  assert.match(page, /\$\{showRomanization \? `\$\{comparisonLetter\.roman\} · ` : ""\}真人 ▶/,
+  assert.match(page, /\{showRomanization \? `\$\{comparisonLetter\.roman\} · ` : ""\}真人 ▶/,
     "the onset comparator must hide its roman hint in direct-reading mode");
   assert.match(page, /className="speed-options"[\s\S]{0,320}\{choice\.roman\}<\/button>/,
     "speed mode deliberately remains the romanization-recall exception");

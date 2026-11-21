@@ -1,0 +1,9 @@
+.letter-onset-detail, .letter-audio-actions .silent-initial, .letter-audio-feedback { grid-column: 1 / -1; }
+.letter-onset-detail { margin-top: .25rem; }
+.letter-onset-detail summary { cursor: pointer; font-size: .9rem; text-decoration: underline; text-underline-offset: .18em; }
+.letter-onset-detail .onset-audio { width: 100%; margin: .45rem 0; }
+.letter-onset-detail small, .letter-audio-actions .silent-initial { display: block; color: var(--ink-soft); font-size: .85rem; line-height: 1.5; }
+.letter-audio-actions .silent-initial { margin: .25rem 0; }
+.letter-audio-feedback { width: fit-content; color: var(--ink-soft); font-size: .85rem; text-decoration: underline; text-underline-offset: .18em; }
+.letter-sound .letter-audio-actions button > span { font-size: .875rem; }
+.letter-sound .letter-audio-actions button > strong { font-size: 1rem; }

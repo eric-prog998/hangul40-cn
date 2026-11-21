@@ -1,11 +1,13 @@
+import { visitView } from "./support/views.ts";
 import { answerListen, audibleClips, expect, expectTotalXp, goToTraining, lastAudio, lastAudioRate, letterOf, nextListen, openApp, readListenQuestion, settle, syllableOf, test } from "./support/app.ts";
 
 test.describe("练习节奏", () => {
   test.use({ autoAdvance: "site-default" });
 
   test("by default the next question arrives by itself a few seconds after the feedback", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await expect(page.locator("#auto-advance-setting")).toHaveValue("3000");
+    await visitView(page, "games");
     await page.locator("#listen-start").click();
     await answerListen(page);
     await expect(page.getByTestId("listen-round")).toHaveText("第 2 / 10 题", { timeout: 12_000 });
@@ -16,8 +18,9 @@ test.describe("练习节奏", () => {
   });
 
   test("manual mode waits for the learner, and the setting is remembered", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#learning-tools");
     await page.locator("#auto-advance-setting").selectOption("0");
+    await visitView(page, "games");
     await page.locator("#listen-start").click();
     await answerListen(page);
     await expect(page.locator("#game-panel-listen .game-feedback small")).toHaveText("自动下一题已关闭；按 Enter 继续。");
@@ -63,6 +66,9 @@ test.describe("键盘导航", () => {
     await page.keyboard.press("KeyS");
     await expect(shown).toHaveText("ㄴ");
     await expect.poll(() => lastAudio(page)).toEqual({ kind: "onset", char: "ㄴ" });
+    await page.keyboard.press("Digit3");
+    await page.keyboard.press("KeyR");
+    await expect.poll(async () => syllableOf(await lastAudio(page))?.syllable).toBe("가");
   });
 
   test("square brackets cycle through the six games", async ({ page }) => {
@@ -81,7 +87,7 @@ test.describe("键盘导航", () => {
   });
 
   test("the shortcut help opens with ?, keeps focus inside, and Esc returns to where the learner was", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#game-tab-listen").focus();
     await page.keyboard.press("Shift+Slash");
     const dialog = page.getByRole("dialog");
@@ -97,12 +103,13 @@ test.describe("键盘导航", () => {
 });
 
 test.describe("纯键盘操作", () => {
-  test("Enter at the top of the page enters the training area and a second Enter starts the round", async ({ page }) => {
+  test("the keyboard-accessible free-study entry opens the six-vowel lesson; F2 followed by Enter starts training", async ({ page }) => {
     await openApp(page);
+    await page.locator("#home-continue").focus();
     await page.keyboard.press("Enter");
-    await expect(page.locator("#keyboard-game-console")).toBeFocused();
-    await expect(page.locator("#keyboard-game-console")).toBeInViewport();
-    await settle(page);
+    await expect(page.locator("#letter-master-ㅏ")).toBeFocused();
+    await expect(page.locator("#letter-panel .letter-card")).toHaveCount(6);
+    await page.keyboard.press("F2");
     await page.keyboard.press("Enter");
     await expect(page.getByTestId("listen-round")).toHaveText("第 1 / 10 题");
     await readListenQuestion(page);
@@ -111,9 +118,8 @@ test.describe("纯键盘操作", () => {
   test("the phrase quiz is fully playable with number keys, ASDF, Space and Enter", async ({ page }) => {
     await openApp(page);
     await page.keyboard.press("Shift+Digit3");
-    await expect(page.locator("#phrase-quiz-panel")).toBeFocused();
-    await settle(page);
     await page.keyboard.press("Enter");
+    await expect(page.locator("#phrase-quiz-panel")).toBeFocused();
     const round = page.getByTestId("phrase-round");
     const verdict = page.locator("#phrase-quiz-panel .phrase-quiz-feedback strong");
     const question = async () => {
@@ -178,24 +184,27 @@ test.describe("纯键盘操作", () => {
 
 test.describe("播放设置", () => {
   test("hiding romanisation and slow playback are applied and remembered", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#starter");
     const firstRoman = page.locator("#letter-panel .letter-card .roman").first();
     await expect(firstRoman).toHaveText("g / k");
     await page.locator(".roman-mode-toggle").click();
     await expect(firstRoman).toHaveText("罗马字已隐藏");
+    await visitView(page, "builder");
     await page.locator(".audio-speed-toggle").getByRole("button", { name: "慢放" }).click();
+    await visitView(page, "builder");
     await page.locator(".syllable-result").click();
     await expect.poll(() => lastAudioRate(page)).toBe(0.82);
 
     await page.reload();
     await expect(firstRoman).toHaveText("罗马字已隐藏");
     await expect(page.locator(".audio-speed-toggle").getByRole("button", { name: "慢放" })).toHaveAttribute("aria-pressed", "true");
+    await visitView(page, "builder");
     await page.locator(".syllable-result").click();
     await expect.poll(() => lastAudioRate(page)).toBe(0.82);
   });
 
   test("starting a new sound always silences the previous one", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#compare");
     const buttons = page.locator(".compare-buttons button");
     await expect(buttons).toHaveCount(12);
     let loudest = 0;
@@ -205,7 +214,9 @@ test.describe("播放设置", () => {
     }
     expect(loudest, "clips audible at the same moment").toBeLessThanOrEqual(1);
     // …and a game question takes over from a reference sound in the same way.
+    await visitView(page, "builder");
     await page.locator(".syllable-result").click();
+    await visitView(page, "games");
     await page.locator("#listen-start").click();
     expect(await audibleClips(page)).toBeLessThanOrEqual(1);
     await answerListen(page);

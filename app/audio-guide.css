@@ -37,3 +37,6 @@
 .audio-feedback-form h3 { margin-top: 0; }
 #audio-report { font: 12px/1.7 ui-monospace, monospace; background: #f3f5ef; }
 @media (max-width: 720px) { .audio-guide { padding: 20px 16px; margin: 32px 0; } .audio-guide-heading { display: block; } .audio-review-count { margin-top: 18px; text-align: left; } .audio-guide-workspace { grid-template-columns: minmax(0,1fr); gap: 18px; } .audio-guide-detail, .audio-feedback-form { padding: 18px 14px; } .audio-guide-detail h3 { font-size: 24px; } .audio-guide-actions button { flex: 1 1 auto; } }
+.core-audio-review { margin-block: 1rem; }
+.core-audio-review summary { cursor: pointer; font-weight: 650; }
+.core-audio-review p { max-width: 68ch; line-height: 1.65; }

@@ -1,3 +1,4 @@
+import { visitView } from "./support/views.ts";
 import { audibleClips, expect, openApp, test } from "./support/app.ts";
 import type { Page } from "@playwright/test";
 
@@ -41,7 +42,7 @@ test.describe("录音回听", () => {
   }
 
   test("the microphone is only on between start and stop, and the clip plays back to its end", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#pronunciation-practice");
     await expect(status(page)).toHaveText("先听示范，再录下自己读的声音。");
     await expect(buttons(page).nth(1)).toBeDisabled();
     expect(await microphoneRequests(page), "no microphone request before the learner asks").toBe(0);
@@ -67,7 +68,7 @@ test.describe("录音回听", () => {
   });
 
   test("a demo sound takes over from the playback, and the clip is dropped when the vowel pair changes", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#pronunciation-practice");
     await record(page, 2);
     await buttons(page).nth(1).click();
     await expect(status(page)).toHaveText("正在回放你的录音。");
@@ -83,13 +84,15 @@ test.describe("录音回听", () => {
   });
 
   test("starting a game or hiding the tab ends the recording and releases the microphone, keeping the clip", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#pronunciation-practice");
     await buttons(page).first().click();
     await phase(page, "recording");
+    await visitView(page, "games");
     await page.locator("#listen-start").click();
     await expect(status(page)).toHaveText(ready);
     expect(await liveMicrophones(page)).toBe(0);
 
+    await visitView(page, "pronunciation-practice");
     await buttons(page).first().click(); // 重新录音
     await phase(page, "recording");
     expect(await liveMicrophones(page)).toBe(1);
@@ -104,7 +107,7 @@ test.describe("录音回听", () => {
 
   test("recording stops by itself after 15 seconds", async ({ page }) => {
     await page.clock.install();
-    await openApp(page);
+    await openApp(page, "/#pronunciation-practice");
     await buttons(page).first().click();
     await phase(page, "recording");
     await page.clock.fastForward(14_000);
@@ -119,7 +122,7 @@ test.describe("录音回听", () => {
       if (!navigator.mediaDevices) return;
       navigator.mediaDevices.getUserMedia = () => Promise.reject(new DOMException("Permission denied", "NotAllowedError"));
     });
-    await openApp(page);
+    await openApp(page, "/#pronunciation-practice");
     await buttons(page).first().click();
     await expect(status(page)).toHaveText("没有获得麦克风权限。请在浏览器的网站设置中允许麦克风后重试；也可以继续听示范，不必开启录音。");
     await expect(buttons(page).first()).toHaveText("开始录音");
@@ -132,7 +135,7 @@ test.describe("录音回听", () => {
     await context.addInitScript(() => {
       Object.defineProperty(window, "MediaRecorder", { configurable: true, value: undefined });
     });
-    await openApp(page);
+    await openApp(page, "/#pronunciation-practice");
     await expect(status(page)).toHaveText("当前浏览器不支持网页录音。你仍可听示范；录音可尝试最新版 Safari、Chrome 或 Edge。");
     for (const index of [0, 1, 2]) await expect(buttons(page).nth(index)).toBeDisabled();
     await page.locator(".vowel-contrast-card").nth(1).click();

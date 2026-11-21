@@ -1,0 +1,20 @@
+.day-dialogue { color: var(--ink); padding: .25rem; }
+.day-dialogue:focus-visible { outline: 2px solid var(--ink); outline-offset: 5px; border-radius: .5rem; }
+.day-dialogue h3 { font-size: clamp(1.65rem, 3vw, 2.3rem); letter-spacing: -.035em; margin: .45rem 0; }
+.day-dialogue p { line-height: 1.6; margin: .35rem 0 .7rem; }
+.day-dialogue .day-dialogue-tag { font-size: .875rem; font-weight: 750; color: var(--ink-soft); margin: 0; }
+.day-dialogue-prompt, .day-dialogue-answer { border: 1px solid var(--line); border-radius: .9rem; padding: .95rem 1.1rem; }
+.day-dialogue-prompt { background: #f0f4e9; margin-top: 1rem; }
+.day-dialogue p[lang=ko] { font-size: 1.32rem; line-height: 1.55; font-weight: 700; margin: .3rem 0; }
+.day-dialogue-task { margin: 1.15rem 0 .95rem; }
+.day-dialogue-controls { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem; margin-top: .65rem; }
+.day-dialogue button { display: inline-flex; align-items: center; gap: .5rem; border: 1px solid var(--ink); background: white; color: var(--ink); border-radius: .55rem; padding: .5rem .8rem; font-size: .95rem; font-weight: 650; cursor: pointer; }
+.day-dialogue button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.day-dialogue .day-dialogue-primary { background: var(--ink); color: #fff; }
+.day-dialogue small { font-size: .875rem; }
+.day-dialogue-answers { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%, 13rem), 1fr)); gap: .7rem; }
+.day-dialogue-answers > p, .day-dialogue-answers > .day-dialogue-controls { grid-column: 1 / -1; margin: 0; }
+.day-dialogue-answer { display: grid; justify-items: start; align-content: start; }
+.day-dialogue-answer button { margin-top: .65rem; }
+.day-dialogue .day-dialogue-bridge, .day-dialogue .day-dialogue-status { font-size: .9rem; margin-top: .55rem; }
+.day-dialogue .day-dialogue-status:empty { margin: .55rem 0 0; }

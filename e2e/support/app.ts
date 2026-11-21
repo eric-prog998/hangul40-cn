@@ -79,9 +79,10 @@ export function syllableOf(clip: AudioClip) {
   return clip.kind === "phrase" ? splitOpenSyllable(clip.phrase.korean) : null;
 }
 
-/** The letter a listening or matching clip stands for: a consonant onset, or the vowel of a syllable. */
+/** Graded consonants are complete ㅏ syllables, whereas a vowel has a silent initial. */
 export function letterOf(clip: AudioClip) {
-  return clip.kind === "onset" ? clip.char : syllableOf(clip)?.vowel ?? "";
+  const parts = syllableOf(clip);
+  return !parts ? "" : parts.initial === "ㅇ" ? parts.vowel : parts.vowel === "ㅏ" ? parts.initial : "";
 }
 
 /** Records which audio the page plays. The learner only hears it; the test needs to know what it was. */
@@ -130,6 +131,26 @@ export async function openApp(page: Page, path = "/") {
   await expect(page.locator("#daily-review")).not.toContainText("正在读取", { timeout: 30_000 });
 }
 
+/** Hold only the console's on-screen report. Focus, scrolling, media and key
+ * events are real, so shortcut-entry races can be exercised deterministically. */
+export async function delayConsoleVisibility(page: Page, id: string) {
+  await page.addInitScript((id) => {
+    window.IntersectionObserver = class extends IntersectionObserver {
+      constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+        super((entries, observer) => {
+          const deliver = entries.filter((entry) => {
+            if (entry.target.id !== id) return true;
+            if (entry.isIntersecting) return false;
+            document.documentElement.dataset.offscreenConsole = id;
+            return true;
+          });
+          if (deliver.length) callback(deliver, observer);
+        }, options);
+      }
+    };
+  }, id);
+}
+
 /**
  * Gives the page the moment a person always gives it between two key presses: the browser
  * reports what is now on screen and the page re-attaches its key handlers. A test types the
@@ -145,7 +166,6 @@ export async function settle(page: Page) {
 export async function goToTraining(page: Page) {
   await page.keyboard.press("F2");
   await expect(page.locator("#keyboard-game-console")).toBeFocused();
-  await settle(page);
 }
 
 export async function totalXp(page: Page) {
@@ -205,7 +225,7 @@ export async function readListenQuestion(page: Page) {
   await expect(page.getByTestId("listen-choice-0")).toBeEnabled();
   const clip = await lastAudio(page);
   const target = letterOf(clip);
-  expect(target, `the question audio should be a consonant onset or a vowel, got ${JSON.stringify(clip)}`).not.toBe("");
+  expect(target, `expected a ㅏ syllable or a vowel, got ${JSON.stringify(clip)}`).not.toBe("");
   const choices = await page.locator('[data-testid^="listen-choice-"] strong').allTextContents();
   expect(choices, "four distinct choices").toHaveLength(4);
   expect(new Set(choices).size, "choices must not repeat").toBe(4);

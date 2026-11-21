@@ -1,3 +1,4 @@
+import { visitView } from "./support/views.ts";
 import { answerListen, expect, lastAudio, listenPanel, nextListen, openApp, syllableOf, test } from "./support/app.ts";
 import type { Page } from "@playwright/test";
 
@@ -13,6 +14,7 @@ test.describe("新手路线", () => {
 
   /** Opens the lesson the route points at and marks every card in it as learned. */
   async function studyLetters(page: Page, label: string, letters: string[]) {
+    await visitView(page, "starter");
     await expect(next(page)).toContainText(label);
     await next(page).click();
     await expect(cards(page)).toHaveCount(letters.length);
@@ -22,7 +24,7 @@ test.describe("新手路线", () => {
 
   test("a beginner can walk the whole route, from the first six vowels to the final 39-sound review", async ({ page }) => {
     test.slow();
-    await openApp(page);
+    await openApp(page, "/#starter");
     await expect(reviewCard(page).getByRole("button")).toBeDisabled();
 
     await studyLetters(page, "继续：核心元音 6 音", coreVowels);
@@ -30,6 +32,7 @@ test.describe("新手路线", () => {
 
     // Step 3: eight syllables, six right answers are enough.
     await expect(next(page)).toContainText("继续：拼读第一局");
+    await visitView(page, "starter");
     await next(page).click();
     const blend = page.locator("#game-panel-blend");
     const initials = blend.locator(".blend-choice-group").nth(0).locator("button");
@@ -51,12 +54,14 @@ test.describe("新手路线", () => {
 
     // Step 4: the two words that only use letters learned so far.
     await expect(next(page)).toContainText("继续：已学字母首读");
+    await visitView(page, "starter");
     await next(page).click();
     await expect(page.locator("#phrase-scene-starter")).toHaveAttribute("aria-pressed", "true");
     for (const id of ["word-where", "word-bus"]) await page.locator(`#phrase-master-${id}`).click();
 
     // Step 5: three of the six survival sentences.
     await expect(next(page)).toContainText("继续：生存 6 句");
+    await visitView(page, "starter");
     await next(page).click();
     await expect(page.locator("#phrase-scene-survival")).toHaveAttribute("aria-pressed", "true");
     for (const id of ["sentence-this", "sentence-toilet", "sentence-help"]) await page.locator(`#phrase-master-${id}`).click();
@@ -67,6 +72,7 @@ test.describe("新手路线", () => {
     await expect(page.locator(".mastery-meter strong")).toHaveText("40/40");
 
     // Final review: ten mixed questions, eight right answers pass.
+    await visitView(page, "starter");
     await expect(next(page)).toContainText("最后验收：39 个可听音");
     await expect(reviewCard(page).getByRole("button")).toBeEnabled();
     await next(page).click();
@@ -100,7 +106,7 @@ test.describe("新手路线", () => {
         window.localStorage.setItem("hangul-phrase-mastered", JSON.stringify(phraseIds));
       } catch { /* blank start page */ }
     }, [[...coreVowels, ...basicConsonants, ...advancedConsonants, ...advancedVowels], ["word-where", "word-bus", "sentence-this", "sentence-toilet", "sentence-help"]] as const);
-    await openApp(page);
+    await openApp(page, "/#starter");
     await expect(page.locator(".mastery-meter strong")).toHaveText("40/40");
     // The beginner blend round has not been played yet, so the route still points there.
     await expect(next(page)).toContainText("继续：拼读第一局");

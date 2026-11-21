@@ -1,0 +1,40 @@
+.task-shell [data-scene][hidden] { display:none !important; }
+.task-shell .scene-wrap:not([hidden]) { display:contents; }
+.task-shell { min-height:100vh; overflow:clip; }
+.task-shell .topbar { max-width:1260px; position:sticky; top:0; z-index:30; background:var(--paper); }
+.task-shell main :where([tabindex], button, a[href], [id]) { scroll-margin-top:104px; }
+.task-shell .topbar nav { flex-wrap:nowrap; gap:4px; }
+.task-shell .topbar nav a { justify-content:center; padding:8px 20px; border-radius:999px; min-height:42px; font-size:16px; }
+.task-shell .topbar nav a::after { display:none; }
+.task-shell .topbar nav a:hover { background:#e7e9df; }
+.task-shell .topbar nav a[aria-current] { background:var(--ink); color:white; }
+.task-shell .scene-settings { font-size:14px; font-weight:650; border:1px solid var(--line); border-radius:10px; padding:8px 12px; }
+.scene-settings[aria-current] { background:var(--lime); }
+.scene-settings span { font-size:1.15rem; }
+.scene-subnav { width:min(1180px,calc(100% - 48px)); margin:30px auto; display:flex; align-items:center; flex-wrap:wrap; gap:6px; }
+.scene-subnav a { font-weight:650; font-size:14px; padding:9px 15px; border:1px solid transparent; border-radius:8px; }
+.scene-subnav a:hover { background:#e7e9df; }
+.scene-subnav a[aria-current] { border-color:var(--line); background:var(--cream); }
+.task-shell main { min-height:calc(100vh - 190px); }
+.task-shell .study-home { width:min(1110px,calc(100% - 72px)); margin:clamp(60px,10vh,115px) auto; display:grid; grid-template-columns:minmax(0,1.3fr) minmax(260px,.72fr); align-items:center; gap:clamp(28px,7vw,110px); }
+.study-kicker, .study-home-sheet > span { font-size:14px; font-weight:750; letter-spacing:.07em; }
+.study-kicker { display:flex; align-items:center; gap:11px; }
+.study-kicker > span { display:inline-block; background:var(--coral); width:28px; height:3px; }
+.study-home h1 { margin:22px 0 18px; color:var(--ink); font-size:clamp(42px,4.8vw,72px); letter-spacing:-.06em; line-height:1.2; }
+.study-home-copy > p { margin:0; max-width:34em; font-size:18px; line-height:1.85; color:var(--ink-soft); }
+.study-home-actions { margin-top:30px; display:flex; flex-wrap:wrap; align-items:center; gap:24px; }
+.study-home-actions button { font-size:18px; font-weight:750; padding:14px 19px; color:white; background:var(--ink); border:1px solid var(--ink); border-radius:12px; cursor:pointer; }
+.study-home-actions kbd { display:inline-block; margin-left:10px; border:1px solid #8bada0; padding:2px 5px; border-radius:4px; font-size:12px; color:white; }
+.study-home-actions a { color:var(--ink-soft); text-decoration:underline; text-underline-offset:4px; font-weight:650; }
+.study-home-sheet { padding:26px 30px; background:#fffdf7; border:1px solid var(--line); border-top:6px solid var(--ink); border-radius:8px; box-shadow:6px 7px 0 #e2e5d6; }
+.study-glyphs { display:grid; grid-template-columns:repeat(3,1fr); margin:20px 0; }
+.study-glyphs i { border:1px solid #d5dcd3; font-style:normal; font-size:clamp(28px,3.4vw,48px); text-align:center; padding:.15em 0; background:linear-gradient(45deg,transparent 49.5%,#e8e9df 50%,transparent 50.5%),linear-gradient(-45deg,transparent 49.5%,#e8e9df 50%,transparent 50.5%); }
+.study-glyphs i.known { background-color:#e3edbe; }
+.study-home-progress { display:flex; gap:12px; align-items:baseline; }
+.study-home-progress strong { font-size:25px; }
+.study-home-progress small, .study-home-progress span { font-size:14px; color:var(--ink-soft); }
+.study-home-sheet .header-progress { margin:8px 0 0; padding:0; min-height:0; border:0; background:transparent; color:var(--ink-soft); }
+.task-shell .scene-builder { width:min(600px,calc(100% - 64px)); margin:48px auto 90px; }
+.scene-builder .audio-speed-toggle { margin:0 0 18px auto; width:fit-content; }
+.task-shell .desk-footer { display:flex; justify-content:space-between; gap:16px; align-items:center; min-height:0; padding:20px max(26px,calc((100vw - 1180px)/2)); color:var(--ink-soft); font-size:13px; border-top:1px solid var(--line); background:transparent; }
+@media (max-width:760px) { .task-shell .study-home { grid-template-columns:1fr; margin:38px auto; } .study-home-sheet { max-width:400px; } .task-shell .topbar nav a { padding:8px 12px; } }

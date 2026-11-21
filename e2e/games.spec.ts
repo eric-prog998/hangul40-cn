@@ -1,3 +1,4 @@
+import { visitView } from "./support/views.ts";
 import { confirmPendingKoreanKey, expect, expectTotalXp, goToTraining, keysFor, lastAudio, letterOf, openApp, syllableOf, test } from "./support/app.ts";
 import type { Page } from "@playwright/test";
 
@@ -23,7 +24,7 @@ test.describe("拼读工坊", () => {
   }
 
   test("eight correct syllables score 8/8 and award 96 XP", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#game-tab-blend").click();
     for (let round = 1; round <= 8; round += 1) {
       await expect(panel(page).locator(".game-board-top span").first()).toContainText(`第 ${round} / 8 题`);
@@ -39,7 +40,7 @@ test.describe("拼读工坊", () => {
   });
 
   test("a wrong part is explained, earns nothing and is remembered as a weak letter", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#game-tab-blend").click();
     const question = await readQuestion(page);
     await initials(page).nth(question.initialIndex).click();
@@ -50,7 +51,7 @@ test.describe("拼读工坊", () => {
   });
 
   test("can be played from a Korean keyboard, including compound vowels", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#game-tab-blend").click();
     await goToTraining(page);
     for (let round = 1; round <= 8; round += 1) {
@@ -66,10 +67,12 @@ test.describe("拼读工坊", () => {
   });
 
   test("a question cut off by another sound asks for a replay", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#game-tab-blend").click();
     const question = await readQuestion(page);
+    await visitView(page, "compare");
     await page.locator(".compare-buttons button").first().click();
+    await visitView(page, "games");
     await expect(initials(page).first()).toBeDisabled();
     await expect(panel(page).locator(".game-feedback")).toContainText("题目声音已中断：请点上方播放按钮或按空格重播");
     await page.locator("#blend-replay").click();
@@ -79,7 +82,7 @@ test.describe("拼读工坊", () => {
   test("the beginner round only uses first-step letters and unlocks the next step", async ({ page }) => {
     const basicConsonants = ["ㄱ", "ㄴ", "ㄷ", "ㄹ", "ㅁ", "ㅂ", "ㅅ", "ㅇ", "ㅈ", "ㅎ"];
     const coreVowels = ["ㅏ", "ㅓ", "ㅗ", "ㅜ", "ㅡ", "ㅣ"];
-    await openApp(page);
+    await openApp(page, "/#starter");
     const step = page.locator(".starter-path article").nth(2);
     await step.getByRole("button", { name: "10 × 6 拼读" }).click();
     for (let round = 1; round <= 8; round += 1) {
@@ -102,7 +105,7 @@ test.describe("配对消除", () => {
   const panel = (page: Page) => page.locator("#game-panel-match");
 
   test("every sound card pairs with its letter; clearing the board awards 73 XP", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#game-tab-match").click();
     await expect(panel(page).locator(".match-grid button")).toHaveCount(12);
     const soundCards = panel(page).locator('.match-grid button[aria-label*="声音牌"]');
@@ -128,7 +131,7 @@ test.describe("配对消除", () => {
   });
 
   test("a sound with the wrong letter does not pair: both flip back, nothing is scored, the right letter still works", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#game-tab-match").click();
     const sound = panel(page).locator('.match-grid button[aria-label*="声音牌"]').first();
     await sound.click();
@@ -155,7 +158,7 @@ test.describe("配对消除", () => {
   });
 
   test("two letter cards never match and flip back", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#game-tab-match").click();
     const letterCards = panel(page).locator('.match-grid button[aria-label*="字母牌"]');
     await letterCards.nth(0).click();
@@ -181,7 +184,7 @@ test.describe("回声跟读", () => {
   }
 
   test("eight confident repeats finish the loop with 64 XP", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#game-tab-shadow").click();
     await page.locator("#shadow-start").click();
     for (let item = 1; item <= 8; item += 1) {
@@ -196,7 +199,7 @@ test.describe("回声跟读", () => {
   });
 
   test("an item rated unsure comes back at the end of the queue", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#game-tab-shadow").click();
     await page.locator("#shadow-start").click();
     await expect(counter(page)).toHaveText("第 1 / 8 个示范");
@@ -219,7 +222,7 @@ test.describe("极速认读", () => {
   const optionTexts = (page: Page) => panel(page).locator(".speed-options button").evaluateAll((buttons) => buttons.map((button) => button.lastChild?.textContent ?? ""));
 
   test("the right romanisation is always offered, only right answers score, and the clock ends the round", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#game-tab-speed").click();
     await page.locator("#speed-restart").click();
     let score = 0;
@@ -250,7 +253,7 @@ test.describe("极速认读", () => {
   });
 
   test("leaving the game cancels the round instead of letting it run in the background", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#game-tab-speed").click();
     await page.locator("#speed-restart").click();
     await expect(page.locator("#speed-choice-0")).toBeEnabled();

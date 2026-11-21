@@ -1,8 +1,9 @@
+import { visitView } from "./support/views.ts";
 import { answerListen, confirmPendingKoreanKey, expect, expectTotalXp, goToTraining, keysFor, lastAudio, letterOf, listenPanel, nextListen, openApp, readListenQuestion, test, todayXp } from "./support/app.ts";
 
 test.describe("听音闯关", () => {
   test("ten correct answers score 10/10, award exactly 180 XP and survive a reload", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#listen-start").click();
     for (let round = 1; round <= 10; round += 1) {
       await expect(page.getByTestId("listen-round")).toHaveText(`第 ${round} / 10 题`);
@@ -23,7 +24,7 @@ test.describe("听音闯关", () => {
   });
 
   test("three wrong answers end the round, give no XP and remember the missed letters", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#listen-start").click();
     const missed: string[] = [];
     for (let attempt = 1; attempt <= 3; attempt += 1) {
@@ -39,7 +40,7 @@ test.describe("听音闯关", () => {
   });
 
   test("a missed sound comes back two questions later", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#listen-start").click();
     const missed = await answerListen(page, false);
     await nextListen(page);
@@ -51,7 +52,7 @@ test.describe("听音闯关", () => {
   });
 
   test("the weak-sound drill asks only sounds that were missed, and their buttons replay them", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#listen-start").click();
     const missed = new Set<string>();
     for (let attempt = 1; attempt <= 3; attempt += 1) {
@@ -76,7 +77,7 @@ test.describe("听音闯关", () => {
   });
 
   test("choices stay locked until the question has been heard, and a second click cannot change the answer", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#listen-start").click();
     // Right after starting, the clip is still playing: nothing may be answered yet.
     await expect(page.getByTestId("listen-choice-0")).toBeDisabled();
@@ -87,7 +88,7 @@ test.describe("听音闯关", () => {
   });
 
   test("the round can be played entirely from a Korean keyboard", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await goToTraining(page);
     await page.keyboard.press("Enter");
     for (let round = 1; round <= 10; round += 1) {
@@ -104,7 +105,7 @@ test.describe("听音闯关", () => {
   });
 
   test("number keys and the ASDF layout both answer", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await goToTraining(page);
     await page.keyboard.press("Enter");
     let question = await readListenQuestion(page);
@@ -120,7 +121,7 @@ test.describe("听音闯关", () => {
   });
 
   test("a beginner drill stays inside its letter set and can confirm what was answered correctly", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#starter");
     const coreVowels = ["ㅏ", "ㅓ", "ㅗ", "ㅜ", "ㅡ", "ㅣ"];
     await page.locator(".starter-path article").nth(0).getByRole("button", { name: "听音练习" }).click();
     const heard = new Set<string>();
@@ -137,10 +138,12 @@ test.describe("听音闯关", () => {
   });
 
   test("a question cut off by another sound asks for a replay instead of looking frozen", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#listen-start").click();
     const question = await readListenQuestion(page);
-    await page.locator(".syllable-result").click(); // any other sound on the page takes over
+    await visitView(page, "builder");
+    await page.locator(".syllable-result").click();
+    await visitView(page, "games");
     await expect(page.getByTestId("listen-choice-0")).toBeDisabled();
     await expect(listenPanel(page).locator(".game-feedback")).toContainText("题目声音已中断：请点“再听一次”或按空格重播");
     await expect(page.getByTestId("listen-choice-0").locator("small")).toHaveText("先重播");
@@ -153,13 +156,13 @@ test.describe("听音闯关", () => {
     await expectTotalXp(page, 12);
   });
 
-  test("scrolling far away pauses the question; coming back shows how to continue", async ({ page }) => {
-    await openApp(page);
+  test("switching away pauses the question; coming back shows how to continue", async ({ page }) => {
+    await openApp(page, "/#games");
     await page.locator("#listen-start").click();
     const question = await readListenQuestion(page);
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await visitView(page, "learn");
     await expect(listenPanel(page).locator(".game-feedback")).toContainText("题目声音已中断");
-    await page.locator("#games").scrollIntoViewIfNeeded();
+    await visitView(page, "games");
     await expect(page.getByTestId("listen-choice-0")).toBeDisabled();
     await goToTraining(page);
     await page.keyboard.press("Space");

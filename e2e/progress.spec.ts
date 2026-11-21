@@ -1,3 +1,4 @@
+import { visitView } from "./support/views.ts";
 import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -8,13 +9,14 @@ const mastered = (page: Page) => page.locator(".mastery-meter strong");
 
 test.describe("学习进度", () => {
   test("two open tabs stay in sync and never overwrite each other's XP", async ({ page, context }) => {
-    await openApp(page);
+    await openApp(page, "/#learn");
     const second = await context.newPage();
-    await openApp(second);
+    await openApp(second, "/#games");
 
     await page.locator("#letter-master-ㄱ").click();
     await expect(mastered(second)).toHaveText("1/40");
 
+    await visitView(page, "games");
     await page.locator("#listen-start").click();
     await answerListen(page);
     await expectTotalXp(page, 12);
@@ -25,6 +27,7 @@ test.describe("学习进度", () => {
     await expectTotalXp(second, 24);
     await expectTotalXp(page, 24);
 
+    await visitView(second, "learn");
     await second.locator("#letter-master-ㄱ").click();
     await expect(mastered(page)).toHaveText("0/40");
 
@@ -37,7 +40,7 @@ test.describe("学习进度", () => {
 
   test("today's XP starts again at local midnight while the total is kept", async ({ page }) => {
     await page.clock.install({ time: new Date("2026-10-12T23:58:30+09:00") });
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#listen-start").click();
     await answerListen(page);
     expect(await todayXp(page)).toBe(12);
@@ -58,8 +61,9 @@ test.describe("学习进度", () => {
   });
 
   test("clearing site data from another tab resets this one, and it keeps saving afterwards", async ({ page, context }) => {
-    await openApp(page);
+    await openApp(page, "/#learn");
     await page.locator("#letter-master-ㄱ").click();
+    await visitView(page, "games");
     await page.locator("#listen-start").click();
     await answerListen(page);
     await expectTotalXp(page, 12);
@@ -81,9 +85,10 @@ test.describe("学习进度", () => {
   });
 
   test("progress is not lost when a tab is closed right after an answer", async ({ page, context }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#listen-start").click();
     await answerListen(page);
+    await visitView(page, "phrases");
     await page.locator("#phrase-master-word-water").click();
     await page.close();
     const reopened = await context.newPage();
@@ -93,7 +98,7 @@ test.describe("学习进度", () => {
   });
 
   test("switching to another app and back keeps saving new answers", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#listen-start").click();
     await answerListen(page);
     await expectTotalXp(page, 12);
@@ -110,6 +115,7 @@ test.describe("学习进度", () => {
     await page.locator("#listen-replay").click(); // the question was paused while the tab was hidden
     await answerListen(page);
     await expectTotalXp(page, 26);
+    await visitView(page, "learn");
     await page.locator("#letter-master-ㅁ").click();
     await setVisibility("hidden");
     await setVisibility("visible");
@@ -121,14 +127,14 @@ test.describe("学习进度", () => {
   });
 
   test("many visits never lose earlier progress, and old records are tidied instead of piling up", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#listen-start").click();
     await answerListen(page);
     const letters = ["ㄱ", "ㄴ", "ㄷ", "ㄹ", "ㅁ", "ㅂ", "ㅅ", "ㅇ", "ㅈ", "ㅊ", "ㅋ", "ㅌ"];
     let mostRecords = 0;
     for (const [visit, letter] of letters.entries()) {
       await page.goto("about:blank"); // leaving the page, as when closing the tab
-      await openApp(page);
+      await openApp(page, "/#learn");
       await expect(mastered(page), `visit ${visit + 1}`).toHaveText(`${visit}/40`);
       await page.locator(`#letter-master-${letter}`).click();
       await expect(mastered(page)).toHaveText(`${visit + 1}/40`);
@@ -149,6 +155,7 @@ test.describe("进度备份", () => {
   const scratch = () => mkdtemp(join(tmpdir(), "hangul40-e2e-"));
 
   async function importFile(page: Page, path: string) {
+    await visitView(page, "learning-tools");
     await expect(fileInput(page)).toBeEnabled();
     await fileInput(page).setInputFiles(path);
     await expect(page.locator(".backup-preview")).toBeVisible();
@@ -158,14 +165,18 @@ test.describe("进度备份", () => {
 
   test("a backup moves progress to another browser, merging instead of overwriting or double counting", async ({ page, browser }) => {
     await page.clock.install({ time: moment });
-    await openApp(page);
+    await openApp(page, "/#learn");
     await page.locator("#letter-master-ㄱ").click();
     await page.locator("#letter-master-ㄴ").click();
+    await visitView(page, "phrases");
     await page.locator("#phrase-master-word-water").click();
+    await visitView(page, "games");
     await page.locator("#listen-start").click();
     await answerListen(page);
+    await visitView(page, "daily-review");
     await page.locator("#daily-review .daily-review-reveal").click();
     await page.locator("#daily-review .daily-review-rating button").nth(1).click();
+    await visitView(page, "learning-tools");
     await page.locator("#auto-advance-setting").selectOption("5000");
 
     const [download] = await Promise.all([page.waitForEvent("download"), page.locator("#learning-tools .backup-actions button").click()]);
@@ -187,8 +198,9 @@ test.describe("进度备份", () => {
     await disableAutoAdvance(other);
     const device = await other.newPage();
     await device.clock.install({ time: moment });
-    await openApp(device);
+    await openApp(device, "/#learn");
     await device.locator("#letter-master-ㄷ").click();
+    await visitView(device, "games");
     await device.locator("#listen-start").click();
     await answerListen(device);
     await nextListen(device);
@@ -214,8 +226,9 @@ test.describe("进度备份", () => {
   });
 
   test("damaged or foreign files are refused and leave existing progress untouched", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#learn");
     await page.locator("#letter-master-ㄱ").click();
+    await visitView(page, "learning-tools");
     const [download] = await Promise.all([page.waitForEvent("download"), page.locator("#learning-tools .backup-actions button").click()]);
     const good = JSON.parse(await readFile(await download.path(), "utf8"));
 
@@ -230,6 +243,7 @@ test.describe("进度备份", () => {
     for (const [name, content, message] of cases) {
       const path = join(folder, name);
       await writeFile(path, content);
+      await visitView(page, "learning-tools");
       await expect(fileInput(page)).toBeEnabled();
       await fileInput(page).setInputFiles(path);
       await expect(status(page), name).toContainText(message);

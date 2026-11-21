@@ -1,3 +1,4 @@
+import { visitView } from "./support/views.ts";
 import { decomposeHangulSyllable } from "../app/learning-logic.ts";
 import { expect, expectTotalXp, lastAudio, openApp, phrases, test } from "./support/app.ts";
 import type { Page } from "@playwright/test";
@@ -16,7 +17,7 @@ test.describe("词句记忆闯关", () => {
   }
 
   test("ten correct words score 10/10 for 100 XP, never repeating a word back to back", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#phrases");
     await page.locator("#phrase-quiz-restart").click();
     let previous = "";
     for (let round = 1; round <= 10; round += 1) {
@@ -37,7 +38,7 @@ test.describe("词句记忆闯关", () => {
   });
 
   test("a wrong meaning shows the right one and gives no XP; sentences have their own quiz", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#phrases");
     await page.locator("#phrase-tab-sentence").click();
     await page.locator("#phrase-quiz-restart").click();
     const question = await readQuestion(page);
@@ -48,7 +49,7 @@ test.describe("词句记忆闯关", () => {
   });
 
   test("the six survival sentences can be drilled and confirmed, which advances the beginner path", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#starter");
     await page.locator(".starter-path article").nth(4).getByRole("button", { name: "练生存 6 句" }).click();
     await expect(page.locator("#phrase-scene-survival")).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator(".phrase-grid article")).toHaveCount(6);
@@ -69,7 +70,7 @@ test.describe("词句记忆闯关", () => {
   });
 
   test("phrase cards reveal, play their own audio, and remember what was marked", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#phrases");
     const card = page.locator(".phrase-grid article").filter({ has: page.locator("#phrase-master-word-water") });
     await card.locator(".phrase-audio").click();
     await expect.poll(async () => { const clip = await lastAudio(page); return clip.kind === "phrase" ? clip.phrase.id : ""; }).toBe("word-water");
@@ -88,7 +89,7 @@ test.describe("词句记忆闯关", () => {
   });
 
   test("the two starter words can be drilled even though the group is tiny", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#starter");
     const step = page.locator(".starter-path article").nth(3);
     await step.getByRole("button", { name: "打开首读词卡" }).click();
     await expect(page.locator("#phrase-scene-starter")).toHaveAttribute("aria-pressed", "true");
@@ -109,11 +110,12 @@ test.describe("词句记忆闯关", () => {
     await expect(step).toContainText("已达标 · 2/2");
   });
 
-  test("a question cut off by scrolling away asks for a replay instead of looking frozen", async ({ page }) => {
-    await openApp(page);
+  test("a question cut off by leaving the phrase view asks for a replay instead of looking frozen", async ({ page }) => {
+    await openApp(page, "/#phrases");
     await page.locator("#phrase-quiz-restart").click();
     const question = await readQuestion(page);
-    await page.evaluate(() => window.scrollTo(0, 0));
+    await visitView(page, "learn");
+    await visitView(page, "phrases");
     await expect(quiz(page).locator(".phrase-quiz-feedback")).toContainText("词句声音已中断：请点上方“只听声音”或按空格重播");
     await page.locator("#phrase-quiz-replay").click();
     const replayed = await readQuestion(page);
@@ -137,7 +139,7 @@ test.describe("今日复习", () => {
   }
 
   test("ten cards a day and no more; the count survives a reload", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#daily-review");
     for (let count = 1; count <= 10; count += 1) {
       await reviewOne(page, count % 2 === 0);
       await expect(done(page)).toHaveText(`${count} / 10`);
@@ -154,7 +156,7 @@ test.describe("今日复习", () => {
   });
 
   test("answers must be revealed before rating, and listening plays the same phrase", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#daily-review");
     await review(page).focus();
     await page.keyboard.press("Digit2");
     await expect(done(page)).toHaveText("0 / 10");
@@ -168,7 +170,7 @@ test.describe("今日复习", () => {
 
   test("cards come back on schedule: forgotten tomorrow, remembered after 1, then 3 days", async ({ page }) => {
     await page.clock.install({ time: new Date("2026-10-12T10:00:00+09:00") });
-    await openApp(page);
+    await openApp(page, "/#daily-review");
     await expect(review(page).locator(".daily-review-progress-heading > span")).toHaveText("2026-10-12");
     const forgotten = await reviewOne(page, false);
     await expect(review(page).locator(".daily-review-feedback")).toContainText("下次复习：2026-10-13");
@@ -195,7 +197,7 @@ test.describe("收音入门", () => {
   const lesson = (page: Page) => page.locator("#batchim-lesson");
 
   test("five questions, each answered from the final consonant of the last block", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#batchim-lesson");
     await lesson(page).getByRole("button", { name: "开始 5 题练习" }).click();
     for (let question = 1; question <= 5; question += 1) {
       await expect(lesson(page).locator(".batchim-mode-controls span")).toHaveText(`第 ${question} / 5 题`);
@@ -212,7 +214,7 @@ test.describe("收音入门", () => {
   });
 
   test("a wrong pick names the right final, and each example plays its own whole word", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#batchim-lesson");
     const examples = lesson(page).locator(".batchim-examples button");
     await expect(examples).toHaveCount(5);
     for (let index = 0; index < 5; index += 1) {

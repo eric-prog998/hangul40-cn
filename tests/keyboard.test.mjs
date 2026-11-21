@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { koreanKeyInput, koreanKeyLabel, resolveKoreanChoice, keyboardShortcutKey, keyboardSectionIndex, isImeConfirmation } from "../app/keyboard-logic.ts";
+import { koreanKeyInput, koreanKeyLabel, resolveKoreanChoice, keyboardShortcutKey, keyboardSectionIndex, isImeConfirmation, imeOwnsPanelKey } from "../app/keyboard-logic.ts";
+
+test("the panel does not score IME candidate keys, but accepts a non-composing physical Korean key", () => {
+  const sample = { key: "Process", code: "KeyR", keyCode: 229, isComposing: false };
+  assert.equal(imeOwnsPanelKey(sample), false);
+  assert.equal(imeOwnsPanelKey({ ...sample, isComposing: true }), true);
+  assert.equal(imeOwnsPanelKey({ ...sample, key: "1", code: "Digit1" }), true);
+  assert.equal(imeOwnsPanelKey({ ...sample, key: "Enter", code: "Enter" }), true);
+  assert.equal(imeOwnsPanelKey({ ...sample, code: "Digit2" }), true);
+});
 
 test("Korean physical keys work with Latin, Hangul and Process IME events", () => {
   for (const key of ["r", "R", "ㄱ", "Process", "Unidentified"]) {
@@ -21,8 +30,10 @@ test("every one of the 40 jamo can be entered using the displayed key labels", (
   const letters = [..."ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ"];
   assert.equal(new Set(letters).size, 40);
   for (const char of letters) {
+    const label = koreanKeyLabel(char);
+    assert.deepEqual(koreanKeyInput(char, ""), { char, physical: label.includes(" → ") ? "" : label.replace("Shift+", "") });
     let pending = "";
-    for (const part of koreanKeyLabel(char).split(" → ")) {
+    for (const part of label.split(" → ")) {
       const shifted = part.startsWith("Shift+");
       const key = part.replace("Shift+", "");
       const input = koreanKeyInput(key.toLowerCase(), `Key${key}`, shifted);

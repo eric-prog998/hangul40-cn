@@ -1,0 +1,37 @@
+.day-free {margin-top:1.65rem;display:flex;align-items:center;gap:.5rem 1rem;flex-wrap:wrap;max-width:37rem;color:var(--ink-soft);font-size:.92rem}
+.day-free button,.day-free a {font:inherit;background:none;color:var(--ink);border:0;padding:4px 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.day-free small {flex-basis:100%;font-size:.875rem}
+.my-day-layout {width:min(1120px,calc(100% - 64px));margin:clamp(28px,5vh,65px) auto 70px;display:grid;grid-template-columns:minmax(0,1fr) minmax(205px,255px);gap:clamp(28px,5vw,68px);align-items:start;color:var(--ink)}
+.my-day-heading h1 {font-size:clamp(2.1rem,3.8vw,3.5rem);margin:.65rem 0 .35rem;line-height:1.16;letter-spacing:-.05em}
+.my-day-heading small,.day-eyebrow span {margin-left:auto;font-size:.875rem;font-weight:600;letter-spacing:.04em}
+.my-day-heading p,.day-margin p,.day-letter-card p,.day-finish p {line-height:1.65}
+.my-day-heading p {margin:0;color:var(--ink-soft)}
+.day-steps {padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;list-style:none;margin:1.3rem 0 1rem}
+.day-steps li {min-height:32px;border-top:3px solid #c5cdc4;padding-top:5px;color:var(--ink-soft);font-size:.94rem}
+.day-steps li[aria-current] {border-color:var(--coral);color:var(--ink);font-weight:750}.day-steps li[data-past=true] {border-color:var(--ink)}
+.day-steps small {font-size:.8rem}
+.day-surface,.day-margin {border:1px solid var(--line);border-radius:14px;background:#fffdf8}
+.day-surface {padding:clamp(20px,2.6vw,36px);box-shadow:0 5px 0 #e0e5da}
+.day-eyebrow,.day-side-label {font-size:.875rem;font-weight:750;letter-spacing:.04em}
+.day-eyebrow {display:flex;align-items:center;border-bottom:1px solid var(--line);padding-bottom:.75rem;margin-bottom:1rem}
+.day-margin {margin-top:4px;padding:1.4rem;background:#e7eddd;border-top:5px solid var(--ink)}
+.day-margin h2 {font-size:1.35rem;margin:1.25rem 0 .4rem}.day-margin hr {border:0;border-top:1px solid var(--line);margin:1.1rem 0}
+.day-margin a,.day-margin small,.day-finish small,.day-more small {display:block;margin:.7rem 0;font-size:.875rem;line-height:1.55}
+.day-margin a {text-decoration:underline;text-underline-offset:3px}
+.day-skill-counts {margin:.65rem 0}.day-skill-counts div {display:flex;justify-content:space-between;gap:.4rem;margin:.3rem 0;font-size:.875rem}.day-skill-counts dd {margin:0}
+.my-day-layout button {cursor:pointer}
+.day-letter-card button,.day-finish button,.day-margin button {font:inherit;font-weight:650;padding:.58rem .9rem;border:1px solid #9daea2;border-radius:8px;background:white;color:var(--ink)}
+.day-letter-card button:disabled {opacity:.55;cursor:default}
+.day-letter-card button:focus-visible,.day-finish button:focus-visible,.day-margin button:focus-visible,.day-free :focus-visible {outline:3px solid var(--coral);outline-offset:3px}
+.day-letter-card h2,.day-dialogue h2,.day-finish h2 {font-size:clamp(1.4rem,2.4vw,2rem);margin:.5rem 0}
+.day-letter-prompt {padding:.8rem 1rem;background:#edf2e4;border-radius:8px;margin:.5rem 0}
+.day-letter-prompt strong {font-size:clamp(2.7rem,5vw,4rem);line-height:1.25}
+.day-letter-actions,.day-more {display:flex;gap:.65rem;align-items:center;flex-wrap:wrap;margin:.7rem 0}
+.day-more small {flex-basis:100%;margin:0}
+.day-letter-card input {font:inherit;border:1px solid #78978a;border-radius:6px;padding:.45rem;max-width:12rem}
+.day-letter-feedback,.day-finish p {padding:.75rem 1rem;border-left:3px solid var(--ink);background:#f1f4e9;margin:.75rem 0}
+.day-letter-card kbd {font-size:.8rem;font-weight:600}
+.day-letter-note,.day-notice,.day-margin small {font-size:.875rem;color:var(--ink-soft)}
+.day-letter-note:empty {display:none}
+.day-finish strong {display:block;font-size:1.5rem}
+@media(max-width:820px){.my-day-layout {width:calc(100% - 32px);grid-template-columns:1fr}.day-margin{margin-top:0}}

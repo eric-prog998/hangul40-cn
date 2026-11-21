@@ -32,7 +32,7 @@ export default defineConfig({
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"], launchOptions: { args: ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"] } } },
     // Targeted WebKit coverage is not a claim of real Safari/device/IME acceptance.
-    { name: "webkit-audio", testMatch: /(?:audio-guide|media-compat|daily-plan|recall)\.spec\.ts/, use: { ...devices["Desktop Safari"] } },
+    { name: "webkit-audio", testMatch: /(?:audio-guide|media-compat|daily-plan|recall|fast-entry|letter-compound|course-resume|keyboard-boundaries|games-boundaries|course-boundaries|my-day)\.spec\.ts/, use: { ...devices["Desktop Safari"] } },
   ],
   webServer: {
     command: `npm run build && npx vinext start -p ${PORT} -H 127.0.0.1`,

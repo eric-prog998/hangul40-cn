@@ -5,11 +5,13 @@ import phrases from "../data/phrases.json";
 import fingerprints from "../data/audio-fingerprints.json";
 import { AUDIO_CATEGORIES, AUDIO_ISSUES, audioFeedback, audioReviewChecklist, createAudioCatalog, filterAudioCatalog, type AudioCategory } from "./audio-catalog";
 import type { AudioPlaybackResult } from "./audio-playback";
+import { coreReviewChecklist, SPELLING_REFERENCE } from "./core-audio-review";
 import "./audio-guide.css";
 
 const catalog = createAudioCatalog(names, phrases, fingerprints);
 type Props = {
   version: string;
+  reportId?: string;
   onPrepare: () => void;
   /** Plays one packaged file, given by its catalog path, as it is: original speed, current file version. */
   onPlay: (path: string) => Promise<AudioPlaybackResult>;
@@ -23,13 +25,14 @@ function download(text: string, filename: string, type: string) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export default function AudioGuide({ version, onPrepare, onPlay, onStop }: Props) {
-  const [category, setCategory] = useState<AudioCategory | "all">("vowel");
+export default function AudioGuide({ version, reportId = "", onPrepare, onPlay, onStop }: Props) {
+  const requested = catalog.find(entry => entry.id === reportId);
+  const [category, setCategory] = useState<AudioCategory | "all">(requested?.category ?? "vowel");
   const [query, setQuery] = useState("");
-  const [selection, setSelection] = useState("");
+  const [selection, setSelection] = useState(requested?.id ?? "");
   const [playing, setPlaying] = useState(false);
   const [message, setMessage] = useState("选择要核对的条目，再按播放。查询不会自动播放，也不会显示当前闯关的答案。");
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(Boolean(requested));
   const [issue, setIssue] = useState<string>(AUDIO_ISSUES[0]);
   const [note, setNote] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState("");
@@ -85,6 +88,10 @@ export default function AudioGuide({ version, onPrepare, onPlay, onStop }: Props
   return <section id="audio-guide" className="audio-guide" data-keyboard-scope="audio-guide" tabIndex={-1} aria-labelledby="audio-guide-title" onKeyDown={keydown} onFocusCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) onPrepare(); }}>
     <div className="audio-guide-heading"><div><span className="section-kicker">先知道听的是什么</span><h2 id="audio-guide-title">音源与发音反馈</h2><p>字母名称、短促起音、完整音节不是同一种示范。这里能查来源，也能准确指出哪条音频有疑问。</p></div><div className="audio-review-count"><strong>{catalog.length}</strong><span>条现有音频 · 待逐条人工听审</span></div></div>
     <div className="audio-review-notice"><strong>来源可追溯 ≠ 发音已审核</strong><p>本次只核对文件与编号，没有新增母语教师逐条听审记录。真人裁切片段和 AI 示范都标为“待人工听审”；不能用程序测试通过来证明读音准确。ㅇ 作初声无声，不提供虚构的起音文件。</p></div>
+    <details className="core-audio-review"><summary>给听审老师：优先核对 40 音</summary>
+      <p>先核对 21 个元音和 19 个辅音名称，再用相同的 ㅏ 比较 가、카、까 等完整音节。<a href={SPELLING_REFERENCE} target="_blank" rel="noreferrer">核对国立国语院的字母名称表</a>。文字一致不能代替听审。</p>
+      <button type="button" onClick={() => { try { download(JSON.stringify(coreReviewChecklist(catalog, version), null, 2), `hangul40-v${version}-core-listening.json`, "application/json"); setMessage("已下载核心音频听审单；文件内的条目均待实际核听。"); } catch { setMessage("听审单未能下载，请重试。"); } }}>下载核心听审单</button>
+    </details>
     <div className="audio-guide-workspace">
       <div className="audio-guide-picker"><label htmlFor="audio-category">音频类型</label><select id="audio-category" value={category} onChange={event => { changing(); setCategory(event.target.value as AudioCategory | "all"); setSelection(""); }}><option value="all">全部类型</option>{Object.entries(AUDIO_CATEGORIES).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select><label htmlFor="audio-search">查找条目</label><input id="audio-search" type="search" placeholder="韩文、中文或音频编号" value={query} onChange={event => { changing(); setQuery(event.target.value); setSelection(""); }} /><label htmlFor="audio-selection">选择音频 · {entries.length} 条</label><select id="audio-selection" value={selected?.id ?? ""} disabled={!entries.length} onChange={event => { changing(); setSelection(event.target.value); }}>{entries.length ? entries.map(entry => <option key={entry.id} value={entry.id}>{entry.label} · {AUDIO_CATEGORIES[entry.category]}</option>) : <option value="">没有匹配条目</option>}</select><p>空格／F8 重听，Esc 停止。输入框和下拉框保留原生键盘操作。核对时一律按原速播放，不受“慢放”设置影响。</p><button type="button" onClick={() => { try { download(JSON.stringify(audioReviewChecklist(catalog, version), null, 2), `hangul40-v${version}-audio-review.json`, "application/json"); setMessage("已发起待听审清单下载；这是审核准备材料，不是已通过的审核报告。"); } catch { setMessage("下载未成功，请重试。"); } }}>下载待听审清单</button></div>
       <article className="audio-guide-detail" aria-label="所选音频详情">{selected ? <><div className="audio-guide-badges"><span>{selected.category === "onset" || selected.category === "clarity" ? "真人录音裁切" : "AI 合成示范"}</span><span>待人工听审</span></div><h3>{selected.label}</h3><p className="audio-guide-explanation">{selected.explanation}</p><p className="audio-source-text">{selected.source} {selected.sourceUrl && <a href={selected.sourceUrl} target="_blank" rel="noreferrer">原始音源 ↗</a>}</p><div className="audio-guide-actions"><button id="audio-guide-play" type="button" onClick={() => void play()}>{playing ? "重新播放" : "播放这条音频"}</button><button type="button" onClick={() => stop()} disabled={!playing}>停止</button><button type="button" aria-expanded={feedbackOpen} aria-controls="audio-feedback-form" onClick={() => { stop("已停止播放，可以描述听到的问题。"); setFeedbackOpen(value => !value); setFeedbackMessage(""); }}>这条发音有疑问</button></div><details><summary>查看音频编号与文件指纹</summary><dl><dt>音频编号</dt><dd>{selected.id}</dd><dt>文件</dt><dd>{selected.path}</dd><dt>SHA-256</dt><dd>{selected.fingerprint?.sha256 ?? "未记录"}</dd></dl><p>指纹只用于确认是否为同一文件，不代表发音审核通过。</p></details></> : <div className="audio-guide-empty"><h3>没有找到条目</h3><p>可以清空搜索词，或把类型切换为“全部类型”。</p></div>}</article>

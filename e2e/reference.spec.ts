@@ -18,7 +18,7 @@ test.describe("起音与音节对照器", () => {
   const status = (page: Page) => page.locator(".onset-lab-actions p");
 
   test("the onset, the full syllable and the ordered comparison each play exactly what they announce", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#learn");
     await consonant(page).selectOption("ㄴ");
     await vowel(page).selectOption("ㅗ");
     await expect(demo(page).nth(1).locator("strong")).toHaveText("노");
@@ -40,19 +40,19 @@ test.describe("起音与音节对照器", () => {
   });
 
   test("ㅇ has no onset to play: it is explained, and the comparison goes straight to the syllable", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#learn");
     await consonant(page).selectOption("ㅇ");
     await vowel(page).selectOption("ㅜ");
     const before = await playedSoFar(page);
-    await demo(page).nth(0).click();
-    await expect(status(page)).toHaveText("ㅇ 作初声时没有辅音声；右边完整音节从元音直接开始。");
+    await expect(page.locator(".onset-lab-demo .silent-initial")).toContainText("不发声");
+    await expect(demo(page)).toHaveCount(1);
     await sequence(page).click();
     await expect(status(page)).toHaveText("初声静音 → 우 完整音节；后者才包含 ㅜ。");
     expect(await clipsSince(page, before)).toEqual(["syllable 우"]);
   });
 
   test("changing the consonant in the middle of a comparison stops it; the old syllable never plays", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#learn");
     await consonant(page).selectOption("ㅁ");
     const before = await playedSoFar(page);
     await sequence(page).click();
@@ -68,7 +68,7 @@ test.describe("起音与音节对照器", () => {
 
 test.describe("拼音节与字块", () => {
   test("the syllable builder joins the chosen letters and plays that syllable", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#builder");
     const result = page.locator(".syllable-result");
     // 네 is also an everyday word ("yes"); the site may play that word's recording for it.
     for (const [initial, vowel, syllable] of [["ㅎ", "ㅘ", "화"], ["ㅇ", "ㅢ", "의"], ["ㅉ", "ㅞ", "쮀"], ["ㄴ", "ㅔ", "네"], ["ㄱ", "ㅏ", "가"]]) {
@@ -81,7 +81,7 @@ test.describe("拼音节与字块", () => {
   });
 
   test("the three block examples show their parts, play their own sound and lead on to the final-consonant lesson", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#starter");
     const lab = page.locator(".block-lab");
     const tabs = lab.locator(".block-example-tabs button");
     await expect(tabs).toHaveCount(3);
@@ -110,7 +110,7 @@ test.describe("元音口型对比", () => {
   const done = "示范播放完成。模仿两次，再录下自己，交替回听比较。";
 
   test("A, B and the A → B order play the pair on show, alone or inside a ㄱ syllable", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#pronunciation-practice");
     let before = await playedSoFar(page);
     await cards(page).nth(0).click();
     await expect(status(page)).toHaveText(done);
@@ -133,7 +133,7 @@ test.describe("元音口型对比", () => {
   });
 
   test("with the section focused, A / B / Space play and Esc stops", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#pronunciation-practice");
     await section(page).focus();
     let before = await playedSoFar(page);
     await page.keyboard.press("KeyB");

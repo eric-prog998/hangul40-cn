@@ -1,9 +1,11 @@
+import { visitView } from "./support/views.ts";
 import { expect, expectTotalXp, openApp, phrases, test } from "./support/app.ts";
 import type { Page } from "@playwright/test";
 import { rateReview, reviewStorageKey } from "../app/review-logic.ts";
 
 async function enterRecall(page: Page) {
   const section = page.locator("#daily-review");
+  await visitView(page, "daily-review");
   await section.scrollIntoViewIfNeeded();
   await section.focus();
   const chinese = await section.locator(".daily-review-chinese").innerText();
@@ -15,7 +17,7 @@ async function enterRecall(page: Page) {
 }
 
 test("keyboard recall stays silent, compares text, and only explicit self-rating saves progress", async ({ page }, testInfo) => {
-  await openApp(page);
+  await openApp(page, "/#daily-review");
   const { section, phrase, input } = await enterRecall(page);
   await input.press("Enter");
   await expect(section.locator(".daily-review-korean")).toHaveCount(0);
@@ -37,7 +39,7 @@ test("keyboard recall stays silent, compares text, and only explicit self-rating
 });
 
 test("IME confirmation, held Enter and numeric or space input never reveal, rate or play", async ({ page }) => {
-  await openApp(page);
+  await openApp(page, "/#daily-review");
   const { section, phrase, input } = await enterRecall(page);
   await input.fill(phrase.korean);
   await input.dispatchEvent("compositionstart");
@@ -63,7 +65,7 @@ test("IME confirmation, held Enter and numeric or space input never reveal, rate
 });
 
 test("a different expression is not called wrong and never automatically changes review records", async ({ page }) => {
-  await openApp(page);
+  await openApp(page, "/#daily-review");
   const { section, input } = await enterRecall(page);
   await input.fill("다른 표현");
   await section.getByRole("button", { name: "对照参考答案" }).click();
@@ -74,11 +76,24 @@ test("a different expression is not called wrong and never automatically changes
   await expect(section.locator(".daily-review-progress-heading strong span")).toHaveText("1 / 10");
 });
 
+test("a new scene cannot take focus back on the next animation frame", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-10-16T10:00:00+09:00") });
+  await openApp(page, "/#daily-review");
+  await page.clock.pauseAt(new Date("2026-10-16T10:01:00+09:00"));
+  await visitView(page, "today-plan");
+  const chosen = page.getByRole("button", { name: "开始／继续短练" });
+  await chosen.focus();
+  await expect(chosen).toBeFocused();
+  await page.clock.runFor(32);
+  await expect(chosen).toBeFocused();
+});
+
 test("changing the local day discards the old draft without stealing focus", async ({ page }) => {
   await page.clock.install({ time: new Date("2026-10-16T10:00:00+09:00") });
-  await openApp(page);
+  await openApp(page, "/#daily-review");
   const { section, input } = await enterRecall(page);
   await input.fill("임시 입력");
+  await visitView(page, "today-plan");
   await page.locator("#today-plan").focus();
   await page.clock.fastForward("24:00:00");
   await expect(section.locator(".daily-review-progress-heading > span")).toHaveText("2026-10-17");
@@ -91,9 +106,10 @@ test("changing the local day discards the old draft without stealing focus", asy
 test("returning to an earlier date never resurrects an abandoned draft or steals focus", async ({ page }) => {
   const firstDay = new Date("2026-10-17T10:00:00+09:00");
   await page.clock.install({ time: firstDay });
-  await openApp(page);
+  await openApp(page, "/#daily-review");
   const { section, input } = await enterRecall(page);
   await input.fill("이전 입력");
+  await visitView(page, "today-plan");
   await page.locator("#today-plan").focus();
   await page.clock.fastForward("24:00:00");
   await expect(section.locator(".daily-review-progress-heading > span")).toHaveText("2026-10-18");
@@ -108,6 +124,7 @@ test("returning to an earlier date never resurrects an abandoned draft or steals
   await input.fill("새 입력");
   await input.press("Enter");
   await expect(section.locator(".daily-review-korean")).toBeVisible();
+  await visitView(page, "today-plan");
   await page.locator("#today-plan").focus();
   await page.clock.fastForward("24:00:00");
   await expect(section.locator(".daily-review-progress-heading > span")).toHaveText("2026-10-18");
@@ -120,7 +137,7 @@ test("returning to an earlier date never resurrects an abandoned draft or steals
 });
 
 test("continuous input completes the five-card route by keyboard without leaking a held rating key", async ({ page }, testInfo) => {
-  await openApp(page);
+  await openApp(page, "/#today-plan");
   await page.locator("#today-plan").focus();
   await page.keyboard.press("Digit1");
   const section = page.locator("#daily-review");
@@ -155,7 +172,7 @@ test("continuous input completes the five-card route by keyboard without leaking
 });
 
 test("turning continuous input off keeps the current draft but does not focus the next card", async ({ page }) => {
-  await openApp(page);
+  await openApp(page, "/#daily-review");
   const mode = page.locator("#daily-review-continuous");
   await mode.check();
   const input = page.locator("#daily-review-input");
@@ -170,7 +187,7 @@ test("turning continuous input off keeps the current draft but does not focus th
 });
 
 test("retry hides the reference, stops playback and never adds a review until self-rated", async ({ page }, testInfo) => {
-  await openApp(page);
+  await openApp(page, "/#daily-review");
   const { section, phrase, input } = await enterRecall(page);
   await input.fill("다른 입력");
   await input.press("Enter");
@@ -198,10 +215,11 @@ test("retry hides the reference, stops playback and never adds a review until se
 
 test("external review updates clear the draft without focusing the continuous input", async ({ page, context }) => {
   await page.clock.install({ time: new Date("2026-10-17T10:00:00+09:00") });
-  await openApp(page);
+  await openApp(page, "/#daily-review");
   const { section, phrase, input } = await enterRecall(page);
   await page.locator("#daily-review-continuous").check();
   await input.fill("이전 카드");
+  await visitView(page, "today-plan");
   await page.locator("#today-plan").focus();
   const other = await context.newPage();
   await other.goto("/");
@@ -214,7 +232,7 @@ test("external review updates clear the draft without focusing the continuous in
 });
 
 test("leaving composition cannot leave all review shortcuts stuck", async ({ page }) => {
-  await openApp(page);
+  await openApp(page, "/#daily-review");
   const { section, input } = await enterRecall(page);
   await input.dispatchEvent("compositionstart");
   await section.focus();
@@ -230,7 +248,7 @@ test("leaving composition cannot leave all review shortcuts stuck", async ({ pag
 
 test("typed reference comparison fits a phone screen with a long answer", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 360, height: 780 });
-  await openApp(page);
+  await openApp(page, "/#daily-review");
   const section = page.locator("#daily-review");
   await section.getByRole("button", { name: "用键盘试着输入" }).click();
   await page.locator("#daily-review-input").fill("네".repeat(80));

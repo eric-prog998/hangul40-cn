@@ -34,7 +34,7 @@ async function playRound(page: Page, wrongAt: number[] = []) {
 
 test.describe("元音盲听", () => {
   test("a round asks eight balanced questions, hides the answer until heard, and never touches XP", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#pronunciation-practice");
     await openChallenge(page);
     await panel(page).locator(".vowel-challenge-intro button").click();
     await expect(panel(page).locator(".vowel-challenge-choices button").first()).toBeDisabled();
@@ -46,7 +46,7 @@ test.describe("元音盲听", () => {
   });
 
   test("a missed sound stays on the long-term list until it is answered right twice in a row", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#pronunciation-practice");
     await openChallenge(page);
     await panel(page).locator(".vowel-challenge-intro button").click();
     await playRound(page, [1, 2]);
@@ -74,7 +74,7 @@ test.describe("元音盲听 · 自动下一题", () => {
   test.use({ autoAdvance: "site-default" });
 
   test("works from the keyboard: Enter starts, Korean keys answer, Space replays, Esc pauses", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#pronunciation-practice");
     await openChallenge(page);
     await panel(page).focus();
     await page.keyboard.press("Enter");

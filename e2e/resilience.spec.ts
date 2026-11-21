@@ -1,3 +1,4 @@
+import { visitView } from "./support/views.ts";
 import { answerListen, audibleClips, expect, expectTotalXp, nextListen, openApp, readListenQuestion, test } from "./support/app.ts";
 
 test.describe("异常情况下仍可用", () => {
@@ -11,7 +12,7 @@ test.describe("异常情况下仍可用", () => {
         window.localStorage.setItem("hangul-phrase-mastered", JSON.stringify(["word-water"]));
       } catch { /* blank start page */ }
     });
-    await openApp(page);
+    await openApp(page, "/#games");
     await expectTotalXp(page, 100);
     await expect(page.locator(".mastery-meter strong")).toHaveText("2/40");
     await expect(page.locator(".phrase-progress strong")).toContainText("1/");
@@ -27,10 +28,10 @@ test.describe("异常情况下仍可用", () => {
   });
 
   test("a damaged progress record is skipped with a warning; the rest keeps working and saving", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#learn");
     await page.locator("#letter-master-ㄱ").click();
     await page.goto("about:blank");
-    await openApp(page);
+    await openApp(page, "/#learn");
     await page.locator("#letter-master-ㄴ").click();
     await expect(page.locator(".mastery-meter strong")).toHaveText("2/40");
 
@@ -56,7 +57,7 @@ test.describe("异常情况下仍可用", () => {
     await context.addInitScript(() => {
       Storage.prototype.setItem = function refuse() { throw new DOMException("The quota has been exceeded.", "QuotaExceededError"); };
     });
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#listen-start").click();
     await answerListen(page);
     await expectTotalXp(page, 12);
@@ -64,6 +65,7 @@ test.describe("异常情况下仍可用", () => {
     await nextListen(page);
     await answerListen(page);
     await expectTotalXp(page, 26);
+    await visitView(page, "learn");
     await page.locator("#letter-master-ㄱ").click();
     await expect(page.locator(".mastery-meter strong")).toHaveText("1/40");
   });
@@ -72,19 +74,20 @@ test.describe("异常情况下仍可用", () => {
     await context.addInitScript(() => {
       Object.defineProperty(window, "localStorage", { configurable: true, get() { throw new DOMException("Access is denied for this document.", "SecurityError"); } });
     });
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#listen-start").click();
     await answerListen(page);
     await expectTotalXp(page, 12);
     await page.locator("#game-tab-blend").click();
     await expect(page.locator("#game-panel-blend .blend-choice-row button").first()).toBeEnabled();
+    await visitView(page, "daily-review");
     await page.locator("#daily-review .daily-review-reveal").click();
     await page.locator("#daily-review .daily-review-rating button").nth(1).click();
     await expect(page.locator("#daily-review .daily-review-progress-heading strong span")).toHaveText("1 / 10");
   });
 
   test("hammering the game tabs leaves the site in a playable state with a single sound", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     const tabs = ["shadow", "match", "blend", "speed", "typing", "listen"];
     let loudest = 0;
     for (let lap = 0; lap < 3; lap += 1) {

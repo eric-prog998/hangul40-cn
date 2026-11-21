@@ -1,3 +1,4 @@
+import { visitView } from "./support/views.ts";
 import { readFile } from "node:fs/promises";
 import { expect, openApp, test, audioLog, audibleClips, lastAudioRate, consonantNames, phrases } from "./support/app.ts";
 import { createAudioCatalog } from "../app/audio-catalog.ts";
@@ -43,7 +44,7 @@ test.describe("音源与反馈", () => {
   });
 
   test("checking a recording plays it at its original speed and the same file version as the lessons", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#builder");
     // A lesson clip shows which file version the lessons request. It plays before slow mode is on:
     // the Linux WebKit test build stalls or crashes on slowed playback (slow lessons are covered in Chromium).
     const start = (await audioLog(page)).length;
@@ -53,6 +54,7 @@ test.describe("音源与反馈", () => {
     const slow = page.locator(".audio-speed-toggle").getByRole("button", { name: "慢放" });
     await slow.click();
     await expect(slow).toHaveAttribute("aria-pressed", "true");
+    await visitView(page, "audio-guide");
 
     await page.locator("#audio-category").selectOption("phrase");
     await page.locator("#audio-search").fill("收据");
@@ -65,7 +67,24 @@ test.describe("音源与反馈", () => {
     expect(checked.searchParams.get("v"), "the guide must not keep an older cached copy than the lessons").toBe(lesson.searchParams.get("v"));
     expect(await lastAudioRate(page), "a slowed-down copy is not the recording being checked").toBe(1);
     // Checking a recording leaves the learner's own slow-playback choice for the lessons alone.
+    await visitView(page, "builder");
     await expect(slow).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("card feedback selects the exact last clip, opens its report, and never plays it a second time", async ({ page }) => {
+    await openApp(page, "/#learn");
+    const card = page.locator(".letter-card").filter({ has: page.locator("#letter-master-ㄲ") });
+    await card.locator(".syllable-audio").click();
+    await expect(card.locator(".letter-audio-feedback")).toContainText("音节 까");
+    await card.locator("summary").click();
+    await card.locator(".onset-audio").click();
+    await expect(card.locator(".letter-audio-feedback")).toContainText("ㄲ 起音");
+    const before = (await audioLog(page)).length;
+    await card.locator(".letter-audio-feedback").click();
+    await expect(page.locator("#audio-guide")).toBeVisible();
+    await expect(page.locator("#audio-selection")).toHaveValue("onset-ssang-giyeok");
+    await expect(page.locator("#audio-report")).toHaveValue(/onset-ssang-giyeok/);
+    expect((await audioLog(page)).length).toBe(before);
   });
 
   test("feedback contains the chosen file and never sends it; changing the selection clears the draft", async ({ page }) => {

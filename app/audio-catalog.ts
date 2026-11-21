@@ -1,6 +1,6 @@
 import { INITIAL_ORDER, VOWEL_ORDER, makeSyllable } from "./learning-logic.ts";
 
-export const AUDIO_CATEGORIES = { name: "辅音名称", onset: "真人起音 · 单次", clarity: "真人起音 · 重复两次", vowel: "元音", syllable: "完整音节", phrase: "词句" } as const;
+export const AUDIO_CATEGORIES = { name: "辅音名称", onset: "真人起音 · 单次", clarity: "旧版存档 · 真人起音重复两次", vowel: "元音", syllable: "完整音节", phrase: "词句" } as const;
 export type AudioCategory = keyof typeof AUDIO_CATEGORIES;
 type Name = { char: string; name: string; id: string; audioFile: string | null; sourceWord?: string; sourcePage?: string };
 type Phrase = { id: string; korean: string; chinese: string };

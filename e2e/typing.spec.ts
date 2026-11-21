@@ -12,7 +12,7 @@ async function typeStop(page: Page, text: string) {
 
 test.describe("地铁打字", () => {
   test("a wrong word keeps the train in the station; finishing the line saves a best time", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#game-tab-typing").click();
     await expect(panel(page).locator(".typing-route-picker button")).toHaveCount(4);
     await page.locator("#typing-start").click();
@@ -46,7 +46,7 @@ test.describe("地铁打字", () => {
   });
 
   test("a clean run reports 100% accuracy and every route starts with its own first word", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#game-tab-typing").click();
     const routes = panel(page).locator(".typing-route-picker button");
     const firstWords = new Set<string>();
@@ -71,7 +71,7 @@ test.describe("地铁打字", () => {
   });
 
   test("Escape pauses without losing the half-typed word, and the clock stops while paused", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#game-tab-typing").click();
     await page.locator("#typing-start").click();
     const word = await target(page).innerText();
@@ -94,7 +94,7 @@ test.describe("地铁打字", () => {
   });
 
   test("with a Korean input method, the Enter that only finishes a syllable is not taken as the answer", async ({ page, context }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#game-tab-typing").click();
     await page.locator("#typing-start").click();
     const stop = panel(page).locator(".game-board-top span").first();
@@ -120,7 +120,7 @@ test.describe("地铁打字", () => {
   });
 
   test("Shift+Enter replays the current word and Enter is ignored while it plays", async ({ page }) => {
-    await openApp(page);
+    await openApp(page, "/#games");
     await page.locator("#game-tab-typing").click();
     await page.locator("#typing-start").click();
     const word = await target(page).innerText();

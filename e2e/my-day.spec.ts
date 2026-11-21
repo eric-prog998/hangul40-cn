@@ -1,0 +1,203 @@
+import type { Page } from "@playwright/test";
+import { audioLog, audibleClips, expect, keysFor, openApp, test } from "./support/app.ts";
+import { beginDay, emptyBook, gradeDialogue, gradeLetter, MY_DAY_KEY } from "../app/my-day-state.ts";
+
+declare global { interface Window { __daySpeechAttempts: number } }
+
+test("all three situations can be revisited; a new line explicitly uses a Korean local voice and stops on exit", async ({page}) => {
+  await page.clock.setFixedTime(new Date("2026-11-21T12:00:00+09:00"));
+  let book = beginDay(emptyBook(), "2026-11-21", []);
+  while (book.session!.marks.length < book.session!.cards.length) book = gradeLetter(book,"good",false);
+  book = gradeDialogue(book,"good");
+  await page.addInitScript(({key,raw}) => {
+    if (!localStorage.getItem(key)) localStorage.setItem(key,raw);
+    const log: string[] = [];
+    const voice = { name:"Fixture local Korean", lang:"ko-KR", localService:true };
+    Object.defineProperty(window, "SpeechSynthesisUtterance", {configurable:true,value:class {constructor(public text:string) {}}});
+    Object.defineProperty(window, "speechSynthesis", {configurable:true,value:Object.assign(new EventTarget(),{
+      getVoices: () => [voice],
+      speak(u:{text:string;voice:unknown}) { log.push(u.voice === voice ? u.text : "INVALID VOICE"); document.documentElement.dataset.fixtureSpeech=JSON.stringify(log); },
+      cancel() { if (log.length) document.documentElement.dataset.fixtureCancelled="yes"; }
+    })});
+  },{key:MY_DAY_KEY,raw:JSON.stringify(book)});
+  await openApp(page,"/#my-day");
+  const finish = page.getByTestId("day-finish");
+  for (const title of ["没听懂，请再说一遍","餐厅点餐"]) {
+    await finish.getByRole("button",{name:title}).click();
+    await expect(page.getByTestId("day-dialogue").getByRole("heading",{name:title})).toBeVisible();
+    expect(await audioLog(page)).toHaveLength(0);
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Digit2");
+    await expect(finish).toBeVisible();
+  }
+  await finish.getByRole("button",{name:"便利店结账"}).click();
+  await page.keyboard.press("Space");
+  await expect(page.locator("html")).toHaveAttribute("data-fixture-speech",JSON.stringify(["봉투 필요하세요?"]));
+  await page.locator("#day-pause").click();
+  await expect(page.locator("html")).toHaveAttribute("data-fixture-cancelled","yes");
+});
+
+const letter = (page: Page) => page.getByTestId("day-letter-card");
+const dialogue = (page: Page) => page.getByTestId("day-dialogue");
+const good = (page: Page) => page.getByTestId("day-letter-good");
+const firstDay = new Date("2026-11-21T12:00:00+09:00");
+
+async function startFromHome(page: Page) {
+  await openApp(page);
+  await expect(page.locator("#top")).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#my-day")).toBeVisible();
+}
+
+/** The bounded loop also catches a stalled card or an accidental skip/repeat. */
+async function finishLetters(page: Page) {
+  const visited: string[] = [];
+  for (let i = 0; i < 6; i++) {
+    const card = letter(page);
+    await expect(card).toBeFocused();
+    const skill = await card.getAttribute("data-skill");
+    if (skill === "keys") {
+      const prompt = (await page.getByTestId("day-letter-prompt").innerText()).match(/[ㄱ-ㅎㅏ-ㅣ]/u)?.[0];
+      if (!prompt) throw new Error("The keyboard practice does not show which jamo to enter.");
+      for (const key of keysFor(prompt)) await page.keyboard.press(key);
+      await page.keyboard.press("Enter");
+      await expect(good(page)).toBeEnabled();
+    } else if (skill === "listen") {
+      const count = (await audioLog(page)).length;
+      await page.keyboard.press("Space");
+      await expect.poll(async () => (await audioLog(page)).length).toBe(count + 1);
+      // The media ended flag can flip before WebKit delivers its completion
+      // callback. Learners see enabled choices only after that callback.
+      await expect(card.getByRole("group", {name:"选择听到的音节"}).getByRole("button").first()).toBeEnabled();
+      await page.keyboard.press("Digit1");
+    } else {
+      expect(skill).toBe("read");
+      await page.keyboard.press("Enter");
+      await expect(good(page)).toBeEnabled();
+    }
+    visited.push(skill!);
+    // A listen choice may deliberately mark a miss. Do not override it as good.
+    await expect(page.getByTestId("day-letter-again")).toBeEnabled();
+    await page.keyboard.press(skill === "listen" ? "Digit1" : "Digit2");
+  }
+  await expect(dialogue(page)).toBeVisible();
+  return visited;
+}
+
+test("a Mac learner can finish the entire day by keyboard and recall the preceding scene on another date", async ({ page }) => {
+  await page.clock.setFixedTime(firstDay);
+  await page.addInitScript(() => {
+    // This Mac has voices, but no local Korean voice: it must not pronounce
+    // Korean with English or silently switch to a network speech service.
+    window.__daySpeechAttempts = 0;
+    const synth = Object.assign(new EventTarget(), {
+      getVoices: () => [
+        { name: "Fixture English", lang: "en-US", localService: true },
+        { name: "Fixture online", lang: "ko-KR", localService: false },
+      ],
+      cancel() {}, speak() { window.__daySpeechAttempts++; },
+    });
+    Object.defineProperty(window, "speechSynthesis", { configurable: true, value: synth });
+  });
+  await startFromHome(page);
+  expect(await audioLog(page), "entering the day must not start audio").toEqual([]);
+  const skills = await finishLetters(page);
+  expect(new Set(skills)).toEqual(new Set(["read", "listen", "keys"]));
+  await expect(dialogue(page)).toHaveAttribute("data-recall", "false");
+  const count = (await audioLog(page)).length;
+  await page.keyboard.press("Space");
+  await expect(dialogue(page)).toContainText("韩语语音");
+  expect(await page.evaluate(() => window.__daySpeechAttempts)).toBe(0);
+  await expect(page.getByTestId("day-dialogue-good")).toBeHidden();
+  await page.keyboard.press("Enter"); // Learner can speak off-mic first; no microphone required.
+  await expect(page.getByTestId("day-dialogue-good")).toBeEnabled();
+  await page.keyboard.press("Digit2");
+  await expect(page.getByTestId("day-finish")).toBeVisible();
+  expect(await audioLog(page)).toHaveLength(count);
+  await page.reload();
+  await expect(page.getByTestId("day-finish")).toBeVisible();
+
+  // A returning learner opens a fresh page in the same browser profile.
+  // Keep persisted storage, not the previous tab's simulated clock/history.
+  const nextVisit = await page.context().newPage();
+  await page.close();
+  await nextVisit.clock.setFixedTime(new Date("2026-11-22T12:00:00+09:00"));
+  await startFromHome(nextVisit);
+  await finishLetters(nextVisit);
+  await expect(dialogue(nextVisit)).toHaveAttribute("data-recall", "true");
+  await nextVisit.keyboard.press("Enter");
+  await expect(nextVisit.getByTestId("day-dialogue-good")).toBeEnabled();
+  await nextVisit.keyboard.press("Digit2");
+  await expect(dialogue(nextVisit)).toHaveAttribute("data-recall", "false");
+});
+
+test("pause, reload and an explicitly saved free-study bookmark remain independent", async ({ page }) => {
+  await page.clock.setFixedTime(firstDay);
+  await openApp(page, "/#learn");
+  await page.locator("#letter-master-ㄱ").click();
+  await expect(page.locator("#letter-master-ㄱ")).toHaveAttribute("aria-pressed", "true");
+  const bookmark = await page.evaluate(() => localStorage.getItem("hangul-last-study-v48"));
+  expect(bookmark).not.toBeNull();
+  await startFromHome(page);
+  await expect(letter(page)).toBeFocused();
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Digit1");
+  const nextPrompt = await page.getByTestId("day-letter-prompt").innerText();
+  await page.locator("#day-pause").click();
+  await expect(page.locator("#top")).toBeVisible();
+  await page.reload();
+  await page.locator("#home-day").click();
+  await expect(page.getByTestId("day-letter-prompt")).toHaveText(nextPrompt);
+  expect(await page.evaluate(() => localStorage.getItem("hangul-last-study-v48"))).toBe(bookmark);
+  await page.keyboard.press("Space");
+  await expect.poll(() => audibleClips(page)).toBe(1);
+  await page.locator("#day-pause").click();
+  await expect.poll(() => audibleClips(page)).toBe(0);
+  await page.locator("#home-continue").click();
+  await expect(page.locator("#learn")).toBeVisible();
+  await expect(page.locator("#letter-master-ㄱ")).toHaveAttribute("aria-pressed", "true");
+});
+
+test("IME composition Enter does not reveal the keyboard answer; typing a wrong jamo cannot earn success", async ({ page }) => {
+  await page.clock.setFixedTime(firstDay);
+  let book = beginDay(emptyBook(), "2026-11-21", []);
+  while (book.session!.cards[book.session!.marks.length].skill !== "keys") book = gradeLetter(book, "good", false);
+  await openApp(page);
+  await page.evaluate(([key, value]) => localStorage.setItem(key, value), [MY_DAY_KEY, JSON.stringify(book)]);
+  await page.goto("about:blank");
+  await openApp(page, "/#my-day");
+  await expect(letter(page)).toHaveAttribute("data-skill", "keys");
+  const input = page.getByTestId("day-letter-input");
+  const target = await page.getByTestId("day-letter-prompt").innerText();
+  await input.fill(target.trim() === "ㄱ" ? "ㄴ" : "ㄱ");
+  await input.dispatchEvent("compositionstart");
+  await input.dispatchEvent("keydown", { key: "Enter", code: "Enter", isComposing: true, keyCode: 229, bubbles: true });
+  await expect(good(page)).toBeHidden();
+  await input.dispatchEvent("compositionend");
+  await input.press("Enter");
+  await expect(good(page)).toBeDisabled();
+  await page.keyboard.press("Digit2");
+  await expect(letter(page)).toHaveAttribute("data-skill", "keys");
+  await page.keyboard.press("Digit1");
+  await expect(dialogue(page)).toBeVisible();
+  expect(await audioLog(page)).toEqual([]);
+});
+
+test("an unrecognised notebook can be used in memory without replacing it or the free-study bookmark", async ({ page }) => {
+  await page.clock.setFixedTime(firstDay);
+  await openApp(page, "/#learn");
+  await expect(page.locator("#learn")).toBeVisible();
+  const raw = JSON.stringify({ version: 999, original: "unrecognised version" });
+  await page.evaluate(([key, value]) => localStorage.setItem(key, value), [MY_DAY_KEY, raw]);
+  await page.goto("about:blank");
+  await startFromHome(page);
+  await expect(letter(page)).toBeVisible();
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Digit1");
+  await expect(letter(page)).toBeVisible();
+  expect(await page.evaluate(key => localStorage.getItem(key), MY_DAY_KEY)).toBe(raw);
+  await page.locator("#day-pause").click();
+  await page.locator("#home-continue").click();
+  await expect(page.locator("#learn")).toBeVisible();
+});
+
