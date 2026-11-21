@@ -1125,7 +1125,7 @@ export default function Home() {
   const noticeTimerRef = useRef<number | null>(null);
   const speedFlashTimerRef = useRef<number | null>(null);
   const keyboardModalRef = useRef<HTMLDivElement | null>(null);
-  const keyboardPreviousFocusRef = useRef<HTMLElement | null>(null);
+  const keyboardReturnRef = useRef<{ opener: HTMLElement | null } | null>(null);
   const keyboardFallbackRef = useRef({ keyboardZone, gameMode, phraseTab });
   const gameStatsRef = useRef<GameStats>(emptyStats);
   const gameSectionVisibleRef = useRef(true);
@@ -2299,8 +2299,23 @@ export default function Home() {
     }
   }
 
-  useEffect(() => {
-    if (!showKeyboardHelp) return;
+  useLayoutEffect(() => {
+    if (!showKeyboardHelp) {
+      const pending = keyboardReturnRef.current;
+      if (!pending) return; // The initial render did not close a dialog.
+      keyboardReturnRef.current = null;
+      const previous = pending.opener;
+      const active = document.activeElement;
+      // The modal has already left the DOM. Restore before the next input,
+      // unless a live control has already taken focus in this commit.
+      if (active && active !== document.body && active !== document.documentElement && active !== previous && active.isConnected) return;
+      const fallback = keyboardFallbackRef.current;
+      const fallbackId = fallback.keyboardZone === "games" ? `game-tab-${fallback.gameMode}` : `phrase-tab-${fallback.phraseTab}`;
+      if (typingPhaseRef.current === "paused" && typingResumeFocusPendingRef.current) focusPausedTypingResume();
+      else if (previous?.isConnected) previous.focus();
+      else document.getElementById(fallbackId)?.focus();
+      return;
+    }
     const previousBodyOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const modal = keyboardModalRef.current;
@@ -2326,15 +2341,6 @@ export default function Home() {
     return () => {
       document.removeEventListener("keydown", trapFocus);
       document.body.style.overflow = previousBodyOverflow;
-      const previous = keyboardPreviousFocusRef.current;
-      const fallback = keyboardFallbackRef.current;
-      const fallbackId = fallback.keyboardZone === "games" ? `game-tab-${fallback.gameMode}` : `phrase-tab-${fallback.phraseTab}`;
-      keyboardPreviousFocusRef.current = null;
-      window.requestAnimationFrame(() => {
-        if (typingPhaseRef.current === "paused" && typingResumeFocusPendingRef.current) focusPausedTypingResume();
-        else if (previous?.isConnected) previous.focus();
-        else document.getElementById(fallbackId)?.focus();
-      });
     };
   }, [focusPausedTypingResume, showKeyboardHelp]);
 
@@ -3520,11 +3526,17 @@ export default function Home() {
     continueBeginnerPath();
   }
 
+  function openHelpFromButton(event: React.MouseEvent<HTMLButtonElement>) {
+    // WebKit does not always focus a pointer-activated button.
+    keyboardReturnRef.current = { opener: event.currentTarget };
+    openKeyboardHelp();
+  }
+
   function openKeyboardHelp() {
     vowelPracticeRef.current?.stop();
     dailyReviewRef.current?.stop();
     batchimLessonRef.current?.stop();
-    keyboardPreviousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    keyboardReturnRef.current ??= { opener: document.activeElement instanceof HTMLElement ? document.activeElement : null };
     pauseTypingRun("快捷键帮助已打开，本次行程已暂停；关闭后可继续。");
     setGameAutoAdvanceCancelled(true);
     setPhraseAutoAdvanceCancelled(true);
@@ -4438,7 +4450,7 @@ export default function Home() {
           {workspaces.map(item => <a key={item.key} href={`#${item.start}`} aria-current={workspace === item.key ? "location" : undefined}>{item.title}</a>)}
         </nav>
         <div className="topbar-actions">
-          <button className="header-keyboard" type="button" onClick={openKeyboardHelp} aria-haspopup="dialog" aria-expanded={showKeyboardHelp} aria-label="打开键盘快捷键帮助"><span aria-hidden="true">⌨</span><b>快捷键</b></button>
+          <button className="header-keyboard" type="button" onClick={openHelpFromButton} aria-haspopup="dialog" aria-expanded={showKeyboardHelp} aria-label="打开键盘快捷键帮助"><span aria-hidden="true">⌨</span><b>快捷键</b></button>
           <button className="header-share" type="button" onClick={() => sharePage()} aria-label="分享这个韩语学习网页"><span aria-hidden="true">↗</span><b>分享</b></button>
           <a className="scene-settings" href="#learning-tools" aria-current={workspace === "settings" ? "location" : undefined} aria-label="设置与备份"><span aria-hidden="true">⚙</span> 设置</a>
         </div>
@@ -4559,7 +4571,7 @@ export default function Home() {
                 <button id="game-tab-speed" type="button" role="tab" aria-controls={gameMode === "speed" ? "game-panel-speed" : undefined} aria-selected={gameMode === "speed"} tabIndex={gameMode === "speed" ? 0 : -1} onClick={() => switchGameMode("speed")}><span aria-hidden="true">⚡</span><div><strong>极速认读</strong><small>30 秒破纪录</small></div></button>
                 <button id="game-tab-typing" type="button" role="tab" aria-controls={gameMode === "typing" ? "game-panel-typing" : undefined} aria-selected={gameMode === "typing"} tabIndex={gameMode === "typing" ? 0 : -1} onClick={() => switchGameMode("typing")}><span aria-hidden="true">地</span><div><strong>地铁打字</strong><small>生活词过站</small></div></button>
               </div>
-              <div className="keyboard-guide"><span aria-hidden="true">⌨</span><strong>键盘模式</strong><p>{gameKeyboardHint}</p><button type="button" onClick={openKeyboardHelp}><kbd>?</kbd> 全部</button></div>
+              <div className="keyboard-guide"><span aria-hidden="true">⌨</span><strong>键盘模式</strong><p>{gameKeyboardHint}</p><button type="button" onClick={openHelpFromButton}><kbd>?</kbd> 全部</button></div>
               <div className="keyboard-navigation-hint"><span><kbd>[</kbd> / <kbd>]</kbd> 切换游戏；训练场聚焦时也可用 <kbd>←</kbd> / <kbd>→</kbd></span><span>长按只响应一次 · 输入框保留正常打字</span></div>
               {(gameMode === "listen" || gameMode === "blend") && <div className="korean-input-panel">
                 <div className="korean-input-heading"><strong>用自己的韩文键盘作答</strong><div role="group" aria-label="选择键盘答题方式"><button type="button" aria-pressed={keyboardInputMode === "hangul"} onClick={() => changeKeyboardInputMode("hangul")}>韩文键位</button><button type="button" aria-pressed={keyboardInputMode === "shortcuts"} onClick={() => changeKeyboardInputMode("shortcuts")}>ASDF 选项</button></div></div>

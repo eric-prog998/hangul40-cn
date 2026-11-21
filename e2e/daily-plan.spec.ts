@@ -230,6 +230,7 @@ test.describe("今日路线 · 离开短练", () => {
   });
 
   test("keyboard jumps to another section end it; the shortcut help shown over it does not", async ({ page }) => {
+    await page.clock.install({ time: new Date("2026-11-21T12:00:00+09:00") });
     await openApp(page, "/#today-plan");
     await enterReview(page);
     const dialog = page.getByRole("dialog");
@@ -238,8 +239,16 @@ test.describe("今日路线 · 离开短练", () => {
     await dialog.getByRole("button", { name: "关闭快捷键帮助" }).click();
     await expect(dialog).toHaveCount(0);
     await expect(review(page)).toBeFocused();
-    await page.getByRole("button", { name: "打开键盘快捷键帮助" }).click();
+    // Open from a persistent, focusable header control in both browser engines.
+    // WebKit does not always focus buttons on pointer clicks.
+    const openHelp = page.getByRole("button", { name: "打开键盘快捷键帮助" });
+    await openHelp.focus();
+    await openHelp.click();
     await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("button", { name: "关闭快捷键帮助" })).toBeFocused();
+    // Hold the closing frame while a fast learner presses F2. A late restore
+    // must not take focus back from the training console to the header.
+    await page.clock.pauseAt(new Date("2026-11-21T12:01:00+09:00"));
     await page.keyboard.press("Escape");
     await expect(dialog).toHaveCount(0);
     await expect(reviewGoal(page)).toHaveText("0 / 5");
@@ -248,6 +257,9 @@ test.describe("今日路线 · 离开短练", () => {
     await review(page).focus();
     await page.keyboard.press("F2");
     await expect(page.locator("#keyboard-game-console")).toBeFocused();
+    await page.clock.runFor(32);
+    await expect(page.locator("#keyboard-game-console")).toBeFocused();
+    await page.clock.resume();
     await expect(reviewGoal(page)).toHaveText("0 / 10");
     await expect(reviewBackToPlan(page)).toHaveCount(0);
 

@@ -1995,8 +1995,14 @@ test("keeps keyboard-help focus trapped while the underlying learning mode chang
   assert.match(page, /keyboardFallbackRef\.current = \{ keyboardZone, gameMode, phraseTab \};\s*\}, \[gameMode, keyboardZone, phraseTab\]\);/,
     "the eventual fallback must track the latest committed mode without restarting the open-modal effect");
 
-  const focusEffect = page.match(/useEffect\(\(\) => \{\s*if \(!showKeyboardHelp\) return;[\s\S]*?\n  \}, \[focusPausedTypingResume, showKeyboardHelp\]\);/)?.[0] ?? "";
-  assert.ok(focusEffect, "keyboard-help focus management must run only when the dialog opens or closes");
+  const focusEffect = page.match(/useLayoutEffect\(\(\) => \{\s*if \(!showKeyboardHelp\) \{\s*const pending = keyboardReturnRef\.current;[\s\S]*?\n  \}, \[focusPausedTypingResume, showKeyboardHelp\]\);/)?.[0] ?? "";
+  assert.ok(focusEffect, "restore the opener in the dialog close commit, before subsequent keyboard navigation");
+  assert.doesNotMatch(focusEffect, /requestAnimationFrame|setTimeout/,
+    "a delayed return to the opener must not steal focus after F2 or another navigation");
+  assert.match(focusEffect, /if \(!pending\) return;[\s\S]*?keyboardReturnRef\.current = null;/,
+    "only a real close should restore focus, and its return target must be consumed once");
+  assert.match(focusEffect, /active !== previous && active\.isConnected\) return;/,
+    "respect a live control that already received focus");
   assert.doesNotMatch(focusEffect, /\}, \[(?:gameMode|keyboardZone|phraseTab)/,
     "underlying mode changes must not run cleanup and restore focus outside an open dialog");
   assert.match(focusEffect, /const fallback = keyboardFallbackRef\.current/);
