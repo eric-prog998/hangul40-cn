@@ -52,7 +52,7 @@ export default function LetterKeyboardLab({ onPlay, onPrepare }: Props) {
       document.removeEventListener("visibilitychange", onVisibility);
       if (pending.current) window.clearTimeout(pending.current.timer);
       pending.current = null;
-      sequence.current++;
+      sequence.current += 1;
     };
   }, [cancelPending]);
 

@@ -935,6 +935,7 @@ export default function Home() {
   const [routeReady, setRouteReady] = useState(false);
   const [destination, setDestination] = useState<{ id: string; focus?: string } | null>(null);
   const [lastStudy, setLastStudy] = useState<StudyPlace | null>(null);
+  const resumeBookmark = useRef<StudyPlace | null>(null);
   const workspace = scenes[scene][0];
   const currentHash = useRef<string | null>(null);
   const stopForNavigation = useRef<() => void>(() => {});
@@ -3301,6 +3302,12 @@ export default function Home() {
 
   // The old fragment URLs remain real browser destinations; inner activity controls
   // stay mounted so moving between panels does not erase a learner's work.
+  const enterScene = useCallback((next: Scene) => {
+    // Only the home screen displays/uses the bookmark. Snapshot it when entering
+    // home instead of re-rendering every time a background bookmark is written.
+    if (next === "top") setLastStudy(resumeBookmark.current);
+    setScene(next);
+  }, []);
   const selectRouteTarget = useCallback((id: string) => {
     const tab = practiceTabForTarget(id);
     if (tab) restorePracticeTab.current(tab);
@@ -3313,9 +3320,9 @@ export default function Home() {
     const hash = "#" + encodeURIComponent(id);
     if (window.location.hash !== hash) window.history.pushState(window.history.state, "", hash);
     currentHash.current = window.location.hash;
-    setScene(next);
+    enterScene(next);
     setDestination({ id, focus });
-  }, [selectRouteTarget]);
+  }, [enterScene, selectRouteTarget]);
 
   useLayoutEffect(() => {
     // Native history events need the latest activity state without reinstalling
@@ -3332,19 +3339,11 @@ export default function Home() {
     };
   });
 
-  useEffect(() => {
-    try {
-      const stored = savedPlace(window.localStorage.getItem(RESUME_KEY));
-      setLastStudy(stored);
-      if (stored?.scene === "learn") {
-        const course = isScopedLesson(stored.subset) ? stored.subset : "all";
-        setLetterLesson(course);
-        setActiveSet(course === "all" ? (stored.detail === "vowels" ? "vowels" : "consonants") : lessonSet(course));
-        setLetterFilter(stored.filter ?? "all");
-      } else if (stored && window.location.hash === "#" + stored.scene) {
-        restorePracticeTab.current(stored);
-      }
-    } catch { /* Reading can be disabled. */ }
+  // Fragment links may target descendants. Attach the router once the actual
+  // shell and its controls exist (not during SSR); React detaches its listeners
+  // with the same ref when the shell unmounts.
+  const attachRouter = useCallback((shell: HTMLDivElement | null) => {
+    if (!shell) return;
     function syncLocation() {
       const hash = window.location.hash;
       if (hash === currentHash.current) return;
@@ -3353,16 +3352,39 @@ export default function Home() {
       if (!initial) stopForNavigation.current();
       let id = "";
       try { id = decodeURIComponent(hash.slice(1)); } catch { /* Malformed bookmark: use home. */ }
-      const next = selectRouteTarget(id);
-      setScene(next ?? "top");
+      let next: Scene | null;
+      if (initial) {
+        let stored: StudyPlace | null = null;
+        try { stored = savedPlace(window.localStorage.getItem(RESUME_KEY)); } catch { /* In-memory bookmarks still work. */ }
+        resumeBookmark.current = stored;
+        if (stored?.scene === "learn") {
+          const course = isScopedLesson(stored.subset) ? stored.subset : "all";
+          setLetterLesson(course);
+          setActiveSet(course === "all" ? (stored.detail === "vowels" ? "vowels" : "consonants") : lessonSet(course));
+          setLetterFilter(stored.filter ?? "all");
+        }
+        const explicitTab = practiceTabForTarget(id);
+        const tab = explicitTab ?? (stored && id === stored.scene ? stored : null);
+        // No activity is running at mount. Select the tab, without starting a
+        // question or running the cancellation routines for later navigation.
+        if (tab?.scene === "games") {
+          const mode = gameModes.find(candidate => candidate === tab.detail);
+          if (mode) setGameMode(mode);
+        } else if (tab?.scene === "phrases") {
+          setPhraseTab(tab.detail === "sentence" ? "sentence" : "word");
+          setKeyboardZone("phrases");
+        }
+        next = explicitTab?.scene ?? sceneForTarget(id);
+        setRouteReady(true);
+      } else next = selectRouteTarget(id);
+      enterScene(next ?? "top");
       if (!initial || id) setDestination({ id: next ? id || "top" : "top" });
     }
     syncLocation();
-    setRouteReady(true);
     window.addEventListener("hashchange", syncLocation);
     window.addEventListener("popstate", syncLocation);
     return () => { window.removeEventListener("hashchange", syncLocation); window.removeEventListener("popstate", syncLocation); };
-  }, [selectRouteTarget]);
+  }, [enterScene, selectRouteTarget]);
 
   // Focus in the same commit that reveals the scene. A queued frame can run
   // after the learner has already selected a different control and steal focus.
@@ -3381,13 +3403,13 @@ export default function Home() {
     else window.scrollTo({ top: 0, behavior: "instant" });
   }, [scene, destination]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!routeReady || !studyScene(scene)) return;
     // A scoped lesson is the learner's bookmark; drills are side trips until the learner exits it.
     const place: StudyPlace = letterLesson !== "all" || scene === "learn"
       ? { scene: "learn", detail: activeSet, subset: letterLesson, filter: letterFilter }
       : { scene, detail: scene === "games" ? gameMode : scene === "phrases" ? phraseTab : "", subset: "" };
-    setLastStudy(place);
+    resumeBookmark.current = place;
     try { window.localStorage.setItem(RESUME_KEY, JSON.stringify(place)); } catch { /* In-page resume still works. */ }
   }, [routeReady, scene, gameMode, phraseTab, activeSet, letterLesson, letterFilter]);
 
@@ -4406,7 +4428,7 @@ export default function Home() {
   }
 
   return (
-    <div className="site-shell task-shell" onClick={followSceneLink}>
+    <div className="site-shell task-shell" ref={attachRouter} onClick={followSceneLink}>
       <header className="topbar">
         <a className="brand" href="#top" aria-label="回到首页">
           <span className="brand-mark" lang="ko" aria-hidden="true">한</span>

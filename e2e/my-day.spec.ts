@@ -42,6 +42,44 @@ const dialogue = (page: Page) => page.getByTestId("day-dialogue");
 const good = (page: Page) => page.getByTestId("day-letter-good");
 const firstDay = new Date("2026-11-21T12:00:00+09:00");
 
+test("two open day lessons display a grade once and can resume from either tab", async ({ page, context }) => {
+  await page.clock.setFixedTime(firstDay);
+  await openApp(page, "/#my-day");
+  const position = (p: Page) => p.locator("#my-day .day-eyebrow span");
+  await expect(position(page)).toHaveText("1 / 6");
+  const other = await context.newPage();
+  await other.clock.setFixedTime(firstDay);
+  await openApp(other, "/#my-day");
+  await expect(position(other)).toHaveText("1 / 6");
+  await page.getByTestId("day-letter-reveal").click();
+  await page.getByTestId("day-letter-good").click();
+  await expect(position(other)).toHaveText("2 / 6");
+  await other.getByTestId("day-letter-reveal").click();
+  await other.getByTestId("day-letter-again").click();
+  await expect(position(page)).toHaveText("3 / 6");
+  await page.reload();
+  await expect(position(page)).toHaveText("3 / 6");
+});
+
+test("a blocked notebook write keeps the graded card when pausing and resuming in the same tab", async ({ page }) => {
+  await page.clock.setFixedTime(firstDay);
+  await page.addInitScript(key => {
+    const write = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (k, v) {
+      if (k === key) throw new DOMException("Full", "QuotaExceededError");
+      return write.call(this, k, v);
+    };
+  }, MY_DAY_KEY);
+  await openApp(page, "/#my-day");
+  await page.getByTestId("day-letter-reveal").click();
+  await page.getByTestId("day-letter-good").click();
+  await expect(page.locator("#my-day .day-notice")).toBeVisible();
+  await page.locator("#day-pause").click();
+  await page.locator("#home-day").click();
+  await expect(page.locator("#my-day .day-eyebrow span")).toHaveText("2 / 6");
+  expect(await page.evaluate(key => localStorage.getItem(key), MY_DAY_KEY)).toBeNull();
+});
+
 async function startFromHome(page: Page) {
   await openApp(page);
   await expect(page.locator("#top")).toBeVisible();

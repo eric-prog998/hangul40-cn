@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import DayLetterCard from "./day-letter-card";
 import { daySkillTotals } from "./day-letters";
 import DayDialogue from "./day-dialogue";
@@ -11,47 +11,72 @@ export type DayBadge = "new" | "started" | "finished";
 type Props = { visible: boolean; active: boolean; day: string; legacy: readonly string[]; onBadge: (b: DayBadge) => void;
   onHome: () => void; onPlay: (path: string) => Promise<boolean>; onStop: () => void };
 const phases = ["温故", "读音", "接话", "收尾"] as const;
-export default function MyDay({visible, active, day, legacy, onBadge, onHome, onPlay, onStop}: Props) {
-  const [book, setBook] = useState<Notebook | null>(null);
-  const [message, setMessage] = useState("");
-  const state = useRef<Notebook | null>(null);
-  const stored = useRef<string | null>(null);
-  const writable = useRef(true);
-  const finish = useRef<HTMLHeadingElement>(null);
-  useEffect(() => { if (active) return onStop; }, [active, onStop]);
-  const apply = useCallback((next: Notebook) => { state.current = next; setBook(next); }, []);
-  const refresh = useCallback(() => {
+type DaySnapshot = { book: Notebook | null; message: string };
+const loadingSnapshot: DaySnapshot = { book: null, message: "" };
+const serverSnapshot = () => loadingSnapshot;
+
+// One store per mounted learner, never shared across server requests. Reads
+// start only after subscription; failed writes retain the lesson in memory.
+function createDayStore() {
+  let snapshot = loadingSnapshot;
+  let stored: string | null | undefined;
+  let writable = true;
+  const listeners = new Set<() => void>();
+  function publish(book: Notebook, message: string) {
+    if (snapshot.book === book && snapshot.message === message) return;
+    snapshot = { book, message };
+    for (const notify of listeners) notify();
+  }
+  function refresh() {
     try {
       const raw = localStorage.getItem(MY_DAY_KEY);
+      if (raw === stored && snapshot.book) return;
       const next = readBook(raw);
-      writable.current = true; stored.current = raw; setMessage(""); apply(next);
+      writable = true; stored = raw; publish(next, "");
     } catch {
-      writable.current = false;
-      setMessage("无法读取日课存档。仍可练习，本次只在当前页面保留，不会覆盖原记录。");
-      if (!state.current) apply(emptyBook());
+      stored = undefined; writable = false;
+      publish(snapshot.book ?? emptyBook(), "无法读取日课存档。仍可练习，本次只在当前页面保留，不会覆盖原记录。");
     }
-  }, [apply]);
-  useEffect(() => {
-    refresh();
-    const sync = (e: StorageEvent) => { if ((e.key === MY_DAY_KEY || e.key === null) && e.storageArea === localStorage) refresh(); };
-    window.addEventListener("storage", sync); return () => window.removeEventListener("storage", sync);
-  }, [refresh]);
-  const save = useCallback((next: Notebook) => {
-    if (writable.current) {
+  }
+  function sync(e: StorageEvent) {
+    if ((e.key === MY_DAY_KEY || e.key === null) && e.storageArea === localStorage) refresh();
+  }
+  return {
+    getSnapshot: () => snapshot,
+    subscribe(notify: () => void) {
+      listeners.add(notify);
+      if (listeners.size === 1) window.addEventListener("storage", sync);
+      refresh();
+      return () => {
+        listeners.delete(notify);
+        if (!listeners.size) window.removeEventListener("storage", sync);
+      };
+    },
+    save(previous: Notebook, next: Notebook) {
+      if (snapshot.book !== previous || previous === next) return;
+      if (!writable) { publish(next, snapshot.message); return; }
       try {
-        if (localStorage.getItem(MY_DAY_KEY) !== stored.current) { refresh(); return; }
+        if (localStorage.getItem(MY_DAY_KEY) !== stored) { refresh(); return; }
         const raw = JSON.stringify(next);
-        localStorage.setItem(MY_DAY_KEY, raw); stored.current = raw;
+        localStorage.setItem(MY_DAY_KEY, raw); stored = raw;
       } catch {
-        writable.current = false;
-        setMessage("浏览器没能保存日课。你仍能继续，暂时不要刷新或关闭页面。");
+        writable = false;
+        publish(next, "浏览器没能保存日课。你仍能继续，暂时不要刷新或关闭页面。");
+        return;
       }
-    }
-    apply(next);
-  }, [apply, refresh]);
+      publish(next, "");
+    },
+  };
+}
+
+export default function MyDay({visible, active, day, legacy, onBadge, onHome, onPlay, onStop}: Props) {
+  const [store] = useState(createDayStore);
+  const { book, message } = useSyncExternalStore(store.subscribe, store.getSnapshot, serverSnapshot);
+  const finish = useRef<HTMLHeadingElement>(null);
+  useEffect(() => { if (active) return onStop; }, [active, onStop]);
   useEffect(() => {
-    if (visible && active && book && day && book.session?.day !== day && state.current === book) save(beginDay(book, day, legacy));
-  }, [visible, active, day, legacy, book, save]);
+    if (visible && active && book && day && book.session?.day !== day) store.save(book, beginDay(book, day, legacy));
+  }, [visible, active, day, legacy, book, store]);
   const s = book?.session;
   const step = s ? currentStep(s) : null;
   useEffect(() => { onBadge(s && s.day === day ? (s.done ? "finished" : "started") : "new"); }, [s, day, onBadge]);
@@ -62,7 +87,7 @@ export default function MyDay({visible, active, day, legacy, onBadge, onHome, on
   const phase = step === "letters" ? Number(index > 0) : step === "finish" ? 3 : 2;
   const sceneIndex = step === "extra" ? s.extra! : step === "recall" ? s.recall! : s.scene;
   const reads = s.cards.filter((card, i) => card.skill === "read" && s.marks[i]?.result === "good" && !s.marks[i].replayed).map(c => c.char);
-  const saveIfCurrent = (next: () => Notebook) => { if (active && state.current === book) save(next()); };
+  const saveIfCurrent = (next: () => Notebook) => { if (active) store.save(book, next()); };
   return <div className="my-day-layout">
     <div className="my-day-main">
       <header className="my-day-heading"><div className="study-kicker"><span aria-hidden="true"/>我的韩语日课 <small>{s.day.slice(5).replace("-", " / ")}</small></div>

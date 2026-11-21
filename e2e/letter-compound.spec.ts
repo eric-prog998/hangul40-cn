@@ -17,11 +17,11 @@ async function recordMediaEvents(page: Page) {
   await page.evaluate(() => {
     window.__letterEvents = [];
     const play = HTMLMediaElement.prototype.play;
-    let previous: HTMLMediaElement | null = null;
+    let previousEnded: (() => boolean) | undefined;
     HTMLMediaElement.prototype.play = function () {
       const source = this.currentSrc || this.src;
-      window.__letterEvents.push({ event: "play", source, previousEnded: previous?.ended });
-      previous = this;
+      window.__letterEvents.push({ event: "play", source, previousEnded: previousEnded?.() });
+      previousEnded = () => this.ended;
       this.addEventListener("ended", () => window.__letterEvents.push({ event: "ended", source }), { once: true });
       return play.call(this);
     };

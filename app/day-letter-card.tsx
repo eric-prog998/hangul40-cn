@@ -33,7 +33,7 @@ function Card({card,onGrade,onPlay,onStop}: Props) {
   const refocus = () => panel.current?.focus({preventScroll:true});
   useLayoutEffect(() => {
     refocus();
-    return () => { token.current++; };
+    return () => { token.current += 1; };
   }, []);
 
   async function play() {

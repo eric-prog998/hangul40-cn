@@ -1,5 +1,23 @@
 import { expect, goToTraining, lastAudio, openApp, readListenQuestion, test } from "./support/app.ts";
 
+test("a course bookmark still works within the page if persistent writes fail", async ({ page }) => {
+  await page.addInitScript(() => {
+    const save = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (key === "hangul-last-study-v48") throw new DOMException("Full", "QuotaExceededError");
+      return save.call(this, key, value);
+    };
+  });
+  await openApp(page);
+  await page.locator("#home-continue").click();
+  await expect(page.locator("#learn .letter-card")).toHaveCount(6);
+  await page.getByRole("navigation", { name: "主要导航" }).getByRole("link", { name: "今天" }).click();
+  await expect(page.locator("#top")).toContainText("继续学「核心元音 6 音」");
+  await page.locator("#home-continue").click();
+  await expect(page.locator("#learn .letter-card")).toHaveCount(6);
+  expect(await page.evaluate(() => localStorage.getItem("hangul-last-study-v48"))).toBeNull();
+});
+
 test("a keyboard side trip and a quiz preserve the six-vowel course, markings and filter", async ({ page }) => {
   await openApp(page);
   await page.locator("#home-continue").focus();
