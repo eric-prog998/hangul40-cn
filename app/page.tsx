@@ -799,16 +799,21 @@ function consonantOnsetPath(letter: Letter) {
   return audioFile ? versionedAudioPath(`/audio/consonant-human-onset/${audioFile}`) : "";
 }
 
+const PUBLIC_BASE_PATH = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/+$/, "");
+function withBasePath(source: string) {
+  return PUBLIC_BASE_PATH && source.startsWith("/") ? `${PUBLIC_BASE_PATH}${source}` : source;
+}
+
 function preloadAudioSource(source: string) {
   if (typeof window === "undefined") return;
-  audioPlayback.preload(source);
+  audioPlayback.preload(withBasePath(source));
 }
 
 async function playAudioSourceToEnd(source: string, speed = 1, daily = false): Promise<AudioPlaybackResult> {
   if (typeof window === "undefined" || !source) return "failed";
   dayOwnsAudio = daily;
   stopSpeechSynthesis();
-  return audioPlayback.play(source, speed);
+  return audioPlayback.play(withBasePath(source), speed);
 }
 
 function preloadKorean(text: string) {
