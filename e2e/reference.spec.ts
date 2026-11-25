@@ -1,4 +1,4 @@
-import { audioLog, describeAudio, expect, lastAudio, openApp, syllableOf, test } from "./support/app.ts";
+import { audioLog, describeAudio, expect, lastAudio, openApp, test } from "./support/app.ts";
 import type { Page } from "@playwright/test";
 
 /** The clips played since `from`, described by what they stand for. */
@@ -70,13 +70,13 @@ test.describe("拼音节与字块", () => {
   test("the syllable builder joins the chosen letters and plays that syllable", async ({ page }) => {
     await openApp(page, "/#builder");
     const result = page.locator(".syllable-result");
-    // 네 is also an everyday word ("yes"); the site may play that word's recording for it.
+    // Even a word homograph such as 네 must use the builder's isolated-syllable recording.
     for (const [initial, vowel, syllable] of [["ㅎ", "ㅘ", "화"], ["ㅇ", "ㅢ", "의"], ["ㅉ", "ㅞ", "쮀"], ["ㄴ", "ㅔ", "네"], ["ㄱ", "ㅏ", "가"]]) {
       await page.getByLabel("选择辅音", { exact: true }).selectOption(initial);
       await page.getByLabel("选择元音", { exact: true }).selectOption(vowel);
       await expect(result.locator("strong")).toHaveText(syllable);
       await result.click();
-      await expect.poll(async () => syllableOf(await lastAudio(page))).toEqual({ syllable, initial, vowel });
+      await expect.poll(() => lastAudio(page)).toMatchObject({ kind: "syllable", syllable, initial, vowel });
     }
   });
 

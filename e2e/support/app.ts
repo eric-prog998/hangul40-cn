@@ -71,8 +71,8 @@ export function describeAudio(src: string | null): AudioClip {
 
 /**
  * The syllable a clip says, or null if it is something else. Two everyday words, 네 and 뭐, are
- * a single open syllable; wherever that syllable is needed the site plays the word's own
- * recording, so those two clips count as syllables here as well.
+ * a single open syllable; this helper identifies the sound, not its source. Tests of the
+ * builder/phrase distinction must check clip.kind as well.
  */
 export function syllableOf(clip: AudioClip) {
   if (clip.kind === "syllable") return { syllable: clip.syllable, initial: clip.initial, vowel: clip.vowel };

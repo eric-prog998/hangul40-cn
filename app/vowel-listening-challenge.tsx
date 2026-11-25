@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
-import { keyboardSectionIndex, keyboardShortcutKey, koreanKeyInput, koreanKeyLabel } from "./keyboard-logic";
+import { imeOwnsPanelKey, keyboardSectionIndex, keyboardShortcutKey, koreanKeyInput, koreanKeyLabel } from "./keyboard-logic";
 import { VOWEL_CONTRASTS } from "./pronunciation-data";
 import { advanceVowelQuestion, answerVowelQuestion, makeVowelQuestions, missedVowelQuestions, newVowelChallenge, shuffleVowelQuestions, vowelChallengeSummary, type VowelChallengeState } from "./vowel-challenge-logic";
 import { pendingVowelQuestions, recentVowelResults } from "./vowel-history";
@@ -127,7 +127,7 @@ const VowelListeningChallenge = forwardRef<VowelChallengeHandle, Props>(function
   }
 
   function handleKey(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.defaultPrevented || event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
+    if (event.defaultPrevented || imeOwnsPanelKey(event.nativeEvent) || event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
     const target = event.target as HTMLElement;
     if (target.closest("input, textarea, select, [contenteditable=true]")) return;
     if (keyboardSectionIndex(event.code, event.shiftKey) !== null) return;

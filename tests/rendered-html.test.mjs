@@ -499,7 +499,7 @@ test("renders the real Korean learning product", async () => {
 
   const html = await response.text();
   assert.match(html, /韩语 40 音｜中文闯关版/);
-  assert.match(html, /中文闯关版 · v51/);
+  assert.match(html, /中文闯关版 · v51\.3</);
   assert.match(html, /id="home-day"/);
   assert.match(html, /id="home-continue"/, "free-study bookmarks keep their separate entry");
   assert.match(html, /用自己的韩文键盘作答/);
@@ -964,10 +964,10 @@ test("generates only fair four-choice blend questions", () => {
   const fairSyllables = new Set(fairQuestions.map(({ syllable }) => syllable));
 
   assert.equal(allQuestions.length, 399);
-  assert.equal(fairQuestions.length, 376);
+  assert.equal(fairQuestions.length, 375);
   assert.deepEqual(fairQuestions.filter(({ vowel }) => vowel === "ㅢ").map(({ syllable }) => syllable), ["의"]);
-  for (const syllable of ["쑈", "져", "쪄", "쳐", "폐"]) assert.ok(!fairSyllables.has(syllable), `${syllable} is a non-preferred duplicate target`);
-  for (const syllable of ["쇼", "저", "쩌", "처", "페", "기", "니", "미", "비", "씨", "지", "찌", "키", "티", "히"]) {
+  for (const syllable of ["쇼", "쑈", "져", "쪄", "쳐", "폐"]) assert.ok(!fairSyllables.has(syllable), `${syllable} is not a safe listening target`);
+  for (const syllable of ["사", "싸", "저", "쩌", "처", "페", "기", "니", "미", "비", "씨", "지", "찌", "키", "티", "히"]) {
     assert.ok(fairSyllables.has(syllable), `${syllable} should remain available as the preferred target`);
   }
 
@@ -1020,7 +1020,7 @@ test("generates only fair four-choice blend questions", () => {
   }
 });
 
-test("keeps one preferred target from every byte-identical blend group", async () => {
+test("quarantines both unresolved cross-initial duplicates; keeps one representative of the other identical groups", async () => {
   const expectedDuplicateGroups = [
     "긔/기", "끠/끼", "늬/니", "띄/띠", "믜/미", "븨/비", "쇼/쑈", "씌/씨",
     "저/져", "즤/지", "쯰/찌", "킈/키", "틔/티", "페/폐", "희/히",
@@ -1050,7 +1050,7 @@ test("keeps one preferred target from every byte-identical blend group", async (
       const parts = partsBySyllable.get(syllable);
       return parts && isFairBlendTarget(parts.initial, parts.vowel);
     });
-    assert.equal(preferredTargets.length, 1, `${group} must retain exactly one fair blend target`);
+    assert.equal(preferredTargets.length, group === "쇼/쑈" ? 0 : 1, `unexpected listening targets for ${group}`);
   }
 
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
@@ -1063,10 +1063,11 @@ test("keeps one preferred target from every byte-identical blend group", async (
 test("versions every audio URL and keeps question gating", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
 
-  assert.match(page, /const APP_VERSION = "51"/);
+  assert.match(page, /const APP_VERSION = "51\.3"/);
   assert.match(page, /const AUDIO_ASSET_VERSION = "21"/);
   assert.match(page, /return `\$\{phraseSource\}\?v=\$\{AUDIO_ASSET_VERSION\}`/);
-  assert.match(page, /\/audio\/hangul-natural\/s-\$\{syllable\.codePointAt\(0\)\?\.toString\(16\)\}\.mp3\?v=\$\{AUDIO_ASSET_VERSION\}/);
+  assert.match(page, /return versionedAudioPath\(`\/audio\/hangul-natural\//);
+  assert.match(page, /revisedClips\[path\]\?\.slice\(0, 16\) \?\? AUDIO_ASSET_VERSION/);
   assert.match(page, /function consonantOnsetPath[\s\S]*?`\/audio\/consonant-human-onset\/\$\{audioFile\}\?v=\$\{AUDIO_ASSET_VERSION\}`/);
   assert.doesNotMatch(page, /consonant-human-clarity/);
   assert.match(page, /function playReferenceLetterExampleAudio[\s\S]*?consonantOnsetPath\(letter\)/);
@@ -1128,7 +1129,7 @@ test("implements the v15 onset comparator and scoped review drills", async () =>
   assert.match(page, /async function playComparisonSyllable/);
   assert.match(page, /async function playComparisonSequence/);
   assert.match(page, /playAudioSourceToEnd\(consonantOnsetPath\(comparisonLetter\), audioSpeed\)/);
-  assert.match(page, /playAudioSourceToEnd\(audioPath\(comparisonSyllable\), audioSpeed\)/);
+  assert.match(page, /playAudioSourceToEnd\(syllableAudioPath\(comparisonSyllable\), audioSpeed\)/);
   assert.match(page, /comparisonConsonant === "ㅇ" \? 650 : 420/);
   assert.match(page, /ㅇ 作初声时没有辅音声；右边完整音节从元音直接开始/);
   assert.match(page, /真人起音 ↔ 完整音节对照器/);

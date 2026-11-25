@@ -238,6 +238,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .syllable-result { min-height: 112px; border: 0; border-radius: 23px 23px 23px 7px; background: var(--lime); cursor: pointer; display: grid; place-items: center; align-content: center; transition: transform .18s ease, background .18s ease; }
 .syllable-result:hover { transform: translateY(-2px) rotate(-1deg); background: #e8f8a6; }
 .syllable-result strong { font-size: 54px; line-height: 1; }
+.syllable-result:disabled { cursor: default; background: #e2e6dd; color: #465044; transform: none; }
+.builder-warning { margin-top: 1rem; padding: .9rem 1rem; border-left: 3px solid #99622d; background: #fff6e7; color: #483522; }
+.builder-warning p { margin: 0 0 .65rem; font-size: 1rem; }
+.builder-warning button { padding: .4rem .85rem; border: 1px solid currentColor; border-radius: .45rem; background: white; color: inherit; cursor: pointer; font: inherit; }
 .syllable-result span { margin-top: 8px; font-size: 10px; font-weight: 740; letter-spacing: .08em; }
 .builder-note { display: grid; grid-template-columns: 34px 1fr; gap: 12px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); }
 .builder-note > span { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; background: var(--coral); color: #fff; font-size: 10px; font-weight: 800; }

@@ -1,4 +1,32 @@
 import { audioLog, expect, openApp, test } from "./support/app.ts";
+import { AUTO_ADVANCE_KEY } from "../app/learning-settings.ts";
+
+test("a failed batchim replay stays paused after a successful retry until Enter", async ({ page }) => {
+  await page.addInitScript(key => localStorage.setItem(key, "5000"), AUTO_ADVANCE_KEY);
+  await openApp(page, "/#batchim-lesson");
+  await page.clock.install();
+  const lesson = page.locator("#batchim-lesson");
+  const progress = lesson.locator(".batchim-mode-controls > span");
+  const status = lesson.getByRole("status");
+  await lesson.getByRole("button", { name: "开始 5 题练习" }).click();
+  await page.keyboard.press("Digit1");
+  await expect(status).toContainText("5 秒后自动下一题");
+  await page.evaluate(() => {
+    const realPlay = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function () {
+      HTMLMediaElement.prototype.play = realPlay;
+      return Promise.reject(new DOMException("First replay blocked", "NotAllowedError"));
+    };
+  });
+  await page.keyboard.press("F8");
+  await expect(status).toContainText("音频未能播放，自动下一题已暂停");
+  await page.keyboard.press("F8");
+  await expect(status).toContainText("完整词播放完毕");
+  await page.clock.fastForward(6000);
+  await expect(progress).toHaveText("第 1 / 5 题", { timeout: 1500 });
+  await page.keyboard.press("Enter");
+  await expect(progress).toHaveText("第 2 / 5 题");
+});
 
 for (const [section, tab] of [["phrases", "phrase-tab-sentence"], ["games", "game-tab-typing"]] as const) {
   test(`refresh and continue keep the selected ${tab} without starting an activity`, async ({ page }) => {

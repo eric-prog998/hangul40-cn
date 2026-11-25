@@ -1,5 +1,56 @@
 import { audioLog, describeAudio, expect, openApp, test } from "./support/app.ts";
 
+test("batchim quiz leaves IME candidates alone but accepts a physical Korean key", async ({ page }) => {
+  await openApp(page, "/#batchim-lesson");
+  const panel = page.locator("#batchim-lesson");
+  await panel.focus();
+  await panel.dispatchEvent("keydown", { key: "Enter", code: "Enter", isComposing: true });
+  await expect(panel.locator(".batchim-question")).toHaveCount(0);
+  await page.keyboard.press("Enter");
+  await expect(panel.locator(".batchim-question")).toBeVisible();
+  await panel.dispatchEvent("keydown", { key: "Process", code: "Digit1", keyCode: 229 });
+  await panel.dispatchEvent("keydown", { key: "Process", code: "KeyF", keyCode: 229, isComposing: true });
+  await expect(panel.locator(".batchim-result")).toHaveCount(0);
+  // On a non-text panel, Process + a physical letter without active IME composition is an ordinary 두벌식 answer.
+  await panel.dispatchEvent("keydown", { key: "Process", code: "KeyF", keyCode: 229 });
+  await expect(panel.locator(".batchim-result")).toBeVisible();
+  await panel.dispatchEvent("keydown", { key: "Enter", code: "Enter", keyCode: 229 });
+  await expect(panel.locator(".batchim-mode-controls span")).toHaveText("第 1 / 5 题");
+  await page.keyboard.press("Enter");
+  await expect(panel.locator(".batchim-mode-controls span")).toHaveText("第 2 / 5 题");
+});
+
+test("vowel comparison never plays a clip from active IME composition", async ({ page }) => {
+  await openApp(page, "/#pronunciation-practice");
+  const panel = page.locator("#pronunciation-practice");
+  await panel.focus();
+  await panel.dispatchEvent("keydown", { key: "Process", code: "KeyA", keyCode: 229, isComposing: true });
+  await panel.dispatchEvent("keydown", { key: " ", code: "Space", keyCode: 229 });
+  expect(await audioLog(page)).toHaveLength(0);
+  await panel.dispatchEvent("keydown", { key: "Process", code: "KeyA", keyCode: 229 });
+  await expect.poll(async () => (await audioLog(page)).length).toBe(1);
+});
+
+test("vowel listening quiz ignores IME candidate digits and Enter without recording an answer", async ({ page }) => {
+  await openApp(page, "/#pronunciation-practice");
+  await page.locator(".vowel-practice-views button").nth(1).click();
+  const panel = page.locator("#vowel-listening");
+  await panel.focus();
+  await panel.dispatchEvent("keydown", { key: "Enter", code: "Enter", keyCode: 229 });
+  await expect(panel.locator(".vowel-challenge-intro")).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(panel.locator(".vowel-challenge-choices button").first()).toBeEnabled();
+  await panel.dispatchEvent("keydown", { key: "Process", code: "Digit1", keyCode: 229 });
+  await panel.dispatchEvent("keydown", { key: "2", code: "Digit2", isComposing: true });
+  await expect(panel.locator(".vowel-challenge-feedback")).toHaveCount(0);
+  await page.keyboard.press("Digit1");
+  await expect(panel.locator(".vowel-challenge-feedback")).toBeVisible();
+  await panel.dispatchEvent("keydown", { key: "Enter", code: "Enter", isComposing: true });
+  await expect(panel.locator(".vowel-challenge-header > span")).toHaveText("盲听 1 / 8");
+  await page.keyboard.press("Enter");
+  await expect(panel.locator(".vowel-challenge-header > span")).toHaveText("盲听 2 / 8");
+});
+
 test("all 40 physical keyboard spellings select their matching name or vowel recording, once", async ({ page }) => {
   // Independent two-set layout fixture, not derived from the application's key map.
   const consonants = [

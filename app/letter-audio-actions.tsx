@@ -33,7 +33,8 @@ export default function LetterAudioActions({ char, sample, consonant, onName, on
       : <details className="letter-onset-detail"><summary>单听起音</summary>
         <button type="button" className="onset-audio" onClick={() => play(`onset-${consonant.id}`, `${char} 起音`, onOnset)}>
           <span>听起音 · 真人片段</span><strong lang="ko">{char}<i aria-hidden="true">▶</i></strong>
-        </button><small>从原词截取，只播一次；跟读请用上面的完整音节。</small>
+        </button><small>从原词截取，只播一次；跟读请用上面的完整音节。{["ㄲ","ㄸ","ㅃ","ㄹ"].includes(char) && "这段起音特别短；听不清时不必反复模仿片段。"}
+        </small>
       </details>)}
     {lastClip && <a className="letter-audio-feedback" href="#audio-guide" onClick={() => onReport(lastClip.id)}>反馈刚听的{lastClip.label}</a>}
   </div>;

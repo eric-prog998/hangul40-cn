@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import phraseData from "../data/phrases.json";
 import consonantNameData from "../data/consonant-names.json";
 import typingRouteData from "../data/typing-routes.json";
+import trimRevisions from "../data/core-tail-trims.json";
 import {
   INITIAL_ORDER as initialOrder,
   VOWEL_ORDER as vowelOrder,
@@ -13,6 +14,8 @@ import {
   fairBlendInitialCandidates,
   fairBlendVowelCandidates,
   isFairBlendTarget,
+  isQuarantinedSyllable,
+  DUPLICATE_SYLLABLE_NOTICE,
   makeSyllable,
   selectFairBlindLetters,
   usesOnlyOpenSyllablesFromSets,
@@ -294,7 +297,7 @@ function practiceTabForTarget(id: string): StudyPlace | null {
   }
   return null;
 }
-const APP_VERSION = "51";
+const APP_VERSION = "51.3";
 const KEYBOARD_MODE_KEY = "hangul-keyboard-mode-v33";
 const AUDIO_ASSET_VERSION = "21";
 const TYPING_BEST_KEY = "hangul-typing-best-v1";
@@ -760,6 +763,18 @@ function shuffle<T>(items: T[]) {
   return result;
 }
 
+const revisedClips: Readonly<Record<string, string>> = trimRevisions;
+function versionedAudioPath(path: string) {
+  return path ? path + "?v=" + (revisedClips[path]?.slice(0, 16) ?? AUDIO_ASSET_VERSION) : "";
+}
+
+// An open syllable on a builder card is not the homographic word in the phrase library.
+function syllableAudioPath(syllable: string) {
+  const parts = decomposeHangulSyllable(syllable);
+  if (syllable.length !== 1 || !parts || parts.final || isQuarantinedSyllable(syllable)) return "";
+  return versionedAudioPath(`/audio/hangul-natural/s-${syllable.codePointAt(0)!.toString(16)}.mp3`);
+}
+
 function audioPath(text: string) {
   const phraseSource = phraseAudioPaths.get(text);
   if (phraseSource) return `${phraseSource}?v=${AUDIO_ASSET_VERSION}`;
@@ -767,7 +782,7 @@ function audioPath(text: string) {
   const syllables = text.match(/[가-힣]/g) ?? [];
   if (syllables.length !== 1) return "";
   const syllable = syllables[0];
-  return syllable ? `/audio/hangul-natural/s-${syllable.codePointAt(0)?.toString(16)}.mp3?v=${AUDIO_ASSET_VERSION}` : "";
+  return syllable ? syllableAudioPath(syllable) : "";
 }
 
 function stopSpeechSynthesis() {
@@ -956,7 +971,7 @@ export default function Home() {
   const [autoAdvanceMs, setAutoAdvanceMs] = useState<AutoAdvanceDelay>(3000);
   const [audioSpeed, setAudioSpeed] = useState<1 | 0.82>(1);
   const playDayClip = useCallback(async (path: string) => {
-    return (await playAudioSourceToEnd(path + "?v=" + AUDIO_ASSET_VERSION, audioSpeed, true)) === "ended";
+    return (await playAudioSourceToEnd(versionedAudioPath(path), audioSpeed, true)) === "ended";
   }, [audioSpeed]);
   const [showRomanization, setShowRomanization] = useState(true);
   const [beginnerBlendCompleted, setBeginnerBlendCompleted] = useState(false);
@@ -2347,11 +2362,11 @@ export default function Home() {
   useEffect(() => {
     // Keep the first screen quiet on the network, too. The playback controller
     // still loads an uncached clip on demand if the learner acts immediately.
-    if (scene === "builder") preloadKorean(syllable);
+    if (scene === "builder") preloadAudioSource(syllableAudioPath(syllable));
     if (scene === "starter") preloadKorean(blockExample.syllable);
     if (scene === "learn") {
       preloadReferenceLetterExample(comparisonLetter);
-      preloadKorean(comparisonSyllable);
+      preloadAudioSource(syllableAudioPath(comparisonSyllable));
     }
     if (scene === "phrases") preloadKorean(phraseQuizTarget.korean);
     if (scene !== "games") return;
@@ -2359,7 +2374,7 @@ export default function Home() {
       case "listen": preloadGameLetterExample(listenTarget); break;
       case "speed": preloadGameLetterExample(speedTarget); break;
       case "shadow": preloadKorean(shadowCurrent.sample); break;
-      case "blend": preloadKorean(blendTarget); break;
+      case "blend": preloadAudioSource(syllableAudioPath(blendTarget)); break;
       case "match": for (const card of matchDeck) preloadGameLetterExample(card.letter); break;
     }
   }, [scene, gameMode, syllable, blendTarget, comparisonSyllable, phraseQuizTarget.korean, listenTarget, speedTarget, shadowCurrent, comparisonLetter, matchDeck, blockExample.syllable]);
@@ -3164,7 +3179,7 @@ export default function Home() {
   }
 
   function playGameSyllable(text: string) {
-    return playGameAudio(() => playSound(text));
+    return playGameAudio(() => playAudioSourceToEnd(syllableAudioPath(text), audioSpeed));
   }
 
   function replayGameLetter(letter: Letter) {
@@ -3207,7 +3222,7 @@ export default function Home() {
     setComparisonBusy(false);
     comparisonPlaybackActiveRef.current = true;
     setComparisonStatus(`正在播放完整音节 ${comparisonSyllable}，这里包含元音 ${comparisonVowel}。`);
-    const result = await playSound(comparisonSyllable);
+    const result = await playAudioSourceToEnd(syllableAudioPath(comparisonSyllable), audioSpeed);
     if (request !== comparisonSequenceRef.current) return;
     comparisonPlaybackActiveRef.current = false;
     setComparisonStatus(result === "ended" ? `刚才是完整音节 ${comparisonSyllable}，其中包含元音 ${comparisonVowel}。` : result === "failed" ? "完整音节未能播放，请再试一次。" : "完整音节播放已停止。");
@@ -3233,7 +3248,7 @@ export default function Home() {
 
     await new Promise((resolve) => window.setTimeout(resolve, comparisonConsonant === "ㅇ" ? 650 : 420));
     if (request !== comparisonSequenceRef.current) return;
-    const syllableResult = await playAudioSourceToEnd(audioPath(comparisonSyllable), audioSpeed);
+    const syllableResult = await playAudioSourceToEnd(syllableAudioPath(comparisonSyllable), audioSpeed);
     if (request !== comparisonSequenceRef.current) return;
     comparisonPlaybackActiveRef.current = false;
     setComparisonBusy(false);
@@ -3306,6 +3321,14 @@ export default function Home() {
     setVowel(value);
   }
 
+  async function playBuilderSyllable() {
+    const path = syllableAudioPath(syllable);
+    if (!path) return;
+    prepareReferenceActivity();
+    cancelComparisonSequence(false);
+    if (await playAudioSourceToEnd(path, audioSpeed) === "failed") showNotice("音频未能播放，请检查网络后再点一次");
+  }
+
   // The old fragment URLs remain real browser destinations; inner activity controls
   // stay mounted so moving between panels does not erase a learner's work.
   const enterScene = useCallback((next: Scene) => {
@@ -3319,6 +3342,16 @@ export default function Home() {
     if (tab) restorePracticeTab.current(tab);
     return tab?.scene ?? sceneForTarget(id);
   }, []);
+
+  // Selecting a tab changes what this address shares, not which section the
+  // learner came from. Do not push a history entry, scroll, focus, or re-open
+  // the activity; the tab's own event already performs the interaction.
+  function rememberPracticeTab(id: string) {
+    const hash = "#" + id;
+    if (window.location.hash === hash) return;
+    window.history.replaceState(window.history.state, "", hash);
+    currentHash.current = hash;
+  }
 
   const moveToSection = useCallback((id: string, focus?: string) => {
     const next = selectRouteTarget(id);
@@ -3337,7 +3370,7 @@ export default function Home() {
       if (place.scene === "games") {
         const mode = gameModes.find(candidate => candidate === place.detail);
         if (mode) switchGameMode(mode, false, "resume");
-      } else if (place.scene === "phrases") changePhraseTab(place.detail === "sentence" ? "sentence" : "word");
+      } else if (place.scene === "phrases") changePhraseTab(place.detail === "sentence" ? "sentence" : "word", false, "resume");
     };
     stopForNavigation.current = () => {
       endPlanActivity();
@@ -3632,7 +3665,8 @@ export default function Home() {
     window.requestAnimationFrame(() => document.getElementById("phrase-quiz-restart")?.focus());
   }
 
-  function changePhraseTab(tab: "word" | "sentence", focusTab = false) {
+  function changePhraseTab(tab: "word" | "sentence", focusTab = false, intent: "select" | "resume" = "select") {
+    if (intent === "select" && tab !== phraseTab) rememberPracticeTab(`phrase-tab-${tab}`);
     claimPhraseActivity();
     if (tab === phraseTab) {
       if (focusTab) window.requestAnimationFrame(() => document.getElementById(`phrase-tab-${tab}`)?.focus());
@@ -3812,7 +3846,10 @@ export default function Home() {
   }
 
   async function sharePage(score?: number, total = 10) {
-    const url = `${window.location.origin}${window.location.pathname}`;
+    // Share the actual practice (never storage, input, query params or an
+    // arbitrary incoming fragment). Other sections still share the homepage.
+    const tab = scene === "games" ? `game-tab-${gameMode}` : scene === "phrases" ? `phrase-tab-${phraseTab}` : "";
+    const url = `${window.location.origin}${window.location.pathname}${tab ? "#" + tab : ""}`;
     const text = score === undefined
       ? "这个韩语 40 音网页可以练发音、背单词和句子，还能用键盘闯关。"
       : `我在韩语词句记忆闯关拿了 ${score}/${total}，你也来挑战一下！`;
@@ -4423,6 +4460,7 @@ export default function Home() {
   }
 
   function switchGameMode(mode: GameMode, focusTab = false, intent: "play" | "resume" = "play") {
+    if (intent === "play" && mode !== gameMode) rememberPracticeTab(`game-tab-${mode}`);
     if (mode === gameMode) {
       setKeyboardZone("games");
       if (focusTab) window.requestAnimationFrame(() => document.getElementById(`game-tab-${mode}`)?.focus());
@@ -4486,7 +4524,7 @@ export default function Home() {
             <div className="audio-speed-toggle" role="group" aria-label="选择发音速度"><button type="button" aria-pressed={audioSpeed === 1} onClick={() => changeAudioSpeed(1)}>标准</button><button type="button" aria-pressed={audioSpeed === 0.82} onClick={() => changeAudioSpeed(0.82)}>慢放</button></div>
             <div className="builder-topline"><span className="mini-label">完整音节 · 可慢放</span><span className="sound-waves" aria-hidden="true">· )))</span></div>
             <h2 id="builder-title">拼一个，就听一个</h2>
-            <p>实际组合使用固定 AI 音频；现代口语中自然合流的组合会听起来相同。</p>
+            <p>听的是固定的 AI 音节示范。遇到已知的录音问题，这里会标出，不用猜。</p>
             <div className="builder-controls">
               <label><span>初声 · 辅音</span><select lang="ko" value={initial} onChange={(event) => changeBuilderInitial(event.target.value)} aria-label="选择辅音">{initialOrder.map((item) => <option key={item}>{item}</option>)}</select></label>
               <span className="plus" aria-hidden="true">+</span>
@@ -4495,8 +4533,11 @@ export default function Home() {
             <div className="syllable-stage">
               <div className="syllable-parts" lang="ko"><span>{initial}</span><span>{vowel}</span></div>
               <span className="becomes" aria-hidden="true">→</span>
-              <button className="syllable-result" type="button" onClick={() => void playSoundWithNotice(syllable)}><strong lang="ko">{syllable}</strong><span>{audioSpeed === 1 ? "标准原音" : "同音慢放"} ▶</span></button>
+              <button id="builder-play" className="syllable-result" type="button" disabled={isQuarantinedSyllable(syllable)} aria-describedby={isQuarantinedSyllable(syllable) ? "builder-duplicate" : undefined} onClick={() => void playBuilderSyllable()}><strong lang="ko">{syllable}</strong><span>{isQuarantinedSyllable(syllable) ? "暂停示范" : audioSpeed === 1 ? "播放示范 ▶" : "慢放示范 ▶"}</span></button>
             </div>
+            {isQuarantinedSyllable(syllable) && <div className="builder-warning"><p id="builder-duplicate" role="status">{DUPLICATE_SYLLABLE_NOTICE}</p>
+              <button type="button" onClick={() => { changeBuilderVowel("ㅏ"); window.requestAnimationFrame(() => document.getElementById("builder-play")?.focus({preventScroll:true})); }}>改练 <span lang="ko">{makeSyllable(initial,"ㅏ")}</span></button>
+            </div>}
             <div className="builder-note"><span aria-hidden="true">听</span><p><strong>听法</strong> 这里读的是完整音节，不是脱离元音的“裸辅音”。例如 ㄱ + ㅏ 读 가；辅音的正式名称请在 40 音表里听。</p></div>
           </div>
         </section>
@@ -4875,7 +4916,7 @@ export default function Home() {
         </div>
 
         <div data-scene="audio-guide" hidden={scene !== "audio-guide"} className="scene-wrap">
-        <AudioGuide key={audioFeedbackTarget.visit} reportId={audioFeedbackTarget.id} version={APP_VERSION} onPrepare={prepareReferenceActivity} onPlay={path => playAudioSourceToEnd(`${path}?v=${AUDIO_ASSET_VERSION}`, 1)} onStop={stopAudioPlayback} />
+        <AudioGuide key={audioFeedbackTarget.visit} reportId={audioFeedbackTarget.id} version={APP_VERSION} onPrepare={prepareReferenceActivity} onPlay={path => playAudioSourceToEnd(versionedAudioPath(path), 1)} onStop={stopAudioPlayback} />
         </div>
 
         <div data-scene="batchim-lesson" hidden={scene !== "batchim-lesson"} className="scene-wrap">

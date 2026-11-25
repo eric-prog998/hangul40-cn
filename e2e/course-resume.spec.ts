@@ -1,4 +1,42 @@
-import { expect, goToTraining, lastAudio, openApp, readListenQuestion, test } from "./support/app.ts";
+import { audioLog, expect, goToTraining, lastAudio, openApp, readListenQuestion, test } from "./support/app.ts";
+
+for (const [initial, selected, section, detail] of [
+  ["phrase-tab-sentence", "phrase-tab-word", "phrases", "word"],
+  ["game-tab-typing", "game-tab-shadow", "games", "shadow"],
+] as const) {
+  test(`changing the shared ${initial} link keeps the new tab on reload, back and forward`, async ({ page }) => {
+    await openApp(page, "/#top");
+    await page.evaluate(id => { location.hash = id; }, initial);
+    const first = page.locator("#" + initial);
+    const next = page.locator("#" + selected);
+    await expect(first).toBeFocused();
+    const historyBefore = await page.evaluate(() => history.length);
+    if (section === "phrases") await page.keyboard.press("ArrowLeft");
+    else await next.click();
+    await expect(next).toHaveAttribute("aria-selected", "true");
+    const hash = "#" + selected;
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe(hash);
+    expect(await page.evaluate(() => history.length)).toBe(historyBefore);
+    const sharedUrl = page.url();
+    await page.evaluate(() => Object.defineProperty(navigator, "share", { configurable: true,
+      value: async (data: ShareData) => { document.documentElement.dataset.sharedPractice = data.url; },
+    }) && undefined);
+    await page.getByRole("button", { name: "分享这个韩语学习网页" }).click();
+    await expect(page.locator("html")).toHaveAttribute("data-shared-practice", sharedUrl);
+
+    await page.reload();
+    await expect(next).toHaveAttribute("aria-selected", "true");
+    const bookmark = await page.evaluate(() => JSON.parse(localStorage.getItem("hangul-last-study-v48") || "{}"));
+    expect(bookmark).toMatchObject({ scene: section, detail });
+    await page.goBack();
+    await expect(page.locator("#top")).toBeVisible();
+    await page.goForward();
+    await expect(next).toBeFocused();
+    await expect(next).toHaveAttribute("aria-selected", "true");
+    expect(page.url()).toBe(sharedUrl);
+    expect(await audioLog(page)).toEqual([]);
+  });
+}
 
 test("a course bookmark still works within the page if persistent writes fail", async ({ page }) => {
   await page.addInitScript(() => {

@@ -56,15 +56,23 @@ test.describe("音源与反馈", () => {
     await expect(slow).toHaveAttribute("aria-pressed", "true");
     await visitView(page, "audio-guide");
 
+    // Cache revisions are per recording. Compare the same 가 file across the two
+    // routes, not a trimmed syllable's revision to an unrelated untouched word.
+    await page.locator("#audio-category").selectOption("syllable");
+    await page.locator("#audio-selection").selectOption("syllable-ac00");
+    await page.locator("#audio-guide-play").click();
+    await expect(page.locator("#audio-guide-status")).toContainText("播放结束");
+    expect(new URL((await audioLog(page)).at(-1)!).href).toBe(lesson.href);
+    expect(await lastAudioRate(page)).toBe(1);
     await page.locator("#audio-category").selectOption("phrase");
     await page.locator("#audio-search").fill("收据");
     await page.locator("#audio-guide-play").click();
     await expect(page.locator("#audio-guide-status")).toContainText("播放结束");
     const log = await audioLog(page);
-    expect(log).toHaveLength(start + 2);
+    expect(log).toHaveLength(start + 3);
     const checked = new URL(log.at(-1)!);
     expect(checked.pathname).toBe("/audio/phrases/word-receipt.mp3");
-    expect(checked.searchParams.get("v"), "the guide must not keep an older cached copy than the lessons").toBe(lesson.searchParams.get("v"));
+    expect(checked.searchParams.get("v"), "untouched phrase recordings keep their existing cache revision").toBe("21");
     expect(await lastAudioRate(page), "a slowed-down copy is not the recording being checked").toBe(1);
     // Checking a recording leaves the learner's own slow-playback choice for the lessons alone.
     await visitView(page, "builder");

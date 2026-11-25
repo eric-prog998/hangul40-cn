@@ -49,6 +49,7 @@ test("across calendar boundaries 40 jamo are practiced, audio files exist, and n
     assert.equal(new Set(deck.map(c => c.char + ":" + c.skill)).size,6);
     for (const c of deck) {
       assert.ok(isDayCard(c),JSON.stringify(c));
+      assert.ok(!["쇼", "쑈"].includes(c.example) && !["쇼", "쑈"].includes(c.alternative), "daily cards cannot teach or assess either disputed recording");
       assert.ok(existsSync(new URL("../public" + dayAudioPath(c), import.meta.url)),c.example);
       if (c.skill === "listen") {
         assert.ok(![..."ㅇㅐㅔㅒㅖㅚㅙㅞ"].includes(c.char));
@@ -72,4 +73,37 @@ test("restoring persisted evidence and cards accepts only bounded, internally co
   assert.equal(isDayCard({...c, example:"../bad"}),false);
   assert.equal(isDayCard({...c, skill:"listen", alternative:c.example}),false);
   assert.equal(isDayCard({...c, char:"ㅐ", example:"애", skill:"listen", alternative:"에"}),false);
+});
+
+test("a year of hearing cards is balanced per jamo and overall; saved choices never shuffle", () => {
+  for (const missSome of [false, true]) {
+    let history = emptyDayHistory();
+    const perLetter = new Map(), total = [0, 0];
+    for (let i = 0; i < 365; i++) {
+      const day = addLocalDays("2026-11-22", i);
+      const deck = makeDayCards(day,history,[]);
+      for (const card of deck) {
+        if (card.skill === "listen") {
+          const opts = dayHearingOptions(card);
+          assert.deepEqual(dayHearingOptions(JSON.parse(JSON.stringify(card))),opts);
+          const side = opts.indexOf(card.example);
+          assert.equal(side,card.correctSide);
+          const count = perLetter.get(card.char) ?? [0,0];
+          count[side]++; total[side]++; perLetter.set(card.char,count);
+          assert.ok(Math.abs(count[0] - count[1]) <= 1);
+        }
+        history = recordDayCard(history, card, day, missSome && i % 5 === 0 ? "again" : "good", false);
+      }
+      history = parseDayHistory(JSON.parse(JSON.stringify(history)));
+    }
+    assert.equal(perLetter.size,32);
+    assert.ok(Math.abs(total[0] - total[1]) <= 6, JSON.stringify(total));
+  }
+});
+
+test("an unfinished legacy listening question retains its original answer position", () => {
+  const card = { char:"ㅏ", skill:"listen", example:"아", alternative:"우" };
+  assert.ok(isDayCard(card));
+  assert.deepEqual(dayHearingOptions(card), ["아","우"]);
+  assert.ok(!isDayCard({...card,correctSide:2}));
 });

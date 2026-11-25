@@ -67,6 +67,38 @@ test("preload errors evict only the failed cache entry", async () => {
   assert.equal(instances.length, 3);
   instances.at(-1).complete(); assert.equal(await result, "ended");
 });
+test("a long practice session releases old previews but retains recently used clips", async () => {
+  const { player, instances } = setup();
+  player.preload("anchor.mp3");
+  const anchor = instances[0];
+  for (let i = 0; i < 100; i++) {
+    player.preload("clip-" + i);
+    player.preload("anchor.mp3");
+  }
+  assert.equal(instances.length, 101, "revisiting a warm clip must not load it again");
+  assert.equal(instances.filter(audio => !audio.released).length, 32);
+  assert.equal(anchor.released, false);
+  assert.equal(instances[1].released, true);
+  const play = player.play("clip-0");
+  assert.equal(instances.length, 103, "an evicted clip can be loaded and played again");
+  instances.at(-1).complete(); assert.equal(await play, "ended");
+});
+test("evicting a preview does not cut off its playing clone or discard a newer preview on failure", async () => {
+  const { player, instances } = setup();
+  const play = player.play("one.mp3");
+  const [original, playing] = instances;
+  for (let i = 0; i < 40; i++) player.preload("clip-" + i);
+  assert.equal(original.released, true);
+  assert.equal(playing.released, false);
+  player.preload("one.mp3");
+  const count = instances.length;
+  original.dispatchEvent(new Event("error"));
+  playing.rejectPlay(new Error("old play failed"));
+  assert.equal(await play, "failed");
+  const retry = player.play("one.mp3");
+  assert.equal(instances.length, count + 1, "the new preview should still be cached");
+  instances.at(-1).complete(); assert.equal(await retry, "ended");
+});
 test("timeout releases a stuck load and resolves as failure", async () => {
   const { player, instances } = setup(5);
   assert.equal(await player.play("one.mp3"), "failed");

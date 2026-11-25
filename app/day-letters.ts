@@ -2,8 +2,10 @@ import { INITIAL_ORDER, VOWEL_ORDER, makeSyllable, decomposeHangulSyllable, isFa
 import { addLocalDays } from "./review-logic.ts";
 
 export type DaySkill = "read" | "listen" | "keys";
-export type DayCard = { char: string; skill: DaySkill; example: string; alternative: string };
-type Entry = { day: string; due: string; stage: 0 | 1 | 2; example: string };
+type Side = 0 | 1;
+type Balance = -1 | 0 | 1;
+export type DayCard = { char: string; skill: DaySkill; example: string; alternative: string; correctSide?: Side };
+type Entry = { day: string; due: string; stage: 0 | 1 | 2; example: string; sideBalance?: Balance };
 export type DayHistory = Record<string, Entry>;
 export const DAY_JAMO = [..."ㅏㄱㅓㄴㅗㅁㅜㄷㅡㅅㅣㅇㄹㅂㅈㅎㅑㅕㅛㅠㅋㅌㅍㅊㅐㅔㄲㄸㅃㅆㅉㅒㅖㅘㅝㅚㅟㅙㅞㅢ"];
 const skills: DaySkill[] = ["read", "listen", "keys"];
@@ -45,7 +47,9 @@ export function isDayCard(value: unknown): value is DayCard {
   if (!value || typeof value !== "object") return false;
   const c = value as DayCard;
   if (!skills.includes(c.skill) || !examples.get(c.char)?.includes(c.example)) return false;
-  return c.skill === "listen" ? distractors(c.char,c.example).includes(c.alternative) : c.alternative === "";
+  return c.skill === "listen"
+    ? (c.correctSide === undefined || c.correctSide === 0 || c.correctSide === 1) && distractors(c.char,c.example).includes(c.alternative)
+    : c.alternative === "" && c.correctSide === undefined;
 }
 
 export function parseDayHistory(value: unknown): DayHistory {
@@ -55,21 +59,32 @@ export function parseDayHistory(value: unknown): DayHistory {
     const key = id(char,skill);
     const row: unknown = (value as Record<string,unknown>)[key];
     if (!row || typeof row !== "object" || (skill === "listen" && noBlindTarget.has(char))) continue;
-    const { day, due, stage, example } = row as Entry;
+    const { day, due, stage, example, sideBalance } = row as Entry;
     if (![0,1,2].includes(stage) || !examples.get(char)!.includes(example)) continue;
     try { if (due !== addLocalDays(day,intervals[stage])) continue; } catch { continue; }
     result[key] = {day, due, stage, example};
+    if (skill === "listen" && (sideBalance === -1 || sideBalance === 0 || sideBalance === 1)) result[key].sideBalance = sideBalance;
   }
   return result;
 }
 
-function makeCard(char: string, skill: DaySkill, history: DayHistory, day: string): DayCard {
+// Prefer the underrepresented side for this letter, then for the whole deck.
+// Only break ties using the day/letter; never shuffle again during a lesson.
+function chooseSide(char: string, day: string, imbalance: number): Side {
+  if (imbalance !== 0) return imbalance > 0 ? 1 : 0;
+  let seed = 2166136261;
+  for (const c of day + char) seed = Math.imul(seed ^ c.charCodeAt(0), 16777619);
+  return ((seed >>> 15) & 1) === 1 ? 1 : 0;
+}
+
+function makeCard(char: string, skill: DaySkill, history: DayHistory, day: string, totalBalance: number): DayCard {
   const old = history[id(char,skill)];
   const variants = examples.get(char)!;
   const example = variants[(variants.indexOf(old?.example ?? "") + 1) % variants.length];
   const options = skill === "listen" ? distractors(char,example) : [];
   const alternative = options.length ? options[(Number(day.slice(-2)) + DAY_JAMO.indexOf(char)) % options.length] : "";
-  return {char,skill,example,alternative};
+  return skill === "listen" ? {char,skill,example,alternative,correctSide:chooseSide(char,day,old?.sideBalance || totalBalance)}
+    : {char,skill,example,alternative};
 }
 
 /** A short lesson always reserves slots for new reading, even if a learner has
@@ -77,7 +92,12 @@ function makeCard(char: string, skill: DaySkill, history: DayHistory, day: strin
 export function makeDayCards(day: string, history: DayHistory, legacyMarked: readonly string[]): DayCard[] {
   const deck: DayCard[] = [];
   const last = (char: string, skill: DaySkill) => history[id(char,skill)];
-  const take = (char: string, skill: DaySkill) => deck.push(makeCard(char,skill,history,day));
+  let totalBalance = Object.values(history).reduce((n, row) => n + (row.sideBalance ?? 0), 0);
+  const take = (char: string, skill: DaySkill) => {
+    const card = makeCard(char,skill,history,day,totalBalance);
+    deck.push(card);
+    if (card.correctSide !== undefined) totalBalance += card.correctSide === 0 ? 1 : -1;
+  };
   const candidates = (skill: DaySkill) => DAY_JAMO.filter(char =>
     !(skill === "listen" && noBlindTarget.has(char)) && !deck.some(c => c.char === char && c.skill === skill));
   const due = (skill: DaySkill) => candidates(skill).filter(char => last(char,skill)?.due <= day)
@@ -114,13 +134,22 @@ export function recordDayCard(history: DayHistory, card: DayCard, day: string, r
   if (result === "good" && !replayed) {
     stage = prev && prev.stage > 0 && (prev.stage === 2 || (prev.day < day && (card.skill === "keys" || prev.example !== card.example || examples.get(card.char)!.length === 1))) ? 2 : 1;
   }
-  return {...history, [key]:{day,due:addLocalDays(day,intervals[stage]),stage,example:card.example}};
+  const entry: Entry = {day,due:addLocalDays(day,intervals[stage]),stage,example:card.example};
+  if (card.correctSide !== undefined) {
+    const delta = (prev?.sideBalance ?? 0) + (card.correctSide === 0 ? 1 : -1);
+    entry.sideBalance = prev?.day === day && prev.sideBalance !== undefined
+      ? prev.sideBalance : delta > 0 ? 1 : delta < 0 ? -1 : 0;
+  }
+  return {...history, [key]:entry};
 }
 
 export function dayAudioPath(card: DayCard) {
   return "/audio/hangul-natural/s-" + card.example.codePointAt(0)!.toString(16) + ".mp3";
 }
 export function dayHearingOptions(card: DayCard) {
-  const place = (VOWEL_ORDER.indexOf(card.char) + INITIAL_ORDER.indexOf(card.char) + card.example.codePointAt(0)!) % 3;
-  return place === 0 ? [card.example,card.alternative] : [card.alternative,card.example];
+  // Do not move the answer of an in-progress v51 card during the upgrade.
+  const first = card.correctSide === undefined
+    ? (VOWEL_ORDER.indexOf(card.char) + INITIAL_ORDER.indexOf(card.char) + card.example.codePointAt(0)!) % 3 === 0
+    : card.correctSide === 0;
+  return first ? [card.example,card.alternative] : [card.alternative,card.example];
 }

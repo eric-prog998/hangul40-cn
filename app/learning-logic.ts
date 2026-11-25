@@ -24,7 +24,12 @@ const recordedBlendEquivalenceGroups = [
 
 const standardBlendEquivalenceGroups = [["쩌", "쪄"], ["처", "쳐"]].map((group) => new Set(group));
 
-const disfavoredBlendTargets = new Set(["쑈", "져", "쪄", "쳐", "폐"]);
+// The files are identical, not evidence that ㅅ and ㅆ are interchangeable.
+// Neither spelling is a safe model until replacement audio is independently reviewed.
+const disputedSyllables = new Set(["쇼", "쑈"]);
+export const DUPLICATE_SYLLABLE_NOTICE = "쇼 和 쑈 的两份录音完全相同，尚不能确认各自的示范读音；不用于跟读或辨音评分。这不代表 ㅅ 和 ㅆ 同音。可改用 사／싸 对照。";
+export function isQuarantinedSyllable(syllable: string) { return disputedSyllables.has(syllable); }
+const disfavoredBlendTargets = new Set(["져", "쪄", "쳐", "폐"]);
 
 export function makeSyllable(initial: string, vowel: string) {
   const initialIndex = INITIAL_ORDER.indexOf(initial);
@@ -104,7 +109,8 @@ export function areBlendPartsEquivalent(leftInitial: string, leftVowel: string, 
 
 export function isFairBlendTarget(initial: string, vowel: string) {
   if (initial !== "ㅇ" && vowel === "ㅢ") return false;
-  return !disfavoredBlendTargets.has(makeSyllable(initial, vowel));
+  const syllable = makeSyllable(initial, vowel);
+  return !!syllable && !isQuarantinedSyllable(syllable) && !disfavoredBlendTargets.has(syllable);
 }
 
 export function fairBlendInitialCandidates(targetInitial: string, targetVowel: string, candidates: string[]) {

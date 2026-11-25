@@ -4,7 +4,7 @@ import DayLetterCard from "./day-letter-card";
 import { daySkillTotals } from "./day-letters";
 import DayDialogue from "./day-dialogue";
 import { SCENE_LINES, SCENE_TITLES } from "./day-dialogue-data";
-import { beginDay, currentStep, emptyBook, gradeDialogue, gradeLetter, MY_DAY_KEY, readBook, type Notebook } from "./my-day-state";
+import { beginDay, currentStep, dayAttemptKey, emptyBook, gradeDialogue, gradeLetter, MY_DAY_KEY, noteDayAttempt, readBook, type Notebook } from "./my-day-state";
 import "./my-day.css";
 
 export type DayBadge = "new" | "started" | "finished";
@@ -41,7 +41,36 @@ function createDayStore() {
   function sync(e: StorageEvent) {
     if ((e.key === MY_DAY_KEY || e.key === null) && e.storageArea === localStorage) refresh();
   }
+  function save(previous: Notebook, next: Notebook): boolean {
+    if (snapshot.book !== previous || previous === next) return false;
+    if (!writable) { publish(next, snapshot.message); return true; }
+    try {
+      if (localStorage.getItem(MY_DAY_KEY) !== stored) { refresh(); return false; }
+      const raw = JSON.stringify(next);
+      localStorage.setItem(MY_DAY_KEY, raw); stored = raw;
+    } catch {
+      writable = false;
+      publish(next, "浏览器没能保存日课。你仍能继续，暂时不要刷新或关闭页面。");
+      return true;
+    }
+    publish(next, "");
+    return true;
+  }
   return {
+    save,
+    changeCard(key: string, update: (previous: Notebook) => Notebook) {
+      // Catch storage updates that have not yet delivered their browser event.
+      // Never apply a stale card action to a later card.
+      for (let i = 0; i < 2; i++) {
+        if (writable) refresh();
+        const previous = snapshot.book;
+        if (!previous?.session || dayAttemptKey(previous.session) !== key) return false;
+        const next = update(previous);
+        if (next === previous) return false;
+        if (save(previous,next)) return true;
+      }
+      return false;
+    },
     getSnapshot: () => snapshot,
     subscribe(notify: () => void) {
       listeners.add(notify);
@@ -52,20 +81,6 @@ function createDayStore() {
         if (!listeners.size) window.removeEventListener("storage", sync);
       };
     },
-    save(previous: Notebook, next: Notebook) {
-      if (snapshot.book !== previous || previous === next) return;
-      if (!writable) { publish(next, snapshot.message); return; }
-      try {
-        if (localStorage.getItem(MY_DAY_KEY) !== stored) { refresh(); return; }
-        const raw = JSON.stringify(next);
-        localStorage.setItem(MY_DAY_KEY, raw); stored = raw;
-      } catch {
-        writable = false;
-        publish(next, "浏览器没能保存日课。你仍能继续，暂时不要刷新或关闭页面。");
-        return;
-      }
-      publish(next, "");
-    },
   };
 }
 
@@ -75,15 +90,22 @@ export default function MyDay({visible, active, day, legacy, onBadge, onHome, on
   const finish = useRef<HTMLHeadingElement>(null);
   useEffect(() => { if (active) return onStop; }, [active, onStop]);
   useEffect(() => {
-    if (visible && active && book && day && book.session?.day !== day) store.save(book, beginDay(book, day, legacy));
+    if (visible && active && book && day && (!book.session || day > book.session.day)) store.save(book, beginDay(book, day, legacy));
   }, [visible, active, day, legacy, book, store]);
   const s = book?.session;
   const step = s ? currentStep(s) : null;
   useEffect(() => { onBadge(s && s.day === day ? (s.done ? "finished" : "started") : "new"); }, [s, day, onBadge]);
   useEffect(() => { if (visible && active && step === "finish") finish.current?.focus({preventScroll:true}); }, [visible, active, step]);
   if (!visible) return null;
+  if (s && day && day < s.day) return <div className="my-day-layout" data-testid="day-clock-guard">
+    <div className="day-surface day-finish"><h1>日课进度已保留</h1>
+      <p role="status">Mac 当前日期为 {day}，早于已保存的日课日期 {s.day}。为避免覆盖进度，这里暂不开始新日课。</p>
+      <p>上次已完成 {s.marks.length} / {s.cards.length} 张字母卡。日期恢复后，重新打开日课即可从原位置继续。现在也可以去自由练习。</p>
+      <div className="day-free"><button type="button" onClick={onHome}>回到首页</button><a href="#learn">去 40 音自由练习</a></div>
+    </div></div>;
   if (!book || !s || s.day !== day || !step) return <p role="status">正在打开今天的日课…</p>;
   const index = s.marks.length;
+  const cardKey = dayAttemptKey(s);
   const phase = step === "letters" ? Number(index > 0) : step === "finish" ? 3 : 2;
   const sceneIndex = step === "extra" ? s.extra! : step === "recall" ? s.recall! : s.scene;
   const reads = s.cards.filter((card, i) => card.skill === "read" && s.marks[i]?.result === "good" && !s.marks[i].replayed).map(c => c.char);
@@ -95,8 +117,10 @@ export default function MyDay({visible, active, day, legacy, onBadge, onHome, on
       <ol className="day-steps" aria-label="日课步骤">{phases.map((name, i) => <li key={name} data-past={i < phase} aria-current={i === phase ? "step" : undefined}><small>0{i + 1}</small> {name}</li>)}</ol>
       {message && <p role="status" className="day-notice">{message}</p>}
       <div className="day-surface">
-        <div className="day-eyebrow">{step === "letters" ? (index === 0 ? "01 · 热身与温故" : "02 · 40 音分项练习") : step === "recall" ? "03 · 上次的场景 / 先用中文提示回忆" : step === "finish" ? "04 · 今日学习小结" : "03 · 生活接话"}<span>{step === "letters" ? (index+1)+" / "+s.cards.length : step === "finish" ? "已完成" : SCENE_TITLES[sceneIndex]}</span></div>
-        {step === "letters" ? <DayLetterCard key={s.day+":"+index} card={s.cards[index]} active={active} onPlay={onPlay} onStop={onStop} onGrade={(result,replayed) => saveIfCurrent(() => gradeLetter(book,result,replayed))}/>
+        <div className="day-eyebrow">{step === "letters" ? (index === 0 ? "01 · 热身与温故" : "02 · 40 音分项练习") : step === "recall" ? "03 · 已学场景 / 先用中文提示回忆" : step === "finish" ? "04 · 今日学习小结" : "03 · 生活接话"}<span>{step === "letters" ? (index+1)+" / "+s.cards.length : step === "finish" ? "已完成" : SCENE_TITLES[sceneIndex]}</span></div>
+        {step === "letters" && cardKey ? <DayLetterCard key={cardKey} card={s.cards[index]} attempt={s.attempt} active={active} onPlay={onPlay} onStop={onStop}
+          onEvidence={action => { if (active) store.changeCard(cardKey, b => noteDayAttempt(b,cardKey,action)); }}
+          onGrade={result => active && store.changeCard(cardKey,b => b.session?.attempt?.answer ? gradeLetter(b,result,false) : b)}/>
         : step !== "finish" ? <DayDialogue key={s.day+":"+step+":"+sceneIndex} sceneIndex={sceneIndex} recall={step === "recall"} active={active} onPlay={onPlay} onStop={onStop} onDone={result => saveIfCurrent(() => gradeDialogue(book,result))}/>
         : <div className="day-finish" data-testid="day-finish"><h2 tabIndex={-1} ref={finish}>今天练到了这里。</h2>
           <p>看字能读 <strong lang="ko">{[...new Set(reads)].join(" · ") || "还在熟悉"}</strong><small>只列本次自评读出、没有重听的字母；隔日还会换音节再练。</small></p>

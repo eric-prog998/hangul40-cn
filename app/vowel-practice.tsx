@@ -3,7 +3,7 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
 import LocalVoiceRecorder, { type LocalVoiceRecorderHandle } from "./local-voice-recorder";
 import VowelListeningChallenge, { type VowelChallengeHandle } from "./vowel-listening-challenge";
-import { keyboardShortcutKey } from "./keyboard-logic";
+import { imeOwnsPanelKey, keyboardShortcutKey } from "./keyboard-logic";
 import { VOWEL_CONTRASTS, VOWEL_GUIDE_SOURCE, type VowelPracticeMode } from "./pronunciation-data";
 import type { VowelHistoryModel } from "./use-vowel-history";
 import type { AutoAdvanceDelay } from "./learning-settings";
@@ -84,7 +84,7 @@ const VowelPractice = forwardRef<VowelPracticeHandle, Props>(function VowelPract
 
   function handleKeyboard(event: KeyboardEvent<HTMLElement>) {
     if (view !== "compare") return;
-    if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey || event.repeat) return;
+    if (event.defaultPrevented || imeOwnsPanelKey(event.nativeEvent) || event.metaKey || event.ctrlKey || event.altKey || event.repeat) return;
     const target = event.target as HTMLElement;
     if (target.closest("input, textarea, select, audio, [contenteditable=true]")) return;
     if ((event.key === "Enter" || event.key === " ") && target.closest("button, a[href], summary")) return;

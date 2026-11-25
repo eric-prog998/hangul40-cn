@@ -49,3 +49,17 @@ test("review checklist starts entirely pending and is tied to exact audio bytes"
   assert.equal(checklist.items.length, 492);
   assert.ok(checklist.items.every(item => item.reviewStatus === "pending" && item.reviewedAt === null && item.reviewer === "" && /^[0-9a-f]{64}$/.test(item.sha256)));
 });
+test("both disputed files stay available for audit with their warning and exact fingerprints", () => {
+  const restricted = catalog.filter(row => row.usageRestriction);
+  assert.deepEqual(restricted.map(x => x.label), ["쇼", "쑈"]);
+  assert.equal(restricted[0].fingerprint.sha256, restricted[1].fingerprint.sha256);
+  for (const row of restricted) {
+    assert.match(row.usageRestriction, /两份录音完全相同/);
+    assert.match(row.explanation, /不用于/);
+    assert.doesNotMatch(row.explanation, /适合跟读/);
+    assert.ok(audioFeedback(row,"其他","","51.3").includes(row.usageRestriction));
+    const item = audioReviewChecklist([row],"51.3").items[0];
+    assert.equal(item.usageRestriction, row.usageRestriction);
+    assert.equal(item.reviewStatus,"pending");
+  }
+});

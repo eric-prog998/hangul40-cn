@@ -3,7 +3,7 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
 import { BATCHIM_GROUPS, BATCHIM_RULE_SOURCE, BATCHIM_WORDS, batchimExampleIndex, isBatchimAnswerCorrect } from "./batchim-data";
 import { decomposeHangulSyllable } from "./learning-logic";
-import { keyboardShortcutKey, koreanKeyInput, koreanKeyLabel, keyboardSectionIndex } from "./keyboard-logic";
+import { imeOwnsPanelKey, keyboardShortcutKey, koreanKeyInput, koreanKeyLabel, keyboardSectionIndex } from "./keyboard-logic";
 import "./batchim-lesson.css";
 import type { AutoAdvanceDelay } from "./learning-settings";
 
@@ -74,7 +74,8 @@ const BatchimLesson = forwardRef<BatchimLessonHandle, Props>(function BatchimLes
         setNotice("完整词播放完毕，稍后自动下一题；Esc 暂停，Enter 立即继续。");
         scheduleAutoAdvance();
       } else {
-        if (result === "interrupted") autoAdvancePending.current = false;
+        // A retry replays the word; it must not revive a failed or paused advance.
+        autoAdvancePending.current = false;
         setNotice(result === "failed"
           ? "音频未能播放，自动下一题已暂停；按空格重试或 Enter 继续。"
           : `${result === "ended" ? "完整词播放完毕" : "播放已停止"}。自动下一题已暂停；按 Enter 继续。`);
@@ -100,7 +101,7 @@ const BatchimLesson = forwardRef<BatchimLessonHandle, Props>(function BatchimLes
     focusPanel();
   }
   function handleKey(event: KeyboardEvent<HTMLElement>) {
-    if (event.defaultPrevented || event.repeat || event.ctrlKey || event.altKey || event.metaKey) return;
+    if (event.defaultPrevented || imeOwnsPanelKey(event.nativeEvent) || event.repeat || event.ctrlKey || event.altKey || event.metaKey) return;
     const target = event.target as HTMLElement;
     if (target.closest("input, textarea, select, [contenteditable=true]")) return;
     if (keyboardSectionIndex(event.code, event.shiftKey) !== null) return;
