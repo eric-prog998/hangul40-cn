@@ -1,4 +1,4 @@
-import { localDateKey, parseReviewRecord, rateReview, readReviewRecords, reviewStorageKey, type ReviewRating, type ReviewRecords } from "./review-logic.ts";
+import { localDateKey, parseReviewRecord, rateReview, readReviewRecords, reviewStorageKey, validatedReviewRecord, type ReviewRating, type ReviewRecords } from "./review-logic.ts";
 
 export type ReviewStorage = { getItem: (key: string) => string | null; setItem: (key: string, value: string) => void };
 export type ReviewSnapshot = { records: ReviewRecords; today: string; storageMessage: string };
@@ -45,7 +45,7 @@ export class DailyReviewRepository {
   restore(incoming: ReviewRecords) {
     let failed = 0;
     for (const [id, candidate] of Object.entries(incoming)) {
-      if (!this.ids.has(id) || !parseReviewRecord(JSON.stringify(candidate), id)) { failed++; continue; }
+      if (!this.ids.has(id) || !validatedReviewRecord(candidate, id)) { failed++; continue; }
       try {
         const storage = this.getStorage();
         const stored = parseReviewRecord(storage.getItem(reviewStorageKey(id)), id);

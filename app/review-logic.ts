@@ -54,7 +54,7 @@ function validTimestamp(value: unknown): value is number {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 && value <= MAX_TIMESTAMP;
 }
 
-function validatedRecord(value: unknown, id: string): ReviewRecord | null {
+export function validatedReviewRecord(value: unknown, id: string): ReviewRecord | null {
   if (!validId(id) || !value || typeof value !== "object" || Array.isArray(value)) return null;
   const record = value as Partial<ReviewRecord>;
   if (record.id !== id || !Number.isInteger(record.stage) || record.stage! < 0 || record.stage! > 3) return null;
@@ -71,7 +71,7 @@ function validatedRecord(value: unknown, id: string): ReviewRecord | null {
 /** Future-but-valid dates survive a device clock correction; queue selection excludes them. */
 export function parseReviewRecord(raw: string | null, id: string): ReviewRecord | null {
   if (typeof raw !== "string" || raw.length > MAX_RECORD_LENGTH) return null;
-  try { return validatedRecord(JSON.parse(raw), id); } catch { return null; }
+  try { return validatedReviewRecord(JSON.parse(raw), id); } catch { return null; }
 }
 
 export function reviewStorageKey(id: string): string {
@@ -82,7 +82,7 @@ export function reviewStorageKey(id: string): string {
 /** A simple self-rating schedule, not a pronunciation score or a claim of mastery. */
 export function rateReview(previous: ReviewRecord | undefined, id: string, rating: ReviewRating, today: string, now: number): ReviewRecord {
   if (!validId(id) || !calendarDate(today) || !validTimestamp(now) || (rating !== "again" && rating !== "remembered")) throw new RangeError("Invalid review rating input");
-  const validPrevious = validatedRecord(previous, id);
+  const validPrevious = validatedReviewRecord(previous, id);
   if (validPrevious && validPrevious.lastReviewed > today) throw new RangeError("Device date precedes the previous review");
   const sameDay = validPrevious?.lastReviewed === today;
   const stage: ReviewRecord["stage"] = rating === "again" ? 0
@@ -103,7 +103,7 @@ export function createDailyReviewQueue(ids: string[], records: ReviewRecords, to
     if (!validId(id) || seen.has(id)) return;
     seen.add(id);
     const raw = Object.prototype.hasOwnProperty.call(records, id) ? records[id] : undefined;
-    const record = validatedRecord(raw, id);
+    const record = validatedReviewRecord(raw, id);
     if (!record) unseen.push(id);
     else if (record.lastReviewed < today && record.due <= today) due.push({ id, due: record.due, index });
   });

@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light;
   --ink: #173f36;
   --ink-soft: #48655e;
   --paper: #f4f2eb;
@@ -82,7 +83,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .vowel-challenge-header > span { background: var(--purple); border-radius: 20px; font-size: 12px; font-weight: 700; padding: 8px 12px; }
 .vowel-challenge-speed { display: flex; gap: 6px; margin: 14px 0; }
 .vowel-challenge-intro p, .vowel-challenge-results p { font-size: 14px; line-height: 1.9; color: var(--ink-soft); }
-.vowel-challenge-intro ol { margin: 22px 0; padding-left: 24px; line-height: 2.2; font-size: 14px; }
+.vowel-challenge-intro ol { list-style: decimal; margin: 22px 0; padding-left: 24px; line-height: 2.2; font-size: 14px; }
 .vowel-listening .vowel-challenge-primary { background: var(--ink); color: white; }
 .vowel-listening progress { display: block; width: 100%; height: 7px; margin: 20px 0; border: 0; border-radius: 8px; overflow: hidden; background: var(--paper); accent-color: var(--ink); }
 .vowel-listening progress::-webkit-progress-bar { background: var(--paper); }
@@ -134,7 +135,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .backup-file-label input { max-width: 100%; font-size: 12px; }
 .backup-file-label input::file-selector-button { min-height: 38px; border: 1px solid var(--line); border-radius: 7px; background: var(--paper); color: var(--ink); cursor: pointer; }
 .backup-preview { margin-top: 20px; background: #f0f4df; }
-.backup-preview ul { padding-left: 22px; }
+.backup-preview ul { list-style: disc; padding-left: 22px; }
 .backup-status { padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px; min-height: 54px; }
 @media (max-width: 760px) { .learning-tools-grid { grid-template-columns: 1fr; } .learning-tools article, .backup-preview { padding: 18px; } }
 
@@ -354,7 +355,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .onset-lab-controls label { display: grid; gap: 6px; }
 .onset-lab-controls label > span { color: var(--ink-soft); font-size: 8px; font-weight: 780; }
 .onset-lab-controls > span { padding-bottom: 15px; color: var(--coral); font-weight: 900; }
-.onset-lab-controls select { width: 100%; height: 48px; padding: 0 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); font-size: 20px; font-weight: 820; }
+.onset-lab-controls select { width: 100%; height: 48px; padding: 0 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); font-size: 20px; font-weight: 820; }
 .onset-lab-demo { margin-top: 12px; display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; }
 .onset-lab-demo button { min-height: 120px; padding: 13px; display: grid; place-items: center; align-content: center; border: 1px solid var(--line); border-radius: 16px 16px 16px 6px; background: var(--blue); cursor: pointer; }
 .onset-lab-demo button:last-child { background: var(--lime); }
@@ -467,7 +468,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .game-tabs > button { min-width: 0; min-height: 58px; padding: 13px 5px; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid transparent; border-radius: 12px; background: transparent; cursor: pointer; }
 .game-tabs > button[aria-selected="true"] { border-color: var(--line); background: white; box-shadow: 0 5px 16px rgba(23,63,54,.07); }
 .game-tabs > button > span { width: 30px; height: 30px; flex: none; display: grid; place-items: center; border-radius: 9px; background: var(--blue); font-size: 15px; font-weight: 850; }
-.game-tabs > button:nth-child(2) > span { background: var(--coral); }
+.game-tabs > button:nth-child(2) > span { background: var(--coral); color: white; }
 .game-tabs > button:nth-child(3) > span { background: var(--lime); }
 .game-tabs > button:nth-child(4) > span { background: var(--purple); }
 .game-tabs > button:nth-child(5) > span { background: var(--blue); }
@@ -539,7 +540,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .speed-game.flash-wrong { background: #ffe1db; }
 .speed-timer span { background: var(--purple); }
 .speed-start { min-height: 455px; display: grid; place-items: center; align-content: center; text-align: center; }
-.speed-start > span { width: 78px; height: 78px; display: grid; place-items: center; border-radius: 26px 26px 26px 8px; background: var(--coral); font-size: 35px; box-shadow: 6px 6px 0 var(--purple); }
+.speed-start > span { width: 78px; height: 78px; display: grid; place-items: center; border-radius: 26px 26px 26px 8px; background: var(--coral); color: white; font-size: 35px; box-shadow: 6px 6px 0 var(--purple); }
 .speed-start h3 { margin: 24px 0 8px; font-size: 28px; }
 .speed-start p { max-width: 410px; margin: 0 0 22px; color: var(--ink-soft); font-size: 10px; line-height: 1.65; }
 .speed-target { min-height: 270px; display: grid; place-items: center; align-content: center; }
@@ -650,7 +651,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .blend-choice-row button.wrong { border-color: var(--coral); background: #ffd1c8; }
 
 .shadow-start { min-height: 470px; display: grid; place-items: center; align-content: center; text-align: center; }
-.shadow-start > span { width: 76px; height: 76px; display: grid; place-items: center; border-radius: 25px 25px 25px 8px; background: var(--coral); font-size: 29px; font-weight: 850; box-shadow: 6px 6px 0 var(--blue); }
+.shadow-start > span { width: 76px; height: 76px; display: grid; place-items: center; border-radius: 25px 25px 25px 8px; background: var(--coral); color: white; font-size: 29px; font-weight: 850; box-shadow: 6px 6px 0 var(--blue); }
 .shadow-start h3 { margin: 24px 0 8px; font-size: 27px; }
 .shadow-start > p { max-width: 440px; margin: 0; color: var(--ink-soft); font-size: 10px; line-height: 1.65; }
 .shadow-set-toggle { margin-top: 20px; padding: 4px; display: grid; grid-template-columns: repeat(3,1fr); gap: 3px; border: 1px solid var(--line); border-radius: 11px; background: var(--paper); }
@@ -756,7 +757,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .phrase-empty button { padding: 8px 11px; border: 0; border-radius: 8px; background: var(--ink); color: white; cursor: pointer; font-size: 8px; font-weight: 760; }
 .phrase-meaning button { min-height: 44px; padding: 9px 6px; border: 1px solid var(--line); border-radius: 7px; background: transparent; cursor: pointer; font-size: 10px; font-weight: 740; }
 .phrase-meaning button[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: white; }
-.phrase-quiz { min-height: 570px; position: sticky; top: 18px; overflow: hidden; border: 1px solid var(--line); border-radius: 8px 22px 22px 8px; background: var(--cream); box-shadow: var(--shadow); }
+.phrase-quiz { min-height: 570px; position: sticky; top: 106px; overflow: hidden; border: 1px solid var(--line); border-radius: 8px 22px 22px 8px; background: var(--cream); box-shadow: var(--shadow); }
 .phrase-quiz-top { min-height: 48px; padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 1px solid var(--line); background: #ece9df; }
 .phrase-quiz-top > span { font-size: 10px; font-weight: 820; }
 .phrase-quiz-top > small { color: var(--ink-soft); text-align: right; font-size: 10px; line-height: 1.6; }

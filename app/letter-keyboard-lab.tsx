@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { memo, useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { COMPOUND_VOWELS, imeOwnsPanelKey, koreanKeyInput, koreanKeyLabel } from "./keyboard-logic";
 import KoreanKeyboard from "./korean-keyboard";
 import "./letter-keyboard-lab.css";
@@ -16,7 +16,7 @@ const COMBINE_MS = 1500;
 const prefixes = new Set(Object.keys(COMPOUND_VOWELS).map((pair) => pair[0]));
 type Pending = { char: string; until: number; timer: number; prefixAudio: Promise<boolean> | null };
 
-export default function LetterKeyboardLab({ onPlay, onPrepare }: Props) {
+export default memo(function LetterKeyboardLab({ onPlay, onPrepare }: Props) {
   const [selected, setSelected] = useState("ㄱ");
   const [activeKey, setActiveKey] = useState("");
   const [shifted, setShifted] = useState(false);
@@ -122,6 +122,6 @@ export default function LetterKeyboardLab({ onPlay, onPrepare }: Props) {
         <p>{split ? "拆开听已开启：先播首音，再播合成音（H → K：오 → 와）。" : "合成后听（默认）：H → K 只播 와。ㅗ、ㅜ、ㅡ 会等第二键 1.5 秒；按 Enter 或等到时间，就读单音。如果两键不能组合，改读新键。其余字母立即读。"} 紧音用 <kbd>Shift</kbd>；⌫ 清除组合，Esc 停止。</p>
       </div>
     </div>
-    <KoreanKeyboard activeKey={activeKey} shifted={shifted} onKey={choose} onShift={() => setShifted((value) => !value)} onClear={clear} />
+    <KoreanKeyboard activeKey={activeKey} shifted={shifted} onKey={(char, physical) => { setShifted(false); choose(char, physical); }} onShift={() => setShifted((value) => !value)} onClear={() => { setShifted(false); clear(); }} />
   </div>;
-}
+});

@@ -2,6 +2,7 @@ import { audioLog, expect, openApp, test } from "./support/app";
 import { readFileSync } from "node:fs";
 
 const trimRevisions = JSON.parse(readFileSync(new URL("../data/core-tail-trims.json", import.meta.url), "utf8")) as Record<string, string>;
+const onsetRevisions = JSON.parse(readFileSync(new URL("../data/consonant-onset-revisions.json", import.meta.url), "utf8")) as Record<string, string>;
 
 const syllablePath = (text: string) => "/audio/hangul-natural/s-" + text.codePointAt(0)!.toString(16) + ".mp3";
 const sharedRecording = /同一|相同|同一份|同一段|重复录音|共用/;
@@ -82,4 +83,22 @@ test("the source guide discloses the shared recording on both entries without su
     await expect(warning).toContainText("쑈");
     expect(await audioLog(page)).toEqual([]);
   }
+});
+
+test("playing revised ㅆ human onset requests its cache-busted revision and retrieves exact non-palatalized WAV bytes", async ({ page }) => {
+  await openApp(page, "/#learn");
+  const card = page.locator(".letter-card").filter({ has: page.locator("#letter-master-ㅆ") });
+  await card.locator("summary").click();
+  await card.locator(".onset-audio").click();
+  const onsetPath = "/audio/consonant-human-onset/ssang-siot.wav";
+  const expected = onsetRevisions[onsetPath];
+  await expect.poll(async () => (await audioLog(page)).map(src => new URL(src).pathname + new URL(src).search))
+    .toEqual([`${onsetPath}?v=${expected.slice(0, 16)}`]);
+  const digest = await page.evaluate(async () => {
+    const response = await fetch(window.__audioLog[0]);
+    if (!response.ok) throw Error("Revised onset HTTP " + response.status);
+    const buffer = await crypto.subtle.digest("SHA-256", await response.arrayBuffer());
+    return Array.from(new Uint8Array(buffer), x => x.toString(16).padStart(2, "0")).join("");
+  });
+  expect(digest).toBe(expected);
 });

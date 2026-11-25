@@ -63,3 +63,21 @@ test("both disputed files stay available for audit with their warning and exact 
     assert.equal(item.reviewStatus,"pending");
   }
 });
+
+test("all 18 human consonant onsets avoid rounded/palatalizing source vowels and carry exact cache revisions", async () => {
+  const clips = await json("../data/consonant-human-clips.json");
+  const revisions = await json("../data/consonant-onset-revisions.json");
+  const vowels = ["ㅏ","ㅐ","ㅑ","ㅒ","ㅓ","ㅔ","ㅕ","ㅖ","ㅗ","ㅘ","ㅙ","ㅚ","ㅛ","ㅜ","ㅝ","ㅞ","ㅟ","ㅠ","ㅡ","ㅢ","ㅣ"];
+  assert.equal(clips.length, 18);
+  for (const clip of clips) {
+    const firstCode = clip.sourceWord.codePointAt(0) - 0xac00;
+    const firstVowel = vowels[Math.floor((firstCode % 588) / 28)];
+    assert.ok(firstVowel === "ㅏ" || firstVowel === "ㅡ", `${clip.char} (${clip.sourceWord}) uses distorting vowel ${firstVowel}`);
+    const onsetPath = `/audio/consonant-human-onset/${clip.id}.wav`;
+    assert.equal(revisions[onsetPath], fingerprints[onsetPath].sha256, onsetPath);
+  }
+  for (const clarityId of ["rieul", "ssang-bieup", "ssang-digeut", "ssang-giyeok"]) {
+    const clarityPath = `/audio/consonant-human-clarity/${clarityId}.wav`;
+    assert.equal(revisions[clarityPath], fingerprints[clarityPath].sha256, clarityPath);
+  }
+});

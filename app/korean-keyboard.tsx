@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { KOREAN_KEY_MAP, KOREAN_KEY_ROWS, KOREAN_SHIFT_MAP } from "./keyboard-logic";
 
 type Props = {
@@ -10,10 +11,12 @@ type Props = {
   onClear: () => void;
 };
 
-export default function KoreanKeyboard({ activeKey, shifted, onKey, onShift, onClear }: Props) {
+export default memo(function KoreanKeyboard({ activeKey, shifted, onKey, onShift, onClear }: Props) {
   return <details className="hangul-keyboard">
     <summary>韩文双拼键位表 <span>두벌식 · 按键同步亮起</span></summary>
-    <div className="hangul-keyboard-scroll" role="group" aria-label="韩文双拼键盘">
+    <div className="hangul-keyboard-scroll" role="group" aria-label="韩文双拼键盘" onMouseDown={(event) => {
+      if ((event.target as HTMLElement).closest("button")) event.preventDefault();
+    }}>
       {KOREAN_KEY_ROWS.map((row, index) => <div className="hangul-key-row" key={index}>
         {row.map((physical) => {
           const char = shifted && KOREAN_SHIFT_MAP[physical] || KOREAN_KEY_MAP[physical];
@@ -26,4 +29,4 @@ export default function KoreanKeyboard({ activeKey, shifted, onKey, onShift, onC
     </div>
     <p>紧音：按住 Shift 再按对应键。复合元音连续按两键，例如 H → K = ㅘ。Caps Lock 不改变韩文字母。</p>
   </details>;
-}
+});

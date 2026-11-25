@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { memo, useState } from "react";
 import "./letter-audio-actions.css";
 
 type Props = {
@@ -13,7 +13,7 @@ type Props = {
 };
 
 /** Only the control explicitly selected plays. A report always names the last clip on this card. */
-export default function LetterAudioActions({ char, sample, consonant, onName, onSample, onOnset, onReport }: Props) {
+export default memo(function LetterAudioActions({ char, sample, consonant, onName, onSample, onOnset, onReport }: Props) {
   const [lastClip, setLastClip] = useState<{ id: string; label: string } | null>(null);
   const sampleId = `syllable-${sample.codePointAt(0)!.toString(16)}`;
   function play(id: string, label: string, action: () => void) {
@@ -33,9 +33,9 @@ export default function LetterAudioActions({ char, sample, consonant, onName, on
       : <details className="letter-onset-detail"><summary>单听起音</summary>
         <button type="button" className="onset-audio" onClick={() => play(`onset-${consonant.id}`, `${char} 起音`, onOnset)}>
           <span>听起音 · 真人片段</span><strong lang="ko">{char}<i aria-hidden="true">▶</i></strong>
-        </button><small>从原词截取，只播一次；跟读请用上面的完整音节。{["ㄲ","ㄸ","ㅃ","ㄹ"].includes(char) && "这段起音特别短；听不清时不必反复模仿片段。"}
+        </button><small>统一从非圆唇词首截取真人起音，只播一次；跟读与听松／紧／送气音调请配合上方完整音节。{["ㄲ","ㄸ","ㅃ","ㄹ"].includes(char) && "这段起音特别短；听不清时不必反复模仿片段。"}
         </small>
       </details>)}
     {lastClip && <a className="letter-audio-feedback" href="#audio-guide" onClick={() => onReport(lastClip.id)}>反馈刚听的{lastClip.label}</a>}
   </div>;
-}
+});

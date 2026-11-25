@@ -336,3 +336,17 @@ test("an unrecognised notebook can be used in memory without replacing it or the
   await expect(page.locator("#learn")).toBeVisible();
 });
 
+test("clicking inside day-letter-input still accepts physical Dubeolsik keys without an OS Korean IME", async ({ page }) => {
+  await openKeyboardCard(page);
+  const prompt = (await page.getByTestId("day-letter-prompt").innerText()).match(/[ㄱ-ㅎㅏ-ㅣ]/u)?.[0];
+  if (!prompt) throw new Error("Missing jamo prompt");
+  const input = page.getByTestId("day-letter-input");
+  await input.click();
+  await expect(input).toBeFocused();
+  for (const key of keysFor(prompt)) await page.keyboard.press(key);
+  await expect(input).toHaveValue(prompt);
+  await input.press("Enter");
+  await expect(good(page)).toBeEnabled();
+  await expect(page.getByTestId("day-letter-feedback")).toContainText("示范音节：");
+});
+

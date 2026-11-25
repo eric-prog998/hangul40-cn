@@ -10,26 +10,30 @@ of Korean pronunciation recordings by the native Korean speaker **호로조
 - Per-file source pages, SHA-256 hashes, and crop boundaries:
   `data/consonant-human-clips.json`
 
-Each original is a 48 kHz, mono, 16-bit PCM WAV. The published clip keeps the
-real release burst, friction, aspiration, nasal murmur, or tongue tap. The full
-vowel and the rest of the source word are removed. Crop boundaries, fades,
-silent tails, and peak targets are tuned per clip where needed so the speaker's
-real articulation remains audible without playing a complete vowel or
-syllable. Defaults are a 4 ms raised-cosine fade-in, an 18 ms fade-out, an 8 ms
-silent tail, and 90% peak normalization; no synthetic sound is mixed in.
+Each original is a 48 kHz, mono, 16-bit PCM WAV. To prevent coarticulation
+distortion from rounded (`ㅜ`, `ㅗ`, `ㅟ`) or palatalizing (`ㅣ`, `ㅕ`) vowels—in
+particular avoiding alveolo-palatal `[ɕ͈]` from `씨` for `ㅆ` and lip-rounded
+onsets from `숲`, `귀`, `쥐`, `코`, `둘`, `봄`, `문`, and `풀`—all 18 clips are
+extracted from neutral, unrounded `+ ㅏ` (`가다`, `까다`, `나`, `다리`, `따르다`,
+`라오스`, `마늘`, `바다`, `빨다`, `사다`, `싸우다`, `자다`, `짜다`, `차`, `타다`,
+`파다`, `하나`) or `+ ㅡ` (`크다`) words by the same speaker.
 
-In v14, `ㄹ`, `ㄸ`, and `ㄲ` use new excerpts from `라오스`, `따르다`, and
-`까다` by the same speaker. Their longer 75/87/87 ms clips retain more of the
-real tongue-tap or pre-release closure, apply a gentler 25/24/24 ms fade-out,
-and use a 26000 peak target. The extra time is not a repeated sound or a hidden
-`ㅏ` syllable.
+The published clip keeps the real release burst, friction, aspiration, nasal
+murmur, or tongue tap while removing the steady vowel and the rest of the
+source word. Crop boundaries, raised-cosine fades, silent tails, and peak
+targets are tuned per clip so the speaker's real articulation remains clear
+without playing a complete syllable; no synthetic sound is mixed in.
 
-These clips are best described as **human consonant onsets**, not as complete
-independent utterances. Korean stops and the initial tap `ㄹ` cannot be
-naturally sustained on their own, and modern Seoul Korean stop contrasts also
-use cues at the beginning of the following vowel. Initial `ㅇ` remains truly
-silent and therefore has no file.
+Tense obstruents (`ㄲ`, `ㄸ`, `ㅃ`, `ㅉ`) and the initial tap `ㄹ` retain a brief
+pre-release closure and faded locus onset (`72–80 ms` total, `28500` peak
+target) so the articulation is audible without speaking a full `ㅏ` vowel.
 
-The deterministic extraction script is
-`scripts/extract-human-consonants.py`. It verifies every original source hash
-before writing a clip.
+These clips are **human consonant onsets**, not standalone dictionary words.
+Korean stops and the initial tap `ㄹ` cannot be naturally sustained on their
+own, and modern Seoul Korean three-way stop contrasts (`ㄱ/ㄲ/ㅋ`, `ㄷ/ㄸ/ㅌ`,
+`ㅂ/ㅃ/ㅍ`, `ㅈ/ㅉ/ㅊ`) also rely on voice onset time and pitch (`F0`) at the
+start of the following vowel. Initial `ㅇ` remains truly silent and therefore
+has no file.
+
+The deterministic extraction script is `scripts/extract-human-consonants.py`.
+It verifies every original source hash before writing a clip.

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import DayLetterCard from "./day-letter-card";
 import { daySkillTotals } from "./day-letters";
 import DayDialogue from "./day-dialogue";
@@ -84,9 +84,10 @@ function createDayStore() {
   };
 }
 
-export default function MyDay({visible, active, day, legacy, onBadge, onHome, onPlay, onStop}: Props) {
+export default memo(function MyDay({visible, active, day, legacy, onBadge, onHome, onPlay, onStop}: Props) {
   const [store] = useState(createDayStore);
   const { book, message } = useSyncExternalStore(store.subscribe, store.getSnapshot, serverSnapshot);
+  const skillTotals = useMemo(() => book ? daySkillTotals(book.history) : [], [book]);
   const finish = useRef<HTMLHeadingElement>(null);
   useEffect(() => { if (active) return onStop; }, [active, onStop]);
   useEffect(() => {
@@ -132,8 +133,8 @@ export default function MyDay({visible, active, day, legacy, onBadge, onHome, on
     <aside className="day-margin"><span className="day-side-label">本课便签</span><h2>今天的生活场景</h2><p>{SCENE_TITLES[s.scene]}</p><hr/><p>先试着自己说，再听示范。想不起来就标「再练」，不扣分。</p>
       <button id="day-pause" type="button" onClick={onHome}>{step === "finish" ? "回到今天" : "暂停并回首页"}</button>
       <a href="#learn">查 40 音表</a><hr/><strong>我的分项记录</strong>
-      <dl className="day-skill-counts">{daySkillTotals(book.history).map(({skill,practiced,total,confirmed}) =>
+      <dl className="day-skill-counts">{skillTotals.map(({skill,practiced,total,confirmed}) =>
         <div key={skill}><dt>{{read:"看字读",listen:"听音认",keys:"按键打"}[skill]}</dt><dd>{practiced} / {total} 已练 · {confirmed} 已复核</dd></div>)}</dl>
       <small>「已复核」需隔日再练。盲听不考静音、易混拼写；自由练习的标记单独保留。</small></aside>
   </div>;
-}
+});

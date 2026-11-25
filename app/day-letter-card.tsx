@@ -104,9 +104,20 @@ export default function DayLetterCard({card,attempt,onEvidence,onGrade,onPlay,on
         onChange={event => setDraft(event.target.value.slice(0,24))} onCompositionStart={() => { composing.current = true; }}
         onCompositionEnd={() => { composing.current = false; }} onBlur={() => { composing.current = false; }}
         onKeyDown={event => {
-          if (event.key !== "Enter" || event.repeat || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229 || composing.current || event.altKey || event.metaKey || event.ctrlKey) return;
-          event.preventDefault(); event.stopPropagation();
-          reveal();
+          if (event.repeat || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229 || composing.current || event.altKey || event.metaKey || event.ctrlKey) return;
+          if (event.key === "Enter") {
+            event.preventDefault(); event.stopPropagation();
+            reveal();
+            return;
+          }
+          if (/^[a-z]$/i.test(event.key)) {
+            const input = koreanKeyInput(event.key, event.code, event.shiftKey);
+            if (input) {
+              event.preventDefault(); event.stopPropagation();
+              setDraft(previous => COMPOUND_VOWELS[previous + input.char] ?? input.char);
+              setMessage("");
+            }
+          }
         }} /></label>
       <p>直接按双拼键位，或按 Tab 使用韩文输入法。Enter 核对；留空按 Enter 看键位，这张记「再练」。</p>
     </div>}
@@ -119,7 +130,7 @@ export default function DayLetterCard({card,attempt,onEvidence,onGrade,onPlay,on
         onClick={()=>reveal()}>{skill === "keys" ? draft ? "核对输入" : "看键位" : skill === "listen" ? "看答案，留待复习" : "看拆解"} <kbd>Enter</kbd></button>}
     </div>
     {revealed && <div className="day-letter-feedback" data-testid="day-letter-feedback">
-      {skill === "keys" ? <p>{canGradeGood ? "键位输入正确。" : answer === "incorrect" ? "这次输入与目标不同。" : "这次先看键位。"} <span lang="ko">{char}</span> 的双拼键位：<kbd>{koreanKeyLabel(char)}</kbd>。</p> :
+      {skill === "keys" ? <p>{canGradeGood ? "键位输入正确。" : answer === "incorrect" ? "这次输入与目标不同。" : "这次先看键位。"} <span lang="ko">{char}</span> 的双拼键位：<kbd>{koreanKeyLabel(char)}</kbd>（示范音节：<span lang="ko">{initial} + {vowel} = {example}</span>）。</p> :
        <p>{skill === "listen" ? (canGradeGood ? "听辨正确。" : "这次先核对，留到以后再听。") : "核对你的读音："}
         <strong lang="ko">{initial} + {vowel} = {example}</strong>。{initial === "ㅇ" ? "这里的 ㅇ 作初声不发音；你听到的是元音。" : "示范是整个音节，不是辅音名称或单独起音。"}
        </p>}

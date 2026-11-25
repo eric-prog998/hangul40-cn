@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
+import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
 import { BATCHIM_GROUPS, BATCHIM_RULE_SOURCE, BATCHIM_WORDS, batchimExampleIndex, isBatchimAnswerCorrect } from "./batchim-data";
 import { decomposeHangulSyllable } from "./learning-logic";
 import { imeOwnsPanelKey, keyboardShortcutKey, koreanKeyInput, koreanKeyLabel, keyboardSectionIndex } from "./keyboard-logic";
@@ -10,7 +10,7 @@ import type { AutoAdvanceDelay } from "./learning-settings";
 export type BatchimLessonHandle = { stop: () => void; open: (id?: string) => void };
 type Props = { items: readonly { id: string; korean: string; chinese: string }[]; onPrepare: () => void; playSample: (text: string) => Promise<"ended" | "interrupted" | "failed">; autoAdvanceMs: AutoAdvanceDelay };
 
-const BatchimLesson = forwardRef<BatchimLessonHandle, Props>(function BatchimLesson({ items, onPrepare, playSample, autoAdvanceMs }, ref) {
+const BatchimLesson = memo(forwardRef<BatchimLessonHandle, Props>(function BatchimLesson({ items, onPrepare, playSample, autoAdvanceMs }, ref) {
   const [mode, setMode] = useState<"lesson" | "quiz" | "finished">("lesson");
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState<string | null>(null);
@@ -142,5 +142,5 @@ const BatchimLesson = forwardRef<BatchimLessonHandle, Props>(function BatchimLes
       <details className="batchim-sources"><summary>读音依据和本课边界</summary><p>词条读音及收音分类依据国立国语院资料核对。播放沿用现有固定 AI 整词音频，不是新真人录音，尚未新增母语教师逐条复核。这里练字形和读词位置，不给发音打分，也不自动标记“背熟”。</p><a href={BATCHIM_RULE_SOURCE} target="_blank" rel="noreferrer">国立国语院：鼻音与流音的发音说明 ↗</a></details>
     </div>
   </section>;
-});
+}));
 export default BatchimLesson;

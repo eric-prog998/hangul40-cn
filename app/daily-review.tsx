@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { isImeConfirmation, keyboardShortcutKey } from "./keyboard-logic";
 import { createDailyReviewQueue, type ReviewRating, type ReviewRecords } from "./review-logic";
 import { compareRecall } from "./recall-logic";
@@ -20,7 +20,7 @@ export type DailyReviewProps = {
   playSample: (korean: string) => Promise<"ended" | "interrupted" | "failed">;
 };
 
-const DailyReview = forwardRef<DailyReviewHandle, DailyReviewProps>(function DailyReview({ items, today, records, ready, storageMessage, target = 10, onReturnToPlan, onRate, onPrepare, playSample }, ref) {
+const DailyReview = memo(forwardRef<DailyReviewHandle, DailyReviewProps>(function DailyReview({ items, today, records, ready, storageMessage, target = 10, onReturnToPlan, onRate, onPrepare, playSample }, ref) {
   const DAILY_TARGET = Number.isFinite(target) ? Math.max(1, Math.min(10, Math.floor(target))) : 10;
   const section = useRef<HTMLElement | null>(null);
   const mounted = useRef(true);
@@ -43,17 +43,25 @@ const DailyReview = forwardRef<DailyReviewHandle, DailyReviewProps>(function Dai
   const [draft, setDraft] = useState({ key: "", text: "" });
   const [checked, setChecked] = useState<{ key: string; text: string; kind: ReturnType<typeof compareRecall> } | null>(null);
   const ids = useMemo(() => [...new Set(items.map((item) => item.id))], [items]);
-  const todayReviewedCount = ids.filter((id) => records[id]?.lastReviewed === today).length;
-  const queue = ready ? createDailyReviewQueue(ids, records, today, Math.max(0, DAILY_TARGET - todayReviewedCount)) : [];
+  const { todayReviewedCount, queue, futureCount, nextDue, nextDueCount } = useMemo(() => {
+    const todayReviewedCount = ids.filter((id) => records[id]?.lastReviewed === today).length;
+    const nextQueue = ready ? createDailyReviewQueue(ids, records, today, Math.max(0, DAILY_TARGET - todayReviewedCount)) : [];
+    const future = ids.map((id) => records[id]).filter((record) => record && record.due > today);
+    const earliestDue = future.map((record) => record.due).sort()[0];
+    return {
+      todayReviewedCount,
+      queue: nextQueue,
+      futureCount: future.length,
+      nextDue: earliestDue,
+      nextDueCount: earliestDue ? future.filter((record) => record.due === earliestDue).length : 0,
+    };
+  }, [DAILY_TARGET, ids, ready, records, today]);
   const current = items.find((item) => item.id === queue[0]);
   const currentKey = `${today}:${current?.id ?? "empty"}:${current ? records[current.id]?.updatedAt ?? "new" : ""}`;
   const revealed = Boolean(current && revealedKey === currentKey);
   const typing = Boolean(current && (typingKey === currentKey || continuousInput));
   const retrying = retryKey === currentKey;
   const playing = playingKey === currentKey;
-  const futureRecords = ids.map((id) => records[id]).filter((record) => record && record.due > today);
-  const nextDue = futureRecords.map((record) => record.due).sort()[0];
-  const nextDueCount = nextDue ? futureRecords.filter((record) => record.due === nextDue).length : 0;
 
   const stop = useCallback(() => {
     token.current += 1;
@@ -242,11 +250,11 @@ const DailyReview = forwardRef<DailyReviewHandle, DailyReviewProps>(function Dai
       </div> : <div className="daily-review-empty"><span aria-hidden="true">✓</span><h3>{todayReviewedCount >= DAILY_TARGET ? `今天的 ${DAILY_TARGET} 项复习完成了` : items.length ? "当前没有需要复习的词句" : "暂时没有可复习的词句"}</h3><p>{todayReviewedCount >= DAILY_TARGET ? "不用继续刷数量。休息一下，明天再试着回忆。" : "到期的内容会再次出现；已经排期的词句不会为了凑数提前重复。"}</p></div>}
       <div className="daily-review-feedback" role="status" aria-live="polite"><p>{feedback}</p>{audioNotice?.key === currentKey && <p>{audioNotice.message}</p>}</div>
       {storageMessage && <p className="daily-review-storage" role="status">{storageMessage}</p>}
-      <p className="daily-review-next">{nextDue ? <>下次到期：<strong>{nextDue}</strong>，{nextDueCount} 项。已排期共 {futureRecords.length} 项。</> : "完成一次自评后，这里会显示下次复习日期。"}</p>
+      <p className="daily-review-next">{nextDue ? <>下次到期：<strong>{nextDue}</strong>，{nextDueCount} 项。已排期共 {futureCount} 项。</> : "完成一次自评后，这里会显示下次复习日期。"}</p>
       <p className="daily-review-shortcuts">聚焦本区：T 输入韩文 · Enter 翻面 · R 遮住再写 · 1 / 2 自评 · 空格 / F8 听示范 · Esc 停止。输入框内按键用于打字，不触发自评或播放；按钮仍可正常用 Tab 和 Enter 操作。</p>
       <details className="daily-review-notes"><summary>复习规则与音频说明</summary><p>“忘了 / 想起来了”是你对记忆的自评，不是发音判分。1 / 3 / 7 天是可调整的产品排期规则，不保证每个人都在同样时间记牢；忘了会安排明天再见。</p><p>本区沿用现有完整 AI 词句音频，没有新增教师逐条校验。不自动播放下一题，不启用麦克风，也不把自评当作发音准确的证明。</p><p>进度仅保存在当前浏览器；换设备、换浏览器或清除网站数据后不会自动同步。今日已完成数量会保留，普通复习每天最多 10 项；路线短练与普通复习共享记录，不会另开一轮计数。</p></details>
     </div>
   </section>;
-});
+}));
 
 export default DailyReview;

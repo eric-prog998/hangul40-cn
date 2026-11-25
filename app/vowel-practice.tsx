@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
+import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
 import LocalVoiceRecorder, { type LocalVoiceRecorderHandle } from "./local-voice-recorder";
 import VowelListeningChallenge, { type VowelChallengeHandle } from "./vowel-listening-challenge";
 import { imeOwnsPanelKey, keyboardShortcutKey } from "./keyboard-logic";
@@ -19,7 +19,7 @@ type Props = {
   onReturnToPlan?: () => void;
 };
 
-const VowelPractice = forwardRef<VowelPracticeHandle, Props>(function VowelPractice({ onPrepare, playSample, speed, onSpeedChange, history, autoAdvanceMs, onReturnToPlan }, ref) {
+const VowelPractice = memo(forwardRef<VowelPracticeHandle, Props>(function VowelPractice({ onPrepare, playSample, speed, onSpeedChange, history, autoAdvanceMs, onReturnToPlan }, ref) {
   const [pairIndex, setPairIndex] = useState(0);
   const [view, setView] = useState<"compare" | "challenge">("compare");
   const [mode, setMode] = useState<VowelPracticeMode>("isolated");
@@ -111,6 +111,6 @@ const VowelPractice = forwardRef<VowelPracticeHandle, Props>(function VowelPract
       <details className="vowel-source-note"><summary>示范音来源与使用边界</summary><p>这里使用网站已有的固定 AI 完整音节音频，不是新增真人录音，也不是把裁切辅音和元音拼接。两侧使用同一播放速度与播放器音量设置；不同音频的实际响度可能略有差异。</p><p>口型提示已按官方资料核对；音频尚未新增母语教师逐条复核。录音回听用于自我比较，不提供自动发音分数或“标准发音”认证。</p><a href={VOWEL_GUIDE_SOURCE} target="_blank" rel="noreferrer">教学依据：国立国语院标准发音法 ↗</a></details>
     </div>
   </section>;
-});
+}));
 
 export default VowelPractice;

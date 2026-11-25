@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { memo, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import names from "../data/consonant-names.json";
 import phrases from "../data/phrases.json";
 import fingerprints from "../data/audio-fingerprints.json";
@@ -25,7 +25,7 @@ function download(text: string, filename: string, type: string) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export default function AudioGuide({ version, reportId = "", onPrepare, onPlay, onStop }: Props) {
+export default memo(function AudioGuide({ version, reportId = "", onPrepare, onPlay, onStop }: Props) {
   const requested = catalog.find(entry => entry.id === reportId);
   const [category, setCategory] = useState<AudioCategory | "all">(requested?.category ?? "vowel");
   const [query, setQuery] = useState("");
@@ -99,4 +99,4 @@ export default function AudioGuide({ version, reportId = "", onPrepare, onPlay, 
     <p id="audio-guide-status" role="status" className="audio-guide-status">{message}</p>
     {feedbackOpen && selected && <div id="audio-feedback-form" className="audio-feedback-form"><h3>生成反馈，自己决定是否发送</h3><p>仅生成下面这些文字；不会自动上传，不读取学习进度，不申请麦克风。请不要填写手机号等个人信息。</p><label htmlFor="audio-issue">遇到什么问题？</label><select id="audio-issue" value={issue} onChange={event => { setIssue(event.target.value); setFeedbackMessage(""); }}>{AUDIO_ISSUES.map(item => <option key={item}>{item}</option>)}</select><label htmlFor="audio-note">补充说明（选填，最多 500 字）</label><textarea id="audio-note" maxLength={500} rows={3} value={note} onChange={event => { setNote(event.target.value); setFeedbackMessage(""); }} /><label htmlFor="audio-report">将要复制或下载的内容 · 未发送</label><textarea id="audio-report" ref={reportBox} value={report} readOnly rows={9} /><div className="audio-guide-actions"><button type="button" onClick={() => void copyReport()}>复制反馈内容</button><button type="button" onClick={() => { try { download(report, `hangul40-audio-${selected.id}.txt`, "text/plain;charset=utf-8"); setFeedbackMessage("已发起下载，尚未发送。请自行将文件发给维护者。"); } catch { setFeedbackMessage("下载未成功；可选择上方文字手动复制。"); } }}>下载反馈文件</button></div><p role="status">{feedbackMessage}</p></div>}
   </section>;
-}
+});

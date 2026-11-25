@@ -28,10 +28,12 @@ function DialogueTurn({ sceneIndex, recall, active, onDone, onPlay, onStop }: Pr
   const timer = useRef<number | null>(null);
   const utterance = useRef<SpeechSynthesisUtterance | null>(null);
   const finished = useRef(false);
+  const speakTimer = useRef<number | null>(null);
   const stopShared = useRef(onStop);
   useLayoutEffect(() => { stopShared.current = onStop; }, [onStop]);
   const cancel = useCallback(() => {
     seq.current += 1;
+    if (speakTimer.current !== null) { window.clearTimeout(speakTimer.current); speakTimer.current = null; }
     if (timer.current !== null) { window.clearTimeout(timer.current); timer.current = null; }
     if (utterance.current) {
       utterance.current.onend = null;
@@ -70,6 +72,7 @@ function DialogueTurn({ sceneIndex, recall, active, onDone, onPlay, onStop }: Pr
 
   async function play(line: DialogueLine) {
     if (!active || finished.current || document.hidden) return;
+    const wasSpeakingVoice = played.current === "voice" || Boolean(window.speechSynthesis?.speaking || window.speechSynthesis?.pending);
     cancel();
     const ticket = seq.current;
     if (line.clip) {
@@ -96,6 +99,7 @@ function DialogueTurn({ sceneIndex, recall, active, onDone, onPlay, onStop }: Pr
       utterance.current = utter;
       const finish = (message: string) => {
         if (ticket !== seq.current) return;
+        if (speakTimer.current !== null) { window.clearTimeout(speakTimer.current); speakTimer.current = null; }
         if (timer.current !== null) window.clearTimeout(timer.current);
         timer.current = null;
         utter.onend = null; utter.onerror = null;
@@ -110,7 +114,14 @@ function DialogueTurn({ sceneIndex, recall, active, onDone, onPlay, onStop }: Pr
         if (seq.current !== ticket) return;
         cancel(); setStatus("本机韩语语音没有完成播放。可重试，或看原文继续。");
       }, 16000);
-      synth.speak(utter);
+      if (wasSpeakingVoice) {
+        speakTimer.current = window.setTimeout(() => {
+          speakTimer.current = null;
+          if (seq.current === ticket) synth.speak(utter);
+        }, 40);
+      } else {
+        synth.speak(utter);
+      }
     } catch { if (ticket === seq.current) { cancel(); setStatus(missingVoice); } }
   }
   function reveal() {
@@ -139,7 +150,7 @@ function DialogueTurn({ sceneIndex, recall, active, onDone, onPlay, onStop }: Pr
   }
 
   return <section ref={panel} tabIndex={-1} aria-label={scene.title + "接话练习"} data-testid="day-dialogue" data-recall={recall}
-    className="day-dialogue" onKeyDown={keyboard} onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget)) stop(); }}>
+    className="day-dialogue" onKeyDown={keyboard}>
     <p className="day-dialogue-tag">{recall ? "隔天开口 · 中文情境" : "日常接话 · 先听后说"}</p>
     <h3>{scene.title}</h3>
     <p>{scene.setting}</p>

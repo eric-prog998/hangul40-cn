@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState, type ChangeEvent } from "react";
+import { memo, useRef, useState, type ChangeEvent } from "react";
 import { AUTO_ADVANCE_OPTIONS, type AutoAdvanceDelay } from "./learning-settings";
 import { BACKUP_MAX_BYTES, backupFileName, type PortableBackup } from "./portable-backup";
 
@@ -12,7 +12,7 @@ type Props = {
   onImport: (backup: PortableBackup) => Promise<string>;
 };
 
-export default function LearningTools({ autoAdvanceMs, onAutoAdvance, onPrepare, onExport, onParse, onImport }: Props) {
+export default memo(function LearningTools({ autoAdvanceMs, onAutoAdvance, onPrepare, onExport, onParse, onImport }: Props) {
   const [pending, setPending] = useState<PortableBackup | null>(null);
   const [message, setMessage] = useState("备份只下载到你的设备；导入文件只在浏览器读取，不会上传。");
   const [busy, setBusy] = useState(false);
@@ -64,4 +64,4 @@ export default function LearningTools({ autoAdvanceMs, onAutoAdvance, onPrepare,
     {pending && <div className="backup-preview"><h3>准备合并的备份</h3><p>导出时间：{new Date(pending.createdAt).toLocaleString("zh-CN")}</p><ul><li>已学字母 {pending.progress.mastered.length} 个 · 背熟词句 {pending.progress.masteredPhrases.length} 条</li><li>累计经验 {pending.progress.stats.totalXp} XP · 每日复习记录 {Object.keys(pending.reviews).length} 条</li><li>盲听作答 {pending.vowelHistory.length} 次 · 打字线路记录 {Object.keys(pending.typing).length} 条</li></ul><p>不会清空现有进度；已学标记取并集，经验／累计次数取较高值，不重复累加；复习保留较新的记录。播放与键盘偏好采用备份值。请在其他标签页暂停学习后恢复。</p><div className="backup-actions"><button type="button" disabled={busy} onClick={() => void importBackup()}>确认合并恢复</button><button type="button" disabled={busy} onClick={() => { setPending(null); setMessage("已取消导入，原记录未改变。"); }}>取消</button></div></div>}
     <p className="backup-status" role="status" aria-live="polite">{busy ? "正在处理，请稍等…" : message}</p>
   </section>;
-}
+});

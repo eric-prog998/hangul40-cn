@@ -1,4 +1,4 @@
-import { addLocalDays, createDailyReviewQueue, localDateKey, parseReviewRecord, type ReviewRecords } from "./review-logic.ts";
+import { addLocalDays, createDailyReviewQueue, localDateKey, validatedReviewRecord, type ReviewRecords } from "./review-logic.ts";
 import { mergeVowelHistory, parseVowelHistoryEntry, pendingVowelQuestions, type VowelHistoryEntry } from "./vowel-history.ts";
 
 export const DAILY_PLAN_REVIEW_TARGET = 5;
@@ -11,7 +11,7 @@ export function dailyPlanSummary(ids: readonly string[], records: ReviewRecords,
   const valid: ReviewRecords = Object.create(null);
   for (const id of catalog) {
     if (!Object.hasOwn(records, id)) continue;
-    const record = parseReviewRecord(JSON.stringify(records[id]), id);
+    const record = validatedReviewRecord(records[id], id);
     if (record) valid[id] = record;
   }
   const reviewed = catalog.filter(id => valid[id]?.lastReviewed === today).length;

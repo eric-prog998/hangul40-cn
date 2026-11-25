@@ -1,12 +1,12 @@
 "use client";
 
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, memo, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { INITIAL_RECORDING_STATE, LocalRecordingSession, MAX_RECORDING_SECONDS, preferredRecordingMimeType, type RecordingState } from "./recording-logic";
 
 export type LocalVoiceRecorderHandle = { stop: () => void };
 type Props = { onPrepare?: () => void; contextKey?: string };
 
-const LocalVoiceRecorder = forwardRef<LocalVoiceRecorderHandle, Props>(function LocalVoiceRecorder({ onPrepare, contextKey }, ref) {
+const LocalVoiceRecorder = memo(forwardRef<LocalVoiceRecorderHandle, Props>(function LocalVoiceRecorder({ onPrepare, contextKey }, ref) {
   const session = useRef<LocalRecordingSession | null>(null);
   const [state, setState] = useState<RecordingState>({ ...INITIAL_RECORDING_STATE });
   const [unsupportedReason, setUnsupportedReason] = useState("");
@@ -81,6 +81,6 @@ const LocalVoiceRecorder = forwardRef<LocalVoiceRecorderHandle, Props>(function 
     <p className={`local-recorder-status${state.phase === "error" || unsupportedReason ? " recorder-error" : ""}`} role="status" aria-live="polite" aria-atomic="true">{checking ? "正在检查浏览器录音能力，不会申请权限…" : unsupportedReason || state.message}</p>
     <p className="local-recorder-listen-tip">回听小提示：先比较元音和送气的差别，不用刻意模仿音色。录音听不见时，请检查系统麦克风输入音量。</p>
   </div>;
-});
+}));
 
 export default LocalVoiceRecorder;

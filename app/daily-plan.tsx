@@ -1,6 +1,6 @@
 "use client";
 
-import type { KeyboardEvent } from "react";
+import { memo, type KeyboardEvent } from "react";
 import { isImeConfirmation, keyboardShortcutKey } from "./keyboard-logic";
 import type { DailyPlanSummary } from "./daily-plan-logic";
 import "./daily-plan.css";
@@ -17,7 +17,7 @@ type Props = {
   onPrepare: () => void;
 };
 
-export default function DailyPlan({ summary, ready, nextLesson, beginner, storageMessages, onReview, onListening, onLesson, onPrepare }: Props) {
+export default memo(function DailyPlan({ summary, ready, nextLesson, beginner, storageMessages, onReview, onListening, onLesson, onPrepare }: Props) {
   const available = ready && summary !== null;
   const next = beginner ? onLesson : summary?.review.complete ? onListening : onReview;
   const nextLabel = beginner ? "先认核心元音" : summary?.review.complete ? "接着听辨元音" : "先回忆几个词句";
@@ -77,4 +77,4 @@ export default function DailyPlan({ summary, ready, nextLesson, beginner, storag
     {available && <div className="daily-plan-storage" role="status">{storageMessages.filter(Boolean).map(message => <p key={message}>{message}</p>)}</div>}
     <details className="daily-plan-notes"><summary>键盘、记录与复习说明</summary><p>聚焦本区后：1 进入回忆、2 进入盲听、3 接着学；Enter 打开推荐下一步。Tab 和 Enter 仍能操作每个按钮，组合输入、长按与系统快捷键不会触发路线。</p><p>回忆沿用原有 1 / 3 / 7 天自评排期；短练最多 5 项，普通“今日复习”仍可做 10 项。盲听按已保留的最近 200 次作答统计，错误也算练习，不算通过考试；累计错题另行展示。</p><p>刷新、跨标签页和进度备份沿用已有记录，不另存一个容易不同步的“打卡完成”标记。跨日会换成新一天；清除网站数据后记录不会保留。</p><a href="#audio-guide" onClick={onPrepare}>音频仍待人工听审，查看来源与反馈 ↗</a></details>
   </section>;
-}
+});

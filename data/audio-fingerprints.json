@@ -1,91 +1,91 @@
 {
   "/audio/consonant-human-clarity/rieul.wav": {
-    "sha256": "94bb3c29128a89e55bb99c433abc5dc594af9406f573d5ebf28c0a4b5cc66495",
-    "bytes": 25964
+    "sha256": "66472e00c737d87ccb413949b5638ae224561d696d2c21b7d0b8f258c618a94d",
+    "bytes": 25388
   },
   "/audio/consonant-human-clarity/ssang-bieup.wav": {
-    "sha256": "0bd9c684de2a884cc7620d421c18a0b0b2f1a656514763f88e94c13549efc4fd",
-    "bytes": 25580
+    "sha256": "806524bcb1846be195d43573e331196f48c2089ccdab52d985678ee21c7e0e0f",
+    "bytes": 26924
   },
   "/audio/consonant-human-clarity/ssang-digeut.wav": {
-    "sha256": "69969f52994bf3f25cbafbf80ac6a7fafa1c4d23c91e8b6a107bb6a6c70f3f7c",
-    "bytes": 28268
+    "sha256": "78d849a3776872c1a2d2adf94c95c3e58e638b218180c798cd143304da78c49b",
+    "bytes": 25772
   },
   "/audio/consonant-human-clarity/ssang-giyeok.wav": {
-    "sha256": "504f08c7ac57713d8f41614ae6060c0e71c8a01fff594dc0c2250c88f9ae3ffe",
-    "bytes": 28268
+    "sha256": "6a2c55cc98e584116324f416662cc67c97e06c73ddb8901e532cd5c991b8af39",
+    "bytes": 26540
   },
   "/audio/consonant-human-onset/bieup.wav": {
-    "sha256": "5f01a3e5c72a1ad9c80b833dde889ba059aad29df327f4ffd0ad8ad1c6b0d5a6",
-    "bytes": 9932
+    "sha256": "15d380f6033395a881b08efb92156f7332f8fef47d8679d6943a8415de04e60e",
+    "bytes": 8108
   },
   "/audio/consonant-human-onset/chieut.wav": {
-    "sha256": "3a29b1f81044fdc4f36c5f015c34a9b6bcc1b7bd57caaa98effe69f756b912c6",
-    "bytes": 16172
+    "sha256": "3c6fdb4169d4d2d859da23b39ebd22d519bd43364d74d80ebd628f6b2e74cff3",
+    "bytes": 15596
   },
   "/audio/consonant-human-onset/digeut.wav": {
-    "sha256": "912ddadfd05c30ebde9c018bae7b3ba9fe4a0d02ea1beb6b34848b3b84f5c5ce",
-    "bytes": 9452
+    "sha256": "82bc5033ee3ddc5136d9e8283d5aaa09408b1f065bfdb9ee0eb67ea5f417d31b",
+    "bytes": 8876
   },
   "/audio/consonant-human-onset/giyeok.wav": {
-    "sha256": "793526ccd6d19a5c7f5c92a6d1f2ac5ec50c0062cdaa0afea2ef7432dcc211e6",
-    "bytes": 14252
+    "sha256": "4f6c4fc00db01dfc4a7e711d6e5dcf743d3ad5ddf7ebc478d5d4846a96887e14",
+    "bytes": 9836
   },
   "/audio/consonant-human-onset/hieut.wav": {
-    "sha256": "4c85c3bbab9c5a30e2e0c931aed598f3956bc912f55cc5a3bacf59e816f97674",
-    "bytes": 9452
+    "sha256": "ba968a4d1168fc83d1f8f78668f6ac7a6f3a33e92280a4fc30a7ddc5ed9d8083",
+    "bytes": 9260
   },
   "/audio/consonant-human-onset/jieut.wav": {
-    "sha256": "ebe635cc798e920e576de97a0823deca0a6c6dba0fd43b67ce395eb3dc894ff2",
-    "bytes": 17132
+    "sha256": "9d20255d8bb1525869f8acf6d3f01565e73c7affd32a02d39ff7e0d669da4f3a",
+    "bytes": 8492
   },
   "/audio/consonant-human-onset/kieuk.wav": {
-    "sha256": "63dd8606ba20500ee01fe239b6585596c1903146cbbdbb45f1da90bd1b54c615",
-    "bytes": 15212
+    "sha256": "49da80aa49fb64d23730eb7b1b161622ca8bba46b65e18bcacbc713886bc9734",
+    "bytes": 8492
   },
   "/audio/consonant-human-onset/mieum.wav": {
-    "sha256": "7b92041791ea03d63b8052bb7712db059dcde636df55405b9001939d3d302299",
-    "bytes": 11852
+    "sha256": "2c4ec34e6540dee9b1fd1720e89870613bb2e1cd04ab8016a69df29d52e0f886",
+    "bytes": 10220
   },
   "/audio/consonant-human-onset/nieun.wav": {
-    "sha256": "6ea366e5c6b6a325f3c561c0732e9f9fb3ed8132a59930ca44560a9422fd4551",
-    "bytes": 8972
+    "sha256": "c73ec25856d63a833ada7acc1b8c9970b78512fc703af324a1d3cef2e65fc478",
+    "bytes": 10412
   },
   "/audio/consonant-human-onset/pieup.wav": {
-    "sha256": "e4cd35f507f8e0f2d5e5c8258157342abcc8be0f1c1708e09a8067d0def307f4",
-    "bytes": 13772
+    "sha256": "f0d277c8537912065cdae3f829082168daefe7f49463cc67bba40e382906f32d",
+    "bytes": 10796
   },
   "/audio/consonant-human-onset/rieul.wav": {
-    "sha256": "a99c56c302863669108ab8af2d54e21829775cbaa2c63851486cfab8a82965a2",
-    "bytes": 7244
+    "sha256": "77f5e64621e91e52eb32350f39cf3675fdd16d4b6badbdb325a86063f5c968b4",
+    "bytes": 6956
   },
   "/audio/consonant-human-onset/siot.wav": {
-    "sha256": "b5209a75ffa0a072dc5071150e6ae87cf1ca0853f4509d854c715da3fd3a9ac2",
-    "bytes": 18572
+    "sha256": "b349776ea60f59cd2cb38d94f9be335f1c65978f8c696078a835ff8056fca1fa",
+    "bytes": 12908
   },
   "/audio/consonant-human-onset/ssang-bieup.wav": {
-    "sha256": "5bc05ae3aa5836370405404275ef04fc77e8a158d2c2539cd86a201134cb5c8a",
-    "bytes": 7052
+    "sha256": "cfb217b7cd47a1c562efeafb0a2331c89e76c8eebe4eba8391a8e9d51b247007",
+    "bytes": 7724
   },
   "/audio/consonant-human-onset/ssang-digeut.wav": {
-    "sha256": "87365fde3d8471f36d57c76a967002a6cc3a376070d14c5f174c66dff1868f42",
-    "bytes": 8396
+    "sha256": "c517b5f7ed57ab792451347ff4ea51310a377f450b9010b1f813be054d708bdc",
+    "bytes": 7148
   },
   "/audio/consonant-human-onset/ssang-giyeok.wav": {
-    "sha256": "41c45e5bd378d212096db3b5ef602b60cf4d96e58a32b9950ca2fc9332720aa9",
-    "bytes": 8396
+    "sha256": "106f0c230c61c211fcbf5939aefc87de619d4db638987020e3cab3e066bc2804",
+    "bytes": 7532
   },
   "/audio/consonant-human-onset/ssang-jieut.wav": {
-    "sha256": "03df5535f5fedb804384b59ca263825ed7a916cfdcb863d7c4408ca9ab4f99e5",
-    "bytes": 10892
+    "sha256": "a269baa3bdf9008dbfdb441d2d820394ea52088ca46acd0fd97eed693c6369d6",
+    "bytes": 6956
   },
   "/audio/consonant-human-onset/ssang-siot.wav": {
-    "sha256": "73d7cfebfe7d68bf06841e2893f0701cfcd07ee90b6429a6088eab1338e8d9d4",
-    "bytes": 27212
+    "sha256": "435210787c82e92486038fd4a617c146e5dd3e44d1d7864d2ec81ed8b0945242",
+    "bytes": 11852
   },
   "/audio/consonant-human-onset/tieut.wav": {
-    "sha256": "997d4c6478bcce555dea8ef8fe0927895a78217ed699dd8f3606a5185e79c603",
-    "bytes": 16172
+    "sha256": "c23b0b7639b1018cb281c5201e6247dc78bf5b7fcd3eb0212467c6ac2284afed",
+    "bytes": 7724
   },
   "/audio/consonant-names/bieup.mp3": {
     "sha256": "e70b6870338a260202c44f3a811b7f886c02d292186f54ee220ba65696ee520a",

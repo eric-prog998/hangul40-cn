@@ -131,4 +131,18 @@ test.describe("地铁打字", () => {
     await typeStop(page, word);
     await expect(panel(page).locator(".game-board-top span").first()).toHaveText("第 2 / 8 站");
   });
+
+  test("blurring the input during IME composition does not deadlock station submission", async ({ page }) => {
+    await openApp(page, "/#games");
+    await page.locator("#game-tab-typing").click();
+    await page.locator("#typing-start").click();
+    const word = await target(page).innerText();
+    await input(page).focus();
+    await input(page).dispatchEvent("compositionstart");
+    await input(page).fill(word);
+    // Simulate a browser/OS focus loss that omits compositionend before clicking submit.
+    await input(page).evaluate((el: HTMLInputElement) => el.blur());
+    await panel(page).locator("button[type=submit]").click();
+    await expect(panel(page).locator(".game-board-top span").first()).toHaveText("第 2 / 8 站");
+  });
 });

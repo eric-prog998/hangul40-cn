@@ -676,26 +676,26 @@ test("ships 18 distinct native-speaker consonant onsets and treats initial ㅇ a
   const silent = metadata.filter((item) => item.initialSilent);
   const clipById = new Map(clips.map((item) => [item.id, item]));
   const expectedOutputs = new Map([
-    ["giyeok", "793526ccd6d19a5c7f5c92a6d1f2ac5ec50c0062cdaa0afea2ef7432dcc211e6"],
-    ["ssang-giyeok", "41c45e5bd378d212096db3b5ef602b60cf4d96e58a32b9950ca2fc9332720aa9"],
-    ["nieun", "6ea366e5c6b6a325f3c561c0732e9f9fb3ed8132a59930ca44560a9422fd4551"],
-    ["digeut", "912ddadfd05c30ebde9c018bae7b3ba9fe4a0d02ea1beb6b34848b3b84f5c5ce"],
-    ["ssang-digeut", "87365fde3d8471f36d57c76a967002a6cc3a376070d14c5f174c66dff1868f42"],
-    ["rieul", "a99c56c302863669108ab8af2d54e21829775cbaa2c63851486cfab8a82965a2"],
-    ["mieum", "7b92041791ea03d63b8052bb7712db059dcde636df55405b9001939d3d302299"],
-    ["bieup", "5f01a3e5c72a1ad9c80b833dde889ba059aad29df327f4ffd0ad8ad1c6b0d5a6"],
-    ["ssang-bieup", "5bc05ae3aa5836370405404275ef04fc77e8a158d2c2539cd86a201134cb5c8a"],
-    ["siot", "b5209a75ffa0a072dc5071150e6ae87cf1ca0853f4509d854c715da3fd3a9ac2"],
-    ["ssang-siot", "73d7cfebfe7d68bf06841e2893f0701cfcd07ee90b6429a6088eab1338e8d9d4"],
-    ["jieut", "ebe635cc798e920e576de97a0823deca0a6c6dba0fd43b67ce395eb3dc894ff2"],
-    ["ssang-jieut", "03df5535f5fedb804384b59ca263825ed7a916cfdcb863d7c4408ca9ab4f99e5"],
-    ["chieut", "3a29b1f81044fdc4f36c5f015c34a9b6bcc1b7bd57caaa98effe69f756b912c6"],
-    ["kieuk", "63dd8606ba20500ee01fe239b6585596c1903146cbbdbb45f1da90bd1b54c615"],
-    ["tieut", "997d4c6478bcce555dea8ef8fe0927895a78217ed699dd8f3606a5185e79c603"],
-    ["pieup", "e4cd35f507f8e0f2d5e5c8258157342abcc8be0f1c1708e09a8067d0def307f4"],
-    ["hieut", "4c85c3bbab9c5a30e2e0c931aed598f3956bc912f55cc5a3bacf59e816f97674"],
+    ["giyeok", "4f6c4fc00db01dfc4a7e711d6e5dcf743d3ad5ddf7ebc478d5d4846a96887e14"],
+    ["ssang-giyeok", "106f0c230c61c211fcbf5939aefc87de619d4db638987020e3cab3e066bc2804"],
+    ["nieun", "c73ec25856d63a833ada7acc1b8c9970b78512fc703af324a1d3cef2e65fc478"],
+    ["digeut", "82bc5033ee3ddc5136d9e8283d5aaa09408b1f065bfdb9ee0eb67ea5f417d31b"],
+    ["ssang-digeut", "c517b5f7ed57ab792451347ff4ea51310a377f450b9010b1f813be054d708bdc"],
+    ["rieul", "77f5e64621e91e52eb32350f39cf3675fdd16d4b6badbdb325a86063f5c968b4"],
+    ["mieum", "2c4ec34e6540dee9b1fd1720e89870613bb2e1cd04ab8016a69df29d52e0f886"],
+    ["bieup", "15d380f6033395a881b08efb92156f7332f8fef47d8679d6943a8415de04e60e"],
+    ["ssang-bieup", "cfb217b7cd47a1c562efeafb0a2331c89e76c8eebe4eba8391a8e9d51b247007"],
+    ["siot", "b349776ea60f59cd2cb38d94f9be335f1c65978f8c696078a835ff8056fca1fa"],
+    ["ssang-siot", "435210787c82e92486038fd4a617c146e5dd3e44d1d7864d2ec81ed8b0945242"],
+    ["jieut", "9d20255d8bb1525869f8acf6d3f01565e73c7affd32a02d39ff7e0d669da4f3a"],
+    ["ssang-jieut", "a269baa3bdf9008dbfdb441d2d820394ea52088ca46acd0fd97eed693c6369d6"],
+    ["chieut", "3c6fdb4169d4d2d859da23b39ebd22d519bd43364d74d80ebd628f6b2e74cff3"],
+    ["kieuk", "49da80aa49fb64d23730eb7b1b161622ca8bba46b65e18bcacbc713886bc9734"],
+    ["tieut", "c23b0b7639b1018cb281c5201e6247dc78bf5b7fcd3eb0212467c6ac2284afed"],
+    ["pieup", "f0d277c8537912065cdae3f829082168daefe7f49463cc67bba40e382906f32d"],
+    ["hieut", "ba968a4d1168fc83d1f8f78668f6ac7a6f3a33e92280a4fc30a7ddc5ed9d8083"],
   ]);
-  const refinedIds = new Set(["rieul", "ssang-digeut", "ssang-giyeok"]);
+  const refinedIds = new Set(["rieul", "ssang-bieup", "ssang-digeut", "ssang-giyeok"]);
   const hashes = [];
 
   assert.equal(metadata.length, 19);
@@ -718,9 +718,10 @@ test("ships 18 distinct native-speaker consonant onsets and treats initial ㅇ a
   assert.deepEqual(
     clips.filter((item) => refinedIds.has(item.id)).map((item) => [item.char, item.sourceWord, item.startMs, item.endMs, item.fadeOutMs, item.silenceTailMs, item.targetPeak]),
     [
-      ["ㄲ", "까다", 195, 270, 24, 12, 26_000],
-      ["ㄸ", "따르다", 202, 277, 24, 12, 26_000],
-      ["ㄹ", "라오스", 210, 273, 25, 12, 26_000],
+      ["ㄲ", "까다", 200, 266, 22, 12, 28_500],
+      ["ㄸ", "따르다", 206, 268, 22, 12, 28_500],
+      ["ㄹ", "라오스", 212, 272, 24, 12, 28_500],
+      ["ㅃ", "빨다", 204, 272, 24, 12, 28_500],
     ],
   );
 
@@ -1068,7 +1069,7 @@ test("versions every audio URL and keeps question gating", async () => {
   assert.match(page, /return `\$\{phraseSource\}\?v=\$\{AUDIO_ASSET_VERSION\}`/);
   assert.match(page, /return versionedAudioPath\(`\/audio\/hangul-natural\//);
   assert.match(page, /revisedClips\[path\]\?\.slice\(0, 16\) \?\? AUDIO_ASSET_VERSION/);
-  assert.match(page, /function consonantOnsetPath[\s\S]*?`\/audio\/consonant-human-onset\/\$\{audioFile\}\?v=\$\{AUDIO_ASSET_VERSION\}`/);
+  assert.match(page, /function consonantOnsetPath[\s\S]*?versionedAudioPath\(`\/audio\/consonant-human-onset\/\$\{audioFile\}`\)/);
   assert.doesNotMatch(page, /consonant-human-clarity/);
   assert.match(page, /function playReferenceLetterExampleAudio[\s\S]*?consonantOnsetPath\(letter\)/);
   assert.match(page, /\/audio\/consonant-names\/\$\{item\.id\}\.mp3/);

@@ -58,7 +58,7 @@ def write_clip(source: Path, output: Path, item: dict[str, object]) -> dict[str,
     target_peak = float(item.get("targetPeak", 32767 * 0.90))
     raised_cosine_fades(clip, rate, fade_in_ms, fade_out_ms)
     peak = max(abs(sample) for sample in clip)
-    gain = min(12.0, target_peak / max(1.0, peak))
+    gain = min(30.0, target_peak / max(1.0, peak))
     encoded = [int(max(-32768, min(32767, round(sample * gain)))) for sample in clip]
     encoded.extend([0] * round(rate * silence_tail_ms / 1000))
 

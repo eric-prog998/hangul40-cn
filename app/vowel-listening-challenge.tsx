@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
+import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { imeOwnsPanelKey, keyboardSectionIndex, keyboardShortcutKey, koreanKeyInput, koreanKeyLabel } from "./keyboard-logic";
 import { VOWEL_CONTRASTS } from "./pronunciation-data";
 import { advanceVowelQuestion, answerVowelQuestion, makeVowelQuestions, missedVowelQuestions, newVowelChallenge, shuffleVowelQuestions, vowelChallengeSummary, type VowelChallengeState } from "./vowel-challenge-logic";
@@ -18,7 +18,7 @@ type Props = {
   autoAdvanceMs: AutoAdvanceDelay;
 };
 
-const VowelListeningChallenge = forwardRef<VowelChallengeHandle, Props>(function VowelListeningChallenge({ onPrepare, playSample, speed, onSpeedChange, history, autoAdvanceMs }, ref) {
+const VowelListeningChallenge = memo(forwardRef<VowelChallengeHandle, Props>(function VowelListeningChallenge({ onPrepare, playSample, speed, onSpeedChange, history, autoAdvanceMs }, ref) {
   const [state, setState] = useState<VowelChallengeState>(() => newVowelChallenge());
   const [playing, setPlaying] = useState(false);
   const [notice, setNotice] = useState("每题只听一个声音，选出对应字母；先听完整，再作答。");
@@ -153,8 +153,8 @@ const VowelListeningChallenge = forwardRef<VowelChallengeHandle, Props>(function
   const correct = state.attempts.filter(item => item.choice === item.question.answer).length;
   const missed = state.attempts.length - correct;
   const modeLabel = question?.mode === "isolated" ? "元音本音 · ㅇ 开头不发音" : "固定 ㄱ 音节 · 只比较元音";
-  const pendingQuestions = pendingVowelQuestions(history.records);
-  const recent = recentVowelResults(history.records);
+  const pendingQuestions = useMemo(() => pendingVowelQuestions(history.records), [history.records]);
+  const recent = useMemo(() => recentVowelResults(history.records), [history.records]);
 
   return <div id="vowel-listening" className="vowel-listening" role="region" aria-labelledby="vowel-listening-title" ref={panel} tabIndex={-1} onKeyDown={handleKey}>
     <div className="vowel-challenge-header"><div><span className="vowel-challenge-tag">新 · 听辨小挑战</span><h3 id="vowel-listening-title">遮住答案，听一听。</h3></div><span>{state.phase === "quiz" ? `${state.kind === "mistakes" ? "错题重练" : "盲听"} ${state.index + 1} / ${state.questions.length}` : "ㅓ / ㅗ · ㅡ / ㅜ"}</span></div>
@@ -173,6 +173,6 @@ const VowelListeningChallenge = forwardRef<VowelChallengeHandle, Props>(function
     {state.phase === "quiz" && <button type="button" onClick={() => { onPrepare(); focusPanel(); }}>暂停播放／自动下一题 <kbd>Esc</kbd></button>}
     <p className="vowel-challenge-help">1／2 选择；也可直接按韩文键：ㅓ J、ㅗ H、ㅡ M、ㅜ N。空格重听，Enter 开始／继续，Esc 暂停。返回口型对比会结束本轮，已答记录仍保留。<a href="#learning-tools" onClick={onPrepare}>设置下一题节奏 ↗</a></p>
   </div>;
-});
+}));
 
 export default VowelListeningChallenge;

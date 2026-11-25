@@ -5,6 +5,7 @@ import phraseData from "../data/phrases.json";
 import consonantNameData from "../data/consonant-names.json";
 import typingRouteData from "../data/typing-routes.json";
 import trimRevisions from "../data/core-tail-trims.json";
+import consonantOnsetRevisions from "../data/consonant-onset-revisions.json";
 import {
   INITIAL_ORDER as initialOrder,
   VOWEL_ORDER as vowelOrder,
@@ -257,6 +258,8 @@ const wordItems = phraseItems.filter((item) => item.type === "word");
 const sentenceItems = phraseItems.filter((item) => item.type === "sentence");
 const phraseItemById = new Map(phraseItems.map((item) => [item.id, item]));
 const phraseItemByKorean = new Map(phraseItems.map((item) => [item.korean, item]));
+const phraseBlocksById = new Map(phraseItems.map((item) => [item.id, decomposeHangulText(item.korean)]));
+const phraseBlockWordsById = new Map(phraseItems.map((item) => [item.id, item.korean.split(/\s+/).map((word) => decomposeHangulText(word)).filter((word) => word.length > 0)]));
 const phraseAudioPaths = new Map(phraseItems.map((item) => [item.korean, `/audio/phrases/${item.id}.mp3`]));
 const consonantNameAudioPaths = new Map(consonantNames.map((item) => [item.name, `/audio/consonant-names/${item.id}.mp3`]));
 const coreVowelChars = ["ㅏ", "ㅓ", "ㅗ", "ㅜ", "ㅡ", "ㅣ"];
@@ -320,6 +323,8 @@ const emptyStats: GameStats = { date: "", dailyXp: 0, totalXp: 0, bestCombo: 0, 
 const validLetterChars = new Set(allLetters.map((letter) => letter.char));
 const validPhraseIds = new Set(phraseItems.map((item) => item.id));
 const progressValidation = { allowedLetters: validLetterChars, allowedPhraseIds: validPhraseIds };
+const backupValidation = { ...progressValidation, allowedRouteIds: typingRouteIds };
+const parseBackupText = (text: string) => parsePortableBackup(text, backupValidation);
 const initialMatchLetters = selectFairBlindLetters(audibleLetters.map((letter) => letter.char), 6)
   .map((char) => audibleLetters.find((letter) => letter.char === char))
   .filter((letter): letter is Letter => Boolean(letter));
@@ -763,7 +768,7 @@ function shuffle<T>(items: T[]) {
   return result;
 }
 
-const revisedClips: Readonly<Record<string, string>> = trimRevisions;
+const revisedClips: Readonly<Record<string, string>> = { ...trimRevisions, ...consonantOnsetRevisions };
 function versionedAudioPath(path: string) {
   return path ? path + "?v=" + (revisedClips[path]?.slice(0, 16) ?? AUDIO_ASSET_VERSION) : "";
 }
@@ -791,7 +796,7 @@ function stopSpeechSynthesis() {
 
 function consonantOnsetPath(letter: Letter) {
   const audioFile = consonantNameMap.get(letter.char)?.audioFile;
-  return audioFile ? `/audio/consonant-human-onset/${audioFile}?v=${AUDIO_ASSET_VERSION}` : "";
+  return audioFile ? versionedAudioPath(`/audio/consonant-human-onset/${audioFile}`) : "";
 }
 
 function preloadAudioSource(source: string) {
@@ -930,7 +935,7 @@ function phraseMatchesGroup(item: PhraseItem, group: string) {
 }
 
 function phraseReadingLevel(item: PhraseItem, knownLetters: Set<string>): PhraseReadingLevel {
-  const blocks = decomposeHangulText(item.korean);
+  const blocks = phraseBlocksById.get(item.id) ?? decomposeHangulText(item.korean);
   if (blocks.length === 0 || blocks.some(({ initial, vowel }) => !knownLetters.has(initial) || !knownLetters.has(vowel))) return "new";
   return blocks.some(({ final }) => final !== null) ? "batchim" : "ready";
 }
@@ -968,8 +973,11 @@ export default function Home() {
   const vowelHistory = useVowelHistory();
   const { activity: planActivity, start: startPlanActivity, end: endPlanActivity } = usePlanActivity();
   const dailyPlan = useMemo(() => dailyPlanSummary(reviewPhraseIds, dailyReview.records, vowelHistory.records, dailyReview.today), [dailyReview.records, dailyReview.today, vowelHistory.records]);
+  const planStorageMessages = useMemo(() => [dailyReview.storageMessage, vowelHistory.storageMessage], [dailyReview.storageMessage, vowelHistory.storageMessage]);
   const [autoAdvanceMs, setAutoAdvanceMs] = useState<AutoAdvanceDelay>(3000);
   const [audioSpeed, setAudioSpeed] = useState<1 | 0.82>(1);
+  const audioSpeedRef = useRef<1 | 0.82>(1);
+  audioSpeedRef.current = audioSpeed;
   const playDayClip = useCallback(async (path: string) => {
     return (await playAudioSourceToEnd(versionedAudioPath(path), audioSpeed, true)) === "ended";
   }, [audioSpeed]);
@@ -1328,6 +1336,15 @@ export default function Home() {
     }
   }, [cancelActiveSpeedRound, cancelComparisonSequence, cancelMatchInteraction, pauseTypingRun, resetKoreanInput]);
 
+  const prepareReferenceActivity = useCallback(() => {
+    claimPhraseActivity();
+    phrasePlaybackRequestRef.current += 1;
+    setPhraseAutoAdvanceCancelled(true);
+    stopAudioPlayback();
+    stopSpeechSynthesis();
+    audioActivityRef.current = "reference";
+  }, [claimPhraseActivity]);
+
   const syllable = useMemo(() => makeSyllable(initial, vowel), [initial, vowel]);
   const blendTarget = useMemo(() => makeSyllable(blendInitial, blendVowel), [blendInitial, blendVowel]);
   const currentLetters = activeSet === "consonants" ? consonants : vowels;
@@ -1347,17 +1364,19 @@ export default function Home() {
   const phraseTypeItems = phraseTab === "word" ? wordItems : sentenceItems;
   const phraseGroups = useMemo(() => [...new Set((phraseTab === "word" ? wordItems : sentenceItems).map((item) => item.group))], [phraseTab]);
   const featuredPhraseGroups = phraseTab === "word" ? [STARTER_PHRASE_GROUP] : [SURVIVAL_PHRASE_GROUP];
-  const phraseGroupItems = phraseTypeItems.filter((item) => phraseMatchesGroup(item, phraseGroup));
+  const phraseGroupItems = useMemo(() => phraseTypeItems.filter((item) => phraseMatchesGroup(item, phraseGroup)), [phraseGroup, phraseTypeItems]);
   const masteredLetterSet = useMemo(() => new Set(mastered), [mastered]);
+  const masteredPhraseSet = useMemo(() => new Set(masteredPhrases), [masteredPhrases]);
+  const revealedPhraseSet = useMemo(() => new Set(revealedPhrases), [revealedPhrases]);
   const phraseReadingLevels = useMemo(() => new Map(phraseTypeItems.map((item) => [item.id, phraseReadingLevel(item, masteredLetterSet)])), [phraseTypeItems, masteredLetterSet]);
-  const phraseReadyCount = phraseGroupItems.filter((item) => phraseReadingLevels.get(item.id) === "ready").length;
-  const phraseQuizItems = phraseReadFilter === "ready" ? phraseGroupItems.filter((item) => phraseReadingLevels.get(item.id) === "ready") : phraseGroupItems;
-  const confirmablePhraseItems = phraseGroupItems.filter((item) => phraseQuizCorrectIds.includes(item.id) && !phraseQuizWrongIds.includes(item.id) && !masteredPhrases.includes(item.id));
-  const confirmableListenChars = listenCorrectChars.filter((char) => !listenWrongChars.includes(char) && listenMasteryScope.includes(char) && !mastered.includes(char));
+  const phraseReadyCount = useMemo(() => phraseGroupItems.filter((item) => phraseReadingLevels.get(item.id) === "ready").length, [phraseGroupItems, phraseReadingLevels]);
+  const phraseQuizItems = useMemo(() => phraseReadFilter === "ready" ? phraseGroupItems.filter((item) => phraseReadingLevels.get(item.id) === "ready") : phraseGroupItems, [phraseGroupItems, phraseReadFilter, phraseReadingLevels]);
+  const confirmablePhraseItems = phraseGroupItems.filter((item) => phraseQuizCorrectIds.includes(item.id) && !phraseQuizWrongIds.includes(item.id) && !masteredPhraseSet.has(item.id));
+  const confirmableListenChars = listenCorrectChars.filter((char) => !listenWrongChars.includes(char) && listenMasteryScope.includes(char) && !masteredLetterSet.has(char));
   const phraseQuizTargetCount = phraseQuizItems.length;
   const phraseQuizAvailableTotal = phraseQuizRoundLimit(phraseQuizTargetCount, phraseGroup !== "all" || phraseReadFilter === "ready");
   const phraseQuizTotal = phraseQuizStarted ? phraseQuizRoundTotal : phraseQuizAvailableTotal;
-  const visiblePhraseItems = phraseGroupItems.filter((item) => (phraseFilter === "all" || (phraseFilter === "mastered" ? masteredPhrases.includes(item.id) : !masteredPhrases.includes(item.id)))
+  const visiblePhraseItems = phraseGroupItems.filter((item) => (phraseFilter === "all" || (phraseFilter === "mastered" ? masteredPhraseSet.has(item.id) : !masteredPhraseSet.has(item.id)))
     && (phraseReadFilter === "all" || phraseReadingLevels.get(item.id) === "ready"));
   const typingRoute = typingRoutes.find((route) => route.id === typingRouteId) ?? typingRoutes[0];
   const typingItems = typingRouteItems.get(typingRoute.id) ?? [];
@@ -1365,12 +1384,21 @@ export default function Home() {
   const typingAccuracy = calculateTypingAccuracy(typingCompletedCharacters, typingErrorCharacters);
   const typingCpm = calculateTypingCpm(typingCompletedCharacters, typingElapsedMs);
   const typingBest = typingBestRecords[typingRoute.id];
-  const coreVowelMastered = coreVowelChars.filter((char) => mastered.includes(char)).length;
-  const basicConsonantMastered = basicConsonantChars.filter((char) => mastered.includes(char)).length;
-  const advancedConsonantMastered = advancedConsonantChars.filter((char) => mastered.includes(char)).length;
-  const advancedVowelMastered = advancedVowelChars.filter((char) => mastered.includes(char)).length;
-  const starterPhraseMastered = starterPhraseItems.filter((item) => masteredPhrases.includes(item.id)).length;
-  const survivalMastered = [...survivalPhraseIds].filter((id) => masteredPhrases.includes(id)).length;
+  const {
+    coreVowelMastered,
+    basicConsonantMastered,
+    advancedConsonantMastered,
+    advancedVowelMastered,
+    starterPhraseMastered,
+    survivalMastered,
+  } = useMemo(() => ({
+    coreVowelMastered: coreVowelChars.filter((char) => masteredLetterSet.has(char)).length,
+    basicConsonantMastered: basicConsonantChars.filter((char) => masteredLetterSet.has(char)).length,
+    advancedConsonantMastered: advancedConsonantChars.filter((char) => masteredLetterSet.has(char)).length,
+    advancedVowelMastered: advancedVowelChars.filter((char) => masteredLetterSet.has(char)).length,
+    starterPhraseMastered: starterPhraseItems.filter((item) => masteredPhraseSet.has(item.id)).length,
+    survivalMastered: [...survivalPhraseIds].filter((id) => masteredPhraseSet.has(id)).length,
+  }), [masteredLetterSet, masteredPhraseSet]);
   const fullReviewPrerequisitesComplete = coreVowelMastered === coreVowelChars.length
     && basicConsonantMastered === basicConsonantChars.length
     && beginnerBlendCompleted
@@ -1937,6 +1965,11 @@ export default function Home() {
         setShowRomanization(readStoredValue(ROMAN_HINT_KEY) !== "false");
         return;
       }
+      if (event.key === KEYBOARD_MODE_KEY) {
+        resetKoreanInput();
+        setKeyboardInputMode(readStoredValue(KEYBOARD_MODE_KEY) === "shortcuts" ? "shortcuts" : "hangul");
+        return;
+      }
       if (event.key === BEGINNER_BLEND_KEY) {
         setBeginnerBlendCompleted(readStoredValue(BEGINNER_BLEND_KEY) === "true");
         return;
@@ -1994,6 +2027,8 @@ export default function Home() {
           refreshProgress();
           compactSealedProgressLedgers();
         });
+        resetKoreanInput();
+        setKeyboardInputMode("hangul");
         setAudioSpeed(1);
         setShowRomanization(true);
         setBeginnerBlendCompleted(false);
@@ -2435,6 +2470,7 @@ export default function Home() {
     focusPausedTypingResume();
   }, [focusPausedTypingResume, gameMode, gameSectionVisible, pageVisible, showKeyboardHelp, typingPhase]);
 
+  const keyboardHandlerRef = useRef<(event: KeyboardEvent) => void>(() => {});
   // Install the current scene's bindings in the same commit that moves focus.
   // Otherwise the next physical key can still reach the previous scene's handler.
   useLayoutEffect(() => {
@@ -2677,10 +2713,14 @@ export default function Home() {
       }
       if (event.defaultPrevented && gameMode !== "typing") focusGameKeyboard();
     }
+    keyboardHandlerRef.current = handleKeyboard;
+  });
 
+  useLayoutEffect(() => {
+    const handleKeyboard = (event: KeyboardEvent) => keyboardHandlerRef.current(event);
     window.addEventListener("keydown", handleKeyboard);
     return () => window.removeEventListener("keydown", handleKeyboard);
-  });
+  }, []);
 
   function updateStats(updater: (current: GameStats) => GameStats) {
     const today = localDateKey();
@@ -2697,25 +2737,36 @@ export default function Home() {
     syncProgressFromStorage();
   }
 
-  function changeAutoAdvance(value: AutoAdvanceDelay, save = true) {
+  const autoAdvanceMsRef = useRef(autoAdvanceMs);
+  autoAdvanceMsRef.current = autoAdvanceMs;
+
+  const changeAutoAdvance = useCallback((value: AutoAdvanceDelay, save = true) => {
     prepareReferenceActivity();
+    autoAdvanceMsRef.current = value;
     setAutoAdvanceMs(value);
     if (!save) return;
     try {
       window.localStorage.setItem(AUTO_ADVANCE_KEY, String(value));
       if (window.localStorage.getItem(AUTO_ADVANCE_KEY) !== String(value)) throw new Error("write failed");
     } catch { showNotice("下一题设置仅本页有效，浏览器暂未保存。"); }
-  }
+  }, [prepareReferenceActivity]);
+
+  const changeAutoAdvanceFromStorageRef = useRef(changeAutoAdvance);
+  changeAutoAdvanceFromStorageRef.current = changeAutoAdvance;
 
   useEffect(() => {
     const update = (event: StorageEvent) => {
-      if (event.key === AUTO_ADVANCE_KEY || event.key === null) changeAutoAdvance(parseAutoAdvance(event.newValue), false);
+      if (event.storageArea && event.storageArea !== window.localStorage) return;
+      if (event.key === AUTO_ADVANCE_KEY || event.key === null) {
+        const next = parseAutoAdvance(event.newValue);
+        if (next !== autoAdvanceMsRef.current) changeAutoAdvanceFromStorageRef.current(next, false);
+      }
     };
     window.addEventListener("storage", update);
     return () => window.removeEventListener("storage", update);
-  });
+  }, []);
 
-  const backupValidation = { ...progressValidation, allowedRouteIds: typingRouteIds };
+  const playAudioGuideClip = useCallback((path: string) => playAudioSourceToEnd(versionedAudioPath(path), 1), []);
 
   async function exportLearningBackup(): Promise<PortableBackup> {
     if (!progressEpochReadyRef.current && !await ensureProgressEpoch(false)) throw new Error("学习进度还未能安全读取，请稍后再导出；原数据不会被覆盖。");
@@ -2765,6 +2816,13 @@ export default function Home() {
       return "已合并恢复到本浏览器。现有已学内容保留，经验未重复累加；可以继续学习。";
     });
   }
+
+  const exportLearningBackupRef = useRef(exportLearningBackup);
+  exportLearningBackupRef.current = exportLearningBackup;
+  const exportLearningBackupStable = useCallback(() => exportLearningBackupRef.current(), []);
+  const importLearningBackupRef = useRef(importLearningBackup);
+  importLearningBackupRef.current = importLearningBackup;
+  const importLearningBackupStable = useCallback((input: PortableBackup) => importLearningBackupRef.current(input), []);
 
   function awardXp(points: number, combo = 0) {
     updateStats((current) => ({
@@ -3023,9 +3081,7 @@ export default function Home() {
     });
   }
 
-  function playSound(text: string, speed = audioSpeed) {
-    return playKorean(text, speed);
-  }
+  const playSound = useCallback((text: string, speed?: 1 | 0.82) => playKorean(text, speed ?? audioSpeedRef.current), []);
 
   function playPhraseItemSource(item: PhraseItem, speed = audioSpeed) {
     return playKorean(item.korean, speed);
@@ -3144,7 +3200,11 @@ export default function Home() {
     if (activity === "reference") prepareReferenceActivity();
     audioActivityRef.current = activity;
     cancelComparisonSequence(false);
-    const source = consonantNameMap.has(letter.char) ? consonantOnsetPath(letter) : audioPath(letter.sample);
+    const source = letter.char === "ㅇ"
+      ? ""
+      : activity === "reference" && consonantNameMap.has(letter.char)
+        ? consonantOnsetPath(letter)
+        : audioPath(letter.sample);
     if (!source) {
       stopAudioPlayback();
       stopSpeechSynthesis();
@@ -3265,14 +3325,15 @@ export default function Home() {
     return result === "ended";
   }
 
-  function changeAudioSpeed(speed: 1 | 0.82) {
+  const changeAudioSpeed = useCallback((speed: 1 | 0.82) => {
+    audioSpeedRef.current = speed;
     setAudioSpeed(speed);
     try {
       window.localStorage.setItem("hangul-audio-speed", String(speed));
     } catch {
       // The speed switch still works when storage is unavailable.
     }
-  }
+  }, []);
 
   function changeRomanization(show: boolean) {
     setShowRomanization(show);
@@ -3362,6 +3423,7 @@ export default function Home() {
     enterScene(next);
     setDestination({ id, focus });
   }, [enterScene, selectRouteTarget]);
+  const goHome = useCallback(() => moveToSection("top"), [moveToSection]);
 
   useLayoutEffect(() => {
     // Native history events need the latest activity state without reinstalling
@@ -3532,32 +3594,38 @@ export default function Home() {
     else startFullReview();
   }
 
-  function returnToDailyPlan() {
+  const returnToDailyPlan = useCallback(() => {
     prepareReferenceActivity();
     endPlanActivity();
     moveToSection("today-plan", "today-plan");
-  }
+  }, [endPlanActivity, moveToSection, prepareReferenceActivity]);
 
-  function openPlanReview() {
+  const openPlanReview = useCallback(() => {
     if (!dailyReview.ready || !dailyPlan || dailyPlan.review.target === 0) return;
     prepareReferenceActivity();
     startPlanActivity("review");
     moveToSection("daily-review", "daily-review");
-  }
+  }, [dailyPlan, dailyReview.ready, moveToSection, prepareReferenceActivity, startPlanActivity]);
 
-  function openPlanListening() {
+  const openPlanListening = useCallback(() => {
     if (!vowelHistory.ready) return;
     prepareReferenceActivity();
     startPlanActivity("listening");
     vowelPracticeRef.current?.openChallenge();
     moveToSection("pronunciation-practice", "vowel-listening");
-  }
+  }, [moveToSection, prepareReferenceActivity, startPlanActivity, vowelHistory.ready]);
 
+  const continueBeginnerPathRef = useRef(continueBeginnerPath);
+  continueBeginnerPathRef.current = continueBeginnerPath;
   /** The route's third step is an ordinary lesson, not a short practice. */
-  function openPlanLesson() {
+  const openPlanLesson = useCallback(() => {
     endPlanActivity();
-    continueBeginnerPath();
-  }
+    continueBeginnerPathRef.current();
+  }, [endPlanActivity]);
+
+  const playKeyboardLetterRef = useRef(playKeyboardLetter);
+  playKeyboardLetterRef.current = playKeyboardLetter;
+  const playKeyboardLetterStable = useCallback((char: string, mode: KeyboardAudioMode) => playKeyboardLetterRef.current(char, mode), []);
 
   function openHelpFromButton(event: React.MouseEvent<HTMLButtonElement>) {
     // WebKit does not always focus a pointer-activated button.
@@ -3905,15 +3973,6 @@ export default function Home() {
     if (mode !== "typing" && typingPhaseRef.current !== "idle") {
       resetTypingRun("本次行程已结束；重新进入后可选择线路再发车。");
     }
-  }
-
-  function prepareReferenceActivity() {
-    claimPhraseActivity();
-    phrasePlaybackRequestRef.current += 1;
-    setPhraseAutoAdvanceCancelled(true);
-    stopAudioPlayback();
-    stopSpeechSynthesis();
-    audioActivityRef.current = "reference";
   }
 
   function openBatchimLesson(id?: string) {
@@ -4510,13 +4569,13 @@ export default function Home() {
           </div>
           <div className="study-home-sheet" aria-label={`已标记 ${mastered.length} 个字母，共 40 个`}>
             <span>我的字母练习簿</span>
-            <div className="study-glyphs" lang="ko" aria-hidden="true">{coreVowelChars.map(char => <i key={char} className={mastered.includes(char) ? "known" : undefined}>{char}</i>)}</div>
+            <div className="study-glyphs" lang="ko" aria-hidden="true">{coreVowelChars.map(char => <i key={char} className={masteredLetterSet.has(char) ? "known" : undefined}>{char}</i>)}</div>
             <div className="study-home-progress"><strong>{mastered.length}<small> / 40</small></strong><span>字母已标记</span></div>
             <p className="header-progress xp-pill"><span>{gameStats.dailyXp}</span>&nbsp;XP 今日</p>
           </div>
         </section>
         <section id="my-day" data-scene="my-day" hidden={scene !== "my-day"} aria-label="我的韩语日课">
-          <MyDay visible={scene === "my-day"} active={scene === "my-day" && pageVisible && !showKeyboardHelp} day={localToday} legacy={mastered} onBadge={setDayBadge} onHome={() => moveToSection("top")} onStop={stopDayClip} onPlay={playDayClip}/>
+          <MyDay visible={scene === "my-day"} active={scene === "my-day" && pageVisible && !showKeyboardHelp} day={localToday} legacy={mastered} onBadge={setDayBadge} onHome={goHome} onStop={stopDayClip} onPlay={playDayClip}/>
         </section>
         <section id="builder" data-scene="builder" hidden={scene !== "builder"} className="scene-builder" aria-labelledby="builder-title">
 
@@ -4545,7 +4604,7 @@ export default function Home() {
         {scene === "today-plan" && <nav className="scene-subnav" aria-label="今日路线导航"><a href="#top">学习首页</a><a href="#starter">完整新手路线</a></nav>}
 
         <div data-scene="today-plan" hidden={scene !== "today-plan"} className="scene-wrap">
-        <DailyPlan summary={dailyPlan} ready={dailyReview.ready && vowelHistory.ready} nextLesson={beginnerNextLabel} beginner={coreVowelMastered < coreVowelChars.length} storageMessages={[dailyReview.storageMessage, vowelHistory.storageMessage]} onReview={openPlanReview} onListening={openPlanListening} onLesson={openPlanLesson} onPrepare={prepareReferenceActivity} />
+        <DailyPlan summary={dailyPlan} ready={dailyReview.ready && vowelHistory.ready} nextLesson={beginnerNextLabel} beginner={coreVowelMastered < coreVowelChars.length} storageMessages={planStorageMessages} onReview={openPlanReview} onListening={openPlanListening} onLesson={openPlanLesson} onPrepare={prepareReferenceActivity} />
         </div>
 
         <section className="starter-section" id="starter" data-scene="starter" hidden={scene !== "starter"} aria-labelledby="starter-title">
@@ -4618,7 +4677,7 @@ export default function Home() {
                 <div className="korean-input-heading"><strong>用自己的韩文键盘作答</strong><div role="group" aria-label="选择键盘答题方式"><button type="button" aria-pressed={keyboardInputMode === "hangul"} onClick={() => changeKeyboardInputMode("hangul")}>韩文键位</button><button type="button" aria-pressed={keyboardInputMode === "shortcuts"} onClick={() => changeKeyboardInputMode("shortcuts")}>ASDF 选项</button></div></div>
                 {directKoreanKeyboard && <>
                   <p className="korean-key-status" role="status" aria-live="polite"><span className={pressedKoreanKey ? "is-pressed" : ""}><kbd>{pressedKoreanKey || "⌨"}</kbd><b lang="ko">{koreanPending || "두벌식"}</b></span><span>{koreanKeyboardStatus || "按选项旁的韩文键位直接作答。R 是 ㄱ；重播请按空格。"}</span></p>
-                  <KoreanKeyboard activeKey={pressedKoreanKey} shifted={koreanShifted} onKey={handleKoreanGameKey} onShift={() => setKoreanShifted((value) => !value)} onClear={clearKoreanPending} />
+                  <KoreanKeyboard activeKey={pressedKoreanKey} shifted={koreanShifted} onKey={(char, physical) => { setKoreanShifted(false); handleKoreanGameKey(char, physical); }} onShift={() => setKoreanShifted((value) => !value)} onClear={() => { setKoreanShifted(false); clearKoreanPending(); }} />
                 </>}
               </div>}
 
@@ -4761,7 +4820,7 @@ export default function Home() {
                               if (event.shiftKey && !event.metaKey && !event.ctrlKey && !event.altKey) { event.preventDefault(); void replayTypingWord(); }
                             }}
                             onKeyUp={(event) => { if (event.key === "Enter") typingImeEnterRef.current = false; }}
-                            onBlur={() => { typingImeEnterRef.current = false; }} />
+                            onBlur={() => { typingCompositionRef.current = false; typingImeEnterRef.current = false; }} />
                           <p id="typing-input-help">请切换 Mac 韩语输入法（두벌식）。Enter 先完成输入法组合，再按一次确认答案；组合完成后按 Shift + Enter 重播，不需要功能键。</p>
                           <button type="submit" disabled={typingAudioBusy}>{typingAudioBusy ? "请先听完发音" : "确认到站"} <kbd>Enter</kbd></button>
                         </form>
@@ -4780,7 +4839,7 @@ export default function Home() {
         </div>
 
         <div data-scene="learning-tools" hidden={scene !== "learning-tools"} className="scene-wrap">
-        <LearningTools autoAdvanceMs={autoAdvanceMs} onAutoAdvance={changeAutoAdvance} onPrepare={prepareReferenceActivity} onExport={exportLearningBackup} onParse={text => parsePortableBackup(text, backupValidation)} onImport={importLearningBackup} />
+        <LearningTools autoAdvanceMs={autoAdvanceMs} onAutoAdvance={changeAutoAdvance} onPrepare={prepareReferenceActivity} onExport={exportLearningBackupStable} onParse={parseBackupText} onImport={importLearningBackupStable} />
         </div>
 
         <section className="phrase-section" id="phrases" data-scene="phrases" hidden={scene !== "phrases"} aria-labelledby="phrases-title" onMouseDown={claimPhraseActivity} onFocusCapture={claimPhraseActivity}>
@@ -4822,10 +4881,10 @@ export default function Home() {
               <div className="phrase-library-head"><div><strong>翻卡背诵</strong><span>先听、先读，最后再翻中文</span></div><div className="phrase-library-tools"><small>{phraseGroup === "all" ? (phraseTab === "word" ? `共 ${phraseTypeItems.length} 个 · 可按会的字筛选` : "按意群整句跟读") : `正在练：${phraseGroup}`}</small><button type="button" aria-pressed={!showRomanization} onClick={() => changeRomanization(!showRomanization)}>{showRomanization ? "隐藏罗马字" : "✓ 直读模式"}</button></div></div>
               <div className={`phrase-grid ${phraseTab === "sentence" ? "sentence-grid" : ""}`}>
                 {visiblePhraseItems.map((item) => {
-                  const revealed = revealedPhrases.includes(item.id);
-                  const masteredPhrase = masteredPhrases.includes(item.id);
+                  const revealed = revealedPhraseSet.has(item.id);
+                  const masteredPhrase = masteredPhraseSet.has(item.id);
                   const expanded = expandedPhraseId === item.id;
-                  const blockWords = item.korean.split(/\s+/).map((word) => decomposeHangulText(word)).filter((word) => word.length > 0);
+                  const blockWords = phraseBlockWordsById.get(item.id) ?? [];
                   const readingLevel = phraseReadingLevels.get(item.id) ?? "new";
                   const readingLabel = readingLevel === "ready" ? "现在可直读" : readingLevel === "batchim" ? "收音下一关" : "含新字母";
                   return <article className={`${revealed ? "revealed" : ""} ${masteredPhrase ? "mastered" : ""}`} key={item.id}>
@@ -4868,14 +4927,14 @@ export default function Home() {
             <div><span className="section-kicker">随时查音</span><h2 id="learn-title">韩语 40 音表</h2><p>想知道字母叫什么，选「听名称」；想跟读，选「听音节」。两个按钮各播一次，不会连读。合成示范和真人片段均待教师逐条核听。</p></div>
             <div className="mastery-meter" aria-label={`已标记进度 ${mastered.length} / 40`}><div><span>已标记</span><strong>{mastered.length}<small>/40</small></strong></div><div className="meter-track"><span style={{ width: `${(mastered.length / 40) * 100}%` }} /></div></div>
           </div>
-          <LetterKeyboardLab onPrepare={prepareReferenceActivity} onPlay={playKeyboardLetter} />
+          <LetterKeyboardLab onPrepare={prepareReferenceActivity} onPlay={playKeyboardLetterStable} />
           <div className="letter-tabs" role="tablist" aria-label="选择字母类型">
             <button id="letter-tab-consonants" type="button" role="tab" aria-controls="letter-panel" aria-selected={activeSet === "consonants"} tabIndex={activeSet === "consonants" ? 0 : -1} onKeyDown={handleLetterTabKeyDown} onClick={() => changeActiveSet("consonants")}><span>辅音</span><strong>19</strong><small>名称 / 音节</small></button>
             <button id="letter-tab-vowels" type="button" role="tab" aria-controls="letter-panel" aria-selected={activeSet === "vowels"} tabIndex={activeSet === "vowels" ? 0 : -1} onKeyDown={handleLetterTabKeyDown} onClick={() => changeActiveSet("vowels")}><span>元音</span><strong>21</strong><small>看口型和舌位</small></button>
           </div>
           {activeSet === "consonants" && (
             <section className="onset-lab" aria-labelledby="onset-lab-title" aria-busy={comparisonBusy}>
-              <div className="onset-lab-copy"><span>进阶试听</span><h3 id="onset-lab-title">真人起音 ↔ 完整音节对照器</h3><p>左边只播一次真人起音；右边播带元音的完整 AI 音节。只有明确选择「顺序播放」才会自动接着播下一段。</p><a href="#compare">对比同一元音：가 / 까 / 카</a></div>
+              <div className="onset-lab-copy"><span>进阶试听</span><h3 id="onset-lab-title">真人起音 ↔ 完整音节对照器</h3><p>左边只播一次真人非圆唇起音（避开 씨、귀、코 等颚化或圆唇变体）；右边播带元音的完整 AI 音节（可选中性元音 ㅡ 或 ㅏ 听清松音、紧音、送气音差别）。只有明确选择「顺序播放」才会自动接着播下一段。</p><a href="#compare">对比同一元音：가 / 까 / 카</a></div>
               <div className="onset-lab-workspace">
                 <div className="onset-lab-controls">
                   <label><span>选辅音</span><select lang="ko" value={comparisonConsonant} onChange={(event) => { cancelComparisonSequence(); setComparisonConsonant(event.target.value); setComparisonStatus("已换辅音；可分别试听或做顺序对照。"); }}>{initialOrder.map((item) => <option key={item}>{item}</option>)}</select></label>
@@ -4898,7 +4957,7 @@ export default function Home() {
           </div>
           <div id="letter-panel" className="letter-grid" role="tabpanel" aria-labelledby={`letter-tab-${activeSet}`}>
             {visibleLetters.map((letter) => {
-              const isMastered = mastered.includes(letter.char);
+              const isMastered = masteredLetterSet.has(letter.char);
               const consonantName = consonantNameMap.get(letter.char);
               return <article className={`letter-card ${isMastered ? "is-mastered" : ""}`} key={letter.char}><button id={`letter-master-${letter.char}`} className="master-button" type="button" onClick={() => toggleMastered(letter.char)} aria-label={`${isMastered ? "取消" : "标记"} ${letter.char} 已学过`} aria-pressed={isMastered}>{isMastered ? "✓" : ""}</button><div className="letter-sound"><span className="card-group">{letter.group}</span><strong className="jamo" lang="ko">{letter.char}</strong><span className="roman">{showRomanization ? letter.roman : "罗马字已隐藏"}</span><LetterAudioActions char={letter.char} sample={letter.sample} consonant={consonantName}
                 onName={() => { if (consonantName) void playLetterName(consonantName.name); }}
@@ -4908,7 +4967,7 @@ export default function Home() {
             })}
             {visibleLetters.length === 0 && <div className="letter-grid-empty"><strong>这一组已经全部掌握了</strong><p>可以取消“只看未掌握”，复习全部字母。</p><button type="button" onClick={() => setLetterFilter("all")}>显示全部</button></div>}
           </div>
-          <p className="pronunciation-note"><span className="pronunciation-note-icon" aria-hidden="true">♪</span><span className="pronunciation-note-copy"><strong>真人起音说明：</strong>18 条起音来自韩国母语者 호로조 的 CC0 原始 WAV，按声谱边界截去完整元音和词尾。每次点读只播单次原片段，不加元音。它是听发音动作的辅助材料，不单独用来判断盲听答错；跟读和辅音听辨使用完整音节。ㅇ 初声无声。<a href="https://commons.wikimedia.org/wiki/Category:Lingua_Libre_pronunciation_by_%ED%98%B8%EB%A1%9C%EC%A1%B0" target="_blank" rel="noreferrer">查看真人音源</a><a href="https://www.korean.go.kr/front/onlineQna/onlineQnaView.do?mn_id=261&amp;pageIndex=1&amp;qna_seq=329921" target="_blank" rel="noreferrer">查看 ㅇ 官方说明</a></span></p>
+          <p className="pronunciation-note"><span className="pronunciation-note-icon" aria-hidden="true">♪</span><span className="pronunciation-note-copy"><strong>真人起音说明：</strong>18 条起音全部取自韩国母语者 호로조（Jeebeen）的 CC0 原始 WAV，统一从非圆唇、非颚化词首（如 가다、까다、크다、사다、싸우다、자다、짜다、차 等）按声谱边界截取，消除旧版由 씨、귀、코、숲 等词带来的颚化／圆唇偏音。韩语塞音和弹音 ㄹ 无法脱离元音独立拉长，松音、紧音、送气音还依赖后续元音起首的音高与气流；跟读和听辨请配合完整音节。ㅇ 初声无声。<a href="https://commons.wikimedia.org/wiki/Category:Lingua_Libre_pronunciation_by_%ED%98%B8%EB%A1%9C%EC%A1%B0" target="_blank" rel="noreferrer">查看真人音源</a><a href="https://www.korean.go.kr/front/onlineQna/onlineQnaView.do?mn_id=261&amp;pageIndex=1&amp;qna_seq=329921" target="_blank" rel="noreferrer">查看 ㅇ 官方说明</a></span></p>
         </section>
 
         <div data-scene="pronunciation-practice" hidden={scene !== "pronunciation-practice"} className="scene-wrap">
@@ -4916,7 +4975,7 @@ export default function Home() {
         </div>
 
         <div data-scene="audio-guide" hidden={scene !== "audio-guide"} className="scene-wrap">
-        <AudioGuide key={audioFeedbackTarget.visit} reportId={audioFeedbackTarget.id} version={APP_VERSION} onPrepare={prepareReferenceActivity} onPlay={path => playAudioSourceToEnd(versionedAudioPath(path), 1)} onStop={stopAudioPlayback} />
+        <AudioGuide key={audioFeedbackTarget.visit} reportId={audioFeedbackTarget.id} version={APP_VERSION} onPrepare={prepareReferenceActivity} onPlay={playAudioGuideClip} onStop={stopAudioPlayback} />
         </div>
 
         <div data-scene="batchim-lesson" hidden={scene !== "batchim-lesson"} className="scene-wrap">

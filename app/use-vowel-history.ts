@@ -21,6 +21,7 @@ export function useVowelHistory() {
   useEffect(() => {
     const frame = requestAnimationFrame(refresh);
     const onStorage = (event: StorageEvent) => {
+      if (event.storageArea && event.storageArea !== window.localStorage) return;
       if (event.key === null) { unsaved.current = []; latest.current = []; }
       if (event.key === null || event.key.startsWith(VOWEL_HISTORY_PREFIX)) refresh();
     };

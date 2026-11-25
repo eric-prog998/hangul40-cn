@@ -23,7 +23,7 @@
 .day-letter-card button,.day-finish button,.day-margin button {font:inherit;font-weight:650;padding:.58rem .9rem;border:1px solid #9daea2;border-radius:8px;background:white;color:var(--ink)}
 .day-letter-card button:disabled {opacity:.55;cursor:default}
 .day-letter-card button:focus-visible,.day-finish button:focus-visible,.day-margin button:focus-visible,.day-free :focus-visible {outline:3px solid var(--coral);outline-offset:3px}
-.day-letter-card h2,.day-dialogue h2,.day-finish h2 {font-size:clamp(1.4rem,2.4vw,2rem);margin:.5rem 0}
+.day-letter-card h2,.day-letter-card h3,.day-dialogue h2,.day-dialogue h3,.day-finish h1,.day-finish h2 {font-size:clamp(1.4rem,2.4vw,2rem);font-weight:750;margin:.5rem 0}
 .day-letter-prompt {padding:.8rem 1rem;background:#edf2e4;border-radius:8px;margin:.5rem 0}
 .day-letter-prompt strong {font-size:clamp(2.7rem,5vw,4rem);line-height:1.25}
 .day-letter-actions,.day-more {display:flex;gap:.65rem;align-items:center;flex-wrap:wrap;margin:.7rem 0}
