@@ -34,4 +34,10 @@
 .day-letter-note,.day-notice,.day-margin small {font-size:.875rem;color:var(--ink-soft)}
 .day-letter-note:empty {display:none}
 .day-finish strong {display:block;font-size:1.5rem}
+.day-first-guide {padding:.8rem 1rem;border:1px solid #b8ccb0;border-left:4px solid var(--ink);border-radius:8px;background:#f4f8ea;margin:.6rem 0}
+.day-first-guide strong {display:block;font-size:.95rem;margin-bottom:.25rem}
+.day-first-guide p {margin:.25rem 0;font-size:.94rem}
+.day-first-guide small {display:block;margin-top:.35rem;font-size:.82rem;color:var(--ink-soft);line-height:1.55}
+.day-letter-card .hangul-keyboard {margin-top:.65rem;padding-top:.4rem}
+.day-letter-card .hangul-key-row button {padding:6px;border-radius:7px}
 @media(max-width:820px){.my-day-layout {width:calc(100% - 32px);grid-template-columns:1fr}.day-margin{margin-top:0}}

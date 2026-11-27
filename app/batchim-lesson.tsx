@@ -1,7 +1,19 @@
 "use client";
 
 import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
-import { BATCHIM_GROUPS, BATCHIM_RULE_SOURCE, BATCHIM_WORDS, batchimExampleIndex, isBatchimAnswerCorrect } from "./batchim-data";
+import {
+  BATCHIM_GROUPS,
+  BATCHIM_RULE_SOURCE,
+  BATCHIM_SEVEN_SOURCE,
+  BATCHIM_WORDS,
+  LIAISON_GROUPS,
+  LIAISON_WORDS,
+  STOP_BATCHIM_GROUPS,
+  STOP_BATCHIM_WORDS,
+  isBatchimAnswerCorrect,
+  resolveBatchimTarget,
+  type BatchimCourseKey,
+} from "./batchim-data";
 import { decomposeHangulSyllable } from "./learning-logic";
 import { imeOwnsPanelKey, keyboardShortcutKey, koreanKeyInput, koreanKeyLabel, keyboardSectionIndex } from "./keyboard-logic";
 import "./batchim-lesson.css";
@@ -10,8 +22,28 @@ import type { AutoAdvanceDelay } from "./learning-settings";
 export type BatchimLessonHandle = { stop: () => void; open: (id?: string) => void };
 type Props = { items: readonly { id: string; korean: string; chinese: string }[]; onPrepare: () => void; playSample: (text: string) => Promise<"ended" | "interrupted" | "failed">; autoAdvanceMs: AutoAdvanceDelay };
 
+const COURSE_META: Readonly<Record<BatchimCourseKey, { kicker: string; label: string; subtitle: string }>> = {
+  sonorant: {
+    kicker: "收音入门 · 第 1 小课",
+    label: "第 1 课：鼻音与流音 ㄹ·ㅁ·ㅇ",
+    subtitle: "先练 ㄹ、ㅁ、ㅇ。收音就是字块底部的辅音；本课找整个词最后一个字块的收音。",
+  },
+  stop: {
+    kicker: "收音入门 · 第 2 小课",
+    label: "第 2 课：闭塞收音 ㅂ·ㄱ（不爆破）",
+    subtitle: "中国人最易多读出一个音节！词尾 ㅂ、ㄱ 只做口型闭塞立刻刹住，绝不加“普”或“克”。",
+  },
+  liaison: {
+    kicker: "收音衔接 · 第 3 小课",
+    label: "第 3 课：连音化与常见音变",
+    subtitle: "学会收音后最关键一步：为什么字面写 합니、실이，耳朵听到的却是 [함니]、[시리]？",
+  },
+};
+
 const BatchimLesson = memo(forwardRef<BatchimLessonHandle, Props>(function BatchimLesson({ items, onPrepare, playSample, autoAdvanceMs }, ref) {
+  const [course, setCourse] = useState<BatchimCourseKey>("sonorant");
   const [mode, setMode] = useState<"lesson" | "quiz" | "finished">("lesson");
+  const [blindQuiz, setBlindQuiz] = useState(false);
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState<string | null>(null);
   const [score, setScore] = useState(0);
@@ -24,10 +56,14 @@ const BatchimLesson = memo(forwardRef<BatchimLessonHandle, Props>(function Batch
   const answered = useRef(false);
   const autoAdvancePending = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const example = BATCHIM_WORDS[index];
+
+  const activeWords = course === "sonorant" ? BATCHIM_WORDS : course === "stop" ? STOP_BATCHIM_WORDS : LIAISON_WORDS;
+  const activeGroups = course === "sonorant" ? BATCHIM_GROUPS : course === "stop" ? STOP_BATCHIM_GROUPS : LIAISON_GROUPS;
+  const safeIndex = Math.min(index, activeWords.length - 1);
+  const example = activeWords[safeIndex];
   const word = items.find((item) => item.id === example.id);
-  const group = BATCHIM_GROUPS.find((item) => item.final === example.final)!;
-  const block = decomposeHangulSyllable(example.last)!;
+  const group = activeGroups.find((item) => item.final === example.final) ?? activeGroups[0];
+  const block = example.last.length === 1 ? decomposeHangulSyllable(example.last) : null;
 
   const stop = useCallback(() => {
     token.current += 1;
@@ -42,11 +78,32 @@ const BatchimLesson = memo(forwardRef<BatchimLessonHandle, Props>(function Batch
     }
     isPlaying.current = false;
   }, []);
-  useImperativeHandle(ref, () => ({ stop, open: (id) => { stop(); answered.current = false; setMode("lesson"); setIndex(batchimExampleIndex(id)); setAnswer(null); setNotice("先听完整词，再看最后一个字块的底部。"); } }), [stop]);
+  useImperativeHandle(ref, () => ({
+    stop,
+    open: (id) => {
+      stop();
+      const target = resolveBatchimTarget(id);
+      answered.current = false;
+      setCourse(target.course);
+      setMode("lesson");
+      setIndex(target.index);
+      setAnswer(null);
+      setNotice("先听完整词，再看最后一个字块的底部。");
+    },
+  }), [stop]);
   useEffect(() => { alive.current = true; return () => { alive.current = false; stop(); }; }, [stop]);
   useEffect(() => { stop(); }, [autoAdvanceMs, stop]);
 
   function focusPanel() { section.current?.focus({ preventScroll: true }); }
+  function switchCourse(nextCourse: BatchimCourseKey) {
+    onPrepare();
+    answered.current = false;
+    setCourse(nextCourse);
+    setIndex(0);
+    setAnswer(null);
+    setMode("lesson");
+    setNotice(nextCourse === "liaison" ? "先听整词/整句，对照字面写法与 [实际读音]。" : "先听完整词，注意词尾如何收住。");
+  }
   function selectExample(next: number) { onPrepare(); answered.current = false; setIndex(next); setAnswer(null); setMode("lesson"); setNotice("已换一个例词。先听整词，不给收音补上元音。"); }
   function scheduleAutoAdvance() {
     if (autoAdvanceMs === 0) return;
@@ -84,17 +141,18 @@ const BatchimLesson = memo(forwardRef<BatchimLessonHandle, Props>(function Batch
     }
     setNotice(result === "ended" ? "完整词播放完毕。注意末尾收住，不另外加一个音节。" : result === "failed" ? "音频未能播放，请检查网络后重试；本题没有记错。" : "播放已停止，可重新听。");
   }
-  function startQuiz() { onPrepare(); answered.current = false; setIndex(0); setAnswer(null); setScore(0); setMode("quiz"); setNotice("5 个词，找最后一个字块的收音。可以看字，也可以按空格听整词。"); focusPanel(); }
+  function startQuiz() { onPrepare(); answered.current = false; setIndex(0); setAnswer(null); setScore(0); setMode("quiz"); setNotice(`${activeWords.length} 题练习：可以看字，也可开启盲听后按空格听整词判断。`); focusPanel(); }
   function advance() {
     if (mode !== "quiz" || !answered.current) return;
     onPrepare(); answered.current = false; setAnswer(null);
-    if (index + 1 === BATCHIM_WORDS.length) { setMode("finished"); setNotice("这只是找收音练习，不是发音准确度评分。"); }
-    else { setIndex(index + 1); setNotice("下一题已就绪；按空格听完整词。"); }
+    if (safeIndex + 1 === activeWords.length) { setMode("finished"); setNotice("这只是收音与音变辨认练习，不是发音准确度评分。"); }
+    else { setIndex(safeIndex + 1); setNotice("下一题已就绪；按空格听完整词。"); }
   }
   function choose(value: string) {
     if (mode !== "quiz" || answered.current) return;
     onPrepare(); answered.current = true; setAnswer(value);
-    if (isBatchimAnswerCorrect(index, value)) setScore((count) => count + 1);
+    const correct = course === "sonorant" ? isBatchimAnswerCorrect(safeIndex, value) : activeWords[safeIndex]?.final === value;
+    if (correct) setScore((count) => count + 1);
     setNotice(autoAdvanceMs === 0 ? "已关闭自动下一题；按 Enter 继续。" : `看清反馈 ${autoAdvanceMs / 1000} 秒后自动下一题；Esc 暂停，Enter 立即继续。`);
     autoAdvancePending.current = autoAdvanceMs > 0;
     scheduleAutoAdvance();
@@ -108,7 +166,7 @@ const BatchimLesson = memo(forwardRef<BatchimLessonHandle, Props>(function Batch
     if ((event.key === "Enter" || event.key === " ") && target.closest("button, a[href], summary")) return;
     const key = keyboardShortcutKey(event.key, event.code);
     const input = koreanKeyInput(event.key, event.code, event.shiftKey);
-    if (mode === "quiz" && !answer && input && BATCHIM_GROUPS.some((group) => group.final === input.char)) {
+    if (mode === "quiz" && !answer && course !== "liaison" && input && activeGroups.some((item) => item.final === input.char)) {
       event.preventDefault(); choose(input.char); return;
     }
     if (key === " " || event.key === "F8") { event.preventDefault(); void listen(); }
@@ -116,30 +174,71 @@ const BatchimLesson = memo(forwardRef<BatchimLessonHandle, Props>(function Batch
     else if (event.key === "Enter") { event.preventDefault(); if (mode === "quiz" && answer) advance(); else if (mode !== "quiz") startQuiz(); }
     else if (/^[1-5]$/.test(key)) {
       event.preventDefault(); const choice = Number(key) - 1;
-      if (mode === "lesson") selectExample(choice);
-      else if (mode === "quiz" && choice < BATCHIM_GROUPS.length) choose(BATCHIM_GROUPS[choice].final);
+      if (mode === "lesson" && choice < activeWords.length) selectExample(choice);
+      else if (mode === "quiz" && choice < activeGroups.length) choose(activeGroups[choice].final);
     }
   }
 
+  const hideScript = mode === "quiz" && blindQuiz && !answer;
+  const answerCorrect = answer !== null && (course === "sonorant" ? isBatchimAnswerCorrect(safeIndex, answer) : example.final === answer);
+
   return <section id="batchim-lesson" className="batchim-lesson" aria-labelledby="batchim-title" ref={section} tabIndex={-1} data-keyboard-scope="batchim" onKeyDown={handleKey}>
-    <div className="batchim-heading"><span className="section-kicker">收音入门 · 第 1 小课</span><h2 id="batchim-title">读到词尾，<br />把声音收住。</h2><p>先练 ㄹ、ㅁ、ㅇ。收音就是字块底部的辅音；本课只找整个词最后一个字块的收音。</p><p>先听整词、看收音，再做 5 题认读。七类收音中的其他类别、连读和复杂变音留到后续小课。</p><a href="#phrases" onClick={onPrepare}>返回词句背诵 ↗</a></div>
+    <div className="batchim-heading">
+      <span className="section-kicker">{COURSE_META[course].kicker}</span>
+      <h2 id="batchim-title">{course === "liaison" ? <>前字收音，<br />滑向后字。</> : <>读到词尾，<br />把声音收住。</>}</h2>
+      <p>{COURSE_META[course].subtitle}</p>
+      <div className="batchim-course-tabs" role="group" aria-label="选择收音与连读小课">
+        {(["sonorant", "stop", "liaison"] as const).map((key) => (
+          <button key={key} type="button" aria-pressed={course === key} onClick={() => switchCourse(key)}>
+            {COURSE_META[key].label}
+          </button>
+        ))}
+      </div>
+      <a href="#phrases" onClick={onPrepare}>返回词句背诵 ↗</a>
+    </div>
     <div className="batchim-workspace">
-      <div className="batchim-mode-controls"><button type="button" aria-pressed={mode === "lesson"} onClick={() => selectExample(index)}>看例词</button><button type="button" aria-pressed={mode === "quiz"} onClick={startQuiz}>{mode === "quiz" ? "重做 5 题" : "开始 5 题练习"}</button><span>{mode === "quiz" ? `第 ${index + 1} / 5 题` : "完整词音频 · 不拆音拼接"}</span></div>
-      {mode === "lesson" && <div className="batchim-examples" role="group" aria-label="选择收音例词">{BATCHIM_WORDS.map((item, i) => <button type="button" key={item.id} aria-pressed={index === i} onClick={() => selectExample(i)}><kbd>{i + 1}</kbd><span lang="ko">{items.find((entry) => entry.id === item.id)?.korean}</span></button>)}</div>}
+      <div className="batchim-mode-controls">
+        <button type="button" aria-pressed={mode === "lesson"} onClick={() => selectExample(safeIndex)}>看例词</button>
+        <button type="button" aria-pressed={mode === "quiz"} onClick={startQuiz}>{mode === "quiz" ? `重做 ${activeWords.length} 题` : `开始 ${activeWords.length} 题练习`}</button>
+        {course !== "liaison" && (
+          <button type="button" aria-pressed={blindQuiz} onClick={() => { onPrepare(); setBlindQuiz((prev) => !prev); }}>
+            {blindQuiz ? "✓ 盲听遮字" : "盲听遮字"}
+          </button>
+        )}
+        <span>{mode === "quiz" ? `第 ${safeIndex + 1} / ${activeWords.length} 题` : "完整词音频 · 不拆音拼接"}</span>
+      </div>
+      {mode === "lesson" && <div className="batchim-examples" role="group" aria-label="选择收音例词">{activeWords.map((item, i) => <button type="button" key={item.id} aria-pressed={safeIndex === i} onClick={() => selectExample(i)}><kbd>{i + 1}</kbd><span lang="ko">{items.find((entry) => entry.id === item.id)?.korean}</span></button>)}</div>}
       {mode !== "finished" && word ? <>
-        <div className="batchim-word"><p>{word.chinese}</p><h3 lang="ko">{Array.from(word.korean).map((char, i, chars) => <span key={i} className={i === chars.length - 1 ? "batchim-last" : ""}>{char}</span>)}</h3><button type="button" onClick={() => void listen()}>{playing ? "正在播放 · 再听一次" : "▶ 听完整词"} <kbd>空格 / F8</kbd></button></div>
-        {mode === "quiz" && !answer ? <div className="batchim-question"><p>最后的「<span lang="ko">{example.last}</span>」底部是什么收音？</p><div role="group" aria-label="选择末尾收音">{BATCHIM_GROUPS.map((item, i) => <button type="button" key={item.final} onClick={() => choose(item.final)}><kbd>{i + 1} / {koreanKeyLabel(item.final)}</kbd><strong lang="ko">{item.final}</strong></button>)}</div></div> : <div className="batchim-explanation">
-          {mode === "quiz" && <strong className="batchim-result">{isBatchimAnswerCorrect(index, answer!) ? "答对了" : `这次选了 ${answer}；正确是 ${example.final}`}</strong>}
-          <div className="batchim-block" aria-label={`末尾字块 ${example.last} 的初声、中声和收音`}><span>初声 <b lang="ko">{block.initial}</b></span><span>中声 <b lang="ko">{block.vowel}</b></span><span className="batchim-final">收音 <b lang="ko">{example.final}</b></span></div>
-          <h4><span lang="ko">{group.final}</span> · {group.title}</h4><p>{group.cue}</p><p className="batchim-note">{group.note}</p>
+        <div className="batchim-word">
+          <p>{word.chinese}</p>
+          {hideScript ? (
+            <h3 className="batchim-blind-mask">请按空格听整词判断词尾</h3>
+          ) : (
+            <h3 lang="ko">{Array.from(word.korean).map((char, i, chars) => <span key={i} className={course !== "liaison" && i === chars.length - 1 ? "batchim-last" : ""}>{char}</span>)}</h3>
+          )}
+          <button type="button" onClick={() => void listen()}>{playing ? "正在播放 · 再听一次" : "▶ 听完整词"} <kbd>空格 / F8</kbd></button>
+        </div>
+        {mode === "quiz" && !answer ? <div className="batchim-question"><p>{course === "liaison" ? <>这句里的「<span lang="ko">{example.last}</span>」发生了哪类音变？</> : hideScript ? <>听整词末尾收住的方式，判断是什么收音（<span className="sr-only" lang="ko">{example.last}</span>）：</> : <>最后的「<span lang="ko">{example.last}</span>」底部是什么收音？</>}</p><div role="group" aria-label="选择末尾收音">{activeGroups.map((item, i) => <button type="button" key={item.final} onClick={() => choose(item.final)}><kbd>{course === "liaison" ? i + 1 : `${i + 1} / ${koreanKeyLabel(item.final)}`}</kbd><strong lang={course === "liaison" ? undefined : "ko"}>{item.final}</strong></button>)}</div></div> : <div className="batchim-explanation">
+          {mode === "quiz" && <strong className="batchim-result">{answerCorrect ? "答对了" : `这次选了 ${answer}；正确是 ${example.final}`}</strong>}
+          {block ? (
+            <div className="batchim-block" aria-label={`末尾字块 ${example.last} 的初声、中声和收音`}><span>初声 <b lang="ko">{block.initial}</b></span><span>中声 <b lang="ko">{block.vowel}</b></span><span className="batchim-final">收音 <b lang="ko">{example.final}</b></span></div>
+          ) : (
+            <div className="batchim-liaison-compare">
+              <span>字面拼写：<b lang="ko">{word.korean}</b></span>
+              <span aria-hidden="true">→</span>
+              <span className="batchim-final">实际读音：<b lang="ko">[{example.pronunciation}]</b></span>
+            </div>
+          )}
+          <h4><span lang={course === "liaison" ? undefined : "ko"}>{group.final}</span> · {group.title}</h4><p>{group.cue}</p><p className="batchim-note">{group.note}</p>
           {example.id === "word-receipt" && <p>영수증 中，영 和 증 都有 ㅇ 收音；这一题只问最后的 증。</p>}
-          {mode === "quiz" && <button type="button" className="batchim-next" onClick={() => { advance(); focusPanel(); }}>{index === 4 ? "查看结果" : "下一题"} <kbd>Enter</kbd></button>}
+          {example.id === "word-pharmacy" && <p>약국 中前字收音 ㄱ 同时让后字紧音化读作 [약꾹]，词尾 ㄱ 依然收住不爆破。</p>}
+          {mode === "quiz" && <button type="button" className="batchim-next" onClick={() => { advance(); focusPanel(); }}>{safeIndex === activeWords.length - 1 ? "查看结果" : "下一题"} <kbd>Enter</kbd></button>}
         </div>}
         <p className="batchim-dictionary">词典读音：<span lang="ko">[{example.pronunciation}]</span> {example.id === "word-person" && "ː 标记首音节长音，本课不考长短音。"}<a href={example.source} target="_blank" rel="noreferrer">查看官方词典 ↗</a></p>
-      </> : mode === "finished" && <div className="batchim-finished"><h3>完成这 5 个词了</h3><strong>{score} / 5</strong><p>能找对字块底部，是开始读带收音词语的一步。继续听整词，不要给词尾补元音。</p><button type="button" onClick={startQuiz}>再练一次 <kbd>Enter</kbd></button></div>}
+      </> : mode === "finished" && <div className="batchim-finished"><h3>完成这 {activeWords.length} 个例词了</h3><strong>{score} / {activeWords.length}</strong><p>{course === "liaison" ? "看懂连音、鼻音化和紧音化后，再回去听 52 条生活词句就会豁然开朗。" : "能找对并收住字块底部，是读准带收音韩语词的关键一步。不要给词尾补元音。"}</p><button type="button" onClick={startQuiz}>再练一次 <kbd>Enter</kbd></button></div>}
       <p className="batchim-status" role="status" aria-live="polite">{notice}</p>
-      <p className="batchim-shortcuts">例词：1–5 切换；练习：直接按 ㄹ(F) / ㅁ(A) / ㅇ(D)，也可用 1 / 2 / 3 作答。空格听词，Enter 开始／下一题，Esc 停止播放和自动下一题。</p>
-      <details className="batchim-sources"><summary>读音依据和本课边界</summary><p>词条读音及收音分类依据国立国语院资料核对。播放沿用现有固定 AI 整词音频，不是新真人录音，尚未新增母语教师逐条复核。这里练字形和读词位置，不给发音打分，也不自动标记“背熟”。</p><a href={BATCHIM_RULE_SOURCE} target="_blank" rel="noreferrer">国立国语院：鼻音与流音的发音说明 ↗</a></details>
+      <p className="batchim-shortcuts">例词：1–{activeWords.length} 切换；练习：可用数字键作答{course !== "liaison" ? "，也可直接按对应韩文键" : ""}。空格听词，Enter 开始／下一题，Esc 停止播放和自动下一题。</p>
+      <details className="batchim-sources"><summary>读音依据和本课边界</summary><p>词条读音、收音分类及标准音变依据国立国语院资料核对。播放沿用现有固定 AI 整词音频，不是新真人录音，尚未新增母语教师逐条复核。这里练字形、收音位置与音变规律，不给发音打分，也不自动标记“背熟”。</p><p><a href={BATCHIM_RULE_SOURCE} target="_blank" rel="noreferrer">国立国语院：鼻音与流音的发音说明 ↗</a> · <a href={BATCHIM_SEVEN_SOURCE} target="_blank" rel="noreferrer">收音的七类代表音说明 ↗</a></p></details>
     </div>
   </section>;
 }));

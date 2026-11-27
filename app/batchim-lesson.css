@@ -20,5 +20,13 @@
 .batchim-dictionary{font-size:14px;color:var(--ink-soft);line-height:1.8}.batchim-dictionary a{display:inline-block;margin-left:8px}.batchim-status{min-height:28px;font-size:14px;line-height:1.8}.batchim-shortcuts{font-size:14px;line-height:1.8;padding-top:14px;border-top:1px solid var(--line);color:var(--ink-soft)}
 .batchim-sources{font-size:14px;line-height:1.8;color:var(--ink-soft)}.batchim-sources summary{cursor:pointer;min-height:40px}.batchim-finished{padding:28px 8px;text-align:center}.batchim-finished h3{font-size:26px}.batchim-finished>strong{font-size:48px}
 .phrase-batchim-link{display:inline-flex;align-items:center;min-height:44px;margin-top:8px;font-size:14px;text-decoration:underline;text-underline-offset:4px}
+.batchim-course-tabs{display:grid;gap:8px;margin:18px 0}
+.batchim-course-tabs button{text-align:left;font-weight:700;background:var(--cream)}
+.batchim-course-tabs button[aria-pressed=true]{background:var(--ink);color:white;border-color:var(--ink)}
+.batchim-blind-mask{font-size:clamp(20px,3vw,26px) !important;color:var(--ink-soft);padding:12px 16px;border:1px dashed var(--line);border-radius:12px;background:var(--paper)}
+.batchim-liaison-compare{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 14px;background:white;border-radius:10px;font-size:14px}
+.batchim-liaison-compare b{font-size:19px}
+.batchim-liaison-compare .batchim-final{padding:6px 10px;border-radius:8px;background:var(--ink);color:white}
+.batchim-question strong{font-size:clamp(18px,2.8vw,34px)}
 @media(max-width:900px){.batchim-lesson{grid-template-columns:1fr;gap:24px}.batchim-heading h2 br{display:none}}
-@media(max-width:520px){.batchim-lesson{width:calc(100% - 28px);margin-bottom:70px}.batchim-workspace{padding:14px}.batchim-mode-controls>span{width:100%;margin:4px 0}.batchim-explanation{padding:14px}.batchim-question button{gap:8px;padding:10px 8px}.batchim-examples button{flex:1 1 auto}}
+@media(max-width:520px){.batchim-lesson{width:calc(100% - 28px);margin-bottom:70px}.batchim-workspace{padding:14px}.batchim-mode-controls>span{width:100%;margin:4px 0}.batchim-explanation{padding:14px}.batchim-question>div{grid-template-columns:1fr}.batchim-question button{gap:8px;padding:10px 8px}.batchim-examples button{flex:1 1 auto}}

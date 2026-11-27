@@ -93,7 +93,9 @@ import DailyReview, { type DailyReviewHandle } from "./daily-review";
 import DailyPlan from "./daily-plan";
 import { RESUME_KEY, isScene, savedPlace, sceneForTarget, scenes, studyScene, workspaces, type Scene, type StudyPlace } from "./desktop-scenes";
 import "./desktop-scenes.css";
-import MyDay, { type DayBadge } from "./my-day";
+import "./chinese-learner-enhancements.css";
+import MyDay, { type DayBadge, type DaySkillSummary } from "./my-day";
+import { MY_DAY_KEY, mergeNotebooks, readBook } from "./my-day-state";
 import { dailyPlanSummary } from "./daily-plan-logic";
 import { useDailyReview } from "./use-daily-review";
 import { usePlanActivity } from "./use-plan-activity";
@@ -102,6 +104,10 @@ import { millisecondsUntilNextLocalMidnight } from "./date-logic";
 import LearningTools from "./learning-tools";
 import AudioGuide from "./audio-guide";
 import LetterAudioActions from "./letter-audio-actions";
+import HangulMnemonics from "./hangul-mnemonics";
+import ImeSetupGuide from "./ime-setup-guide";
+import ConsonantContrastLab, { type ConsonantContrastLabHandle } from "./consonant-contrast-lab";
+import { PHRASE_STUDY_NOTES } from "./phrase-study-notes";
 import { AudioPlaybackController, type AudioPlaybackResult } from "./audio-playback";
 import { AUTO_ADVANCE_KEY, parseAutoAdvance, type AutoAdvanceDelay } from "./learning-settings";
 import { useVowelHistory } from "./use-vowel-history";
@@ -313,10 +319,10 @@ const typingRouteItems = new Map(typingRoutes.map((route) => [route.id, route.wo
   .filter((item): item is PhraseItem => item?.type === "word")]));
 
 const compareGroups = [
-  { title: "가 · 까 · 카", cue: "松音 → 紧音 → 送气音", items: [{ text: "가", label: "ㄱ 松音" }, { text: "까", label: "ㄲ 紧音" }, { text: "카", label: "ㅋ 送气" }] },
-  { title: "다 · 따 · 타", cue: "气流不是越大越好，先分清喉咙是否绷紧", items: [{ text: "다", label: "ㄷ 松音" }, { text: "따", label: "ㄸ 紧音" }, { text: "타", label: "ㅌ 送气" }] },
-  { title: "바 · 빠 · 파", cue: "送气音通常最明显；松音也可能带少量气流", items: [{ text: "바", label: "ㅂ 松音" }, { text: "빠", label: "ㅃ 紧音" }, { text: "파", label: "ㅍ 送气" }] },
-  { title: "자 · 짜 · 차", cue: "都不要卷舌，差别在紧张度和送气量", items: [{ text: "자", label: "ㅈ 松音" }, { text: "짜", label: "ㅉ 紧音" }, { text: "차", label: "ㅊ 送气" }] },
+  { title: "가 · 까 · 카", cue: "舌根组：가 低音放松 → 까 高音紧绷 → 카 高音强送气", items: [{ text: "가", label: "ㄱ 松音·低" }, { text: "까", label: "ㄲ 紧音·高" }, { text: "카", label: "ㅋ 送气·高" }] },
+  { title: "다 · 따 · 타", cue: "舌尖组：先分清词首音调是低平（松）还是高平（紧/送气）", items: [{ text: "다", label: "ㄷ 松音·低" }, { text: "따", label: "ㄸ 紧音·高" }, { text: "타", label: "ㅌ 送气·高" }] },
+  { title: "바 · 빠 · 파", cue: "双唇组：松音在词首也带微弱气流，靠低音调与 파 区分", items: [{ text: "바", label: "ㅂ 松音·低" }, { text: "빠", label: "ㅃ 紧音·高" }, { text: "파", label: "ㅍ 送气·高" }] },
+  { title: "자 · 짜 · 차", cue: "舌面组：都不卷舌，差别在词首音高低/高、紧度与送气量", items: [{ text: "자", label: "ㅈ 松音·低" }, { text: "짜", label: "ㅉ 紧音·高" }, { text: "차", label: "ㅊ 送气·高" }] },
 ];
 
 const emptyStats: GameStats = { date: "", dailyXp: 0, totalXp: 0, bestCombo: 0, games: 0, mistakes: {}, phraseMistakes: {}, history: {} };
@@ -956,6 +962,7 @@ function focusedConsoleOnscreen(target: HTMLElement | null, console: HTMLElement
 
 export default function Home() {
   const [dayBadge, setDayBadge] = useState<DayBadge>("new");
+  const [daySkills, setDaySkills] = useState<DaySkillSummary>([]);
   const [scene, setScene] = useState<Scene>("top");
   const [routeReady, setRouteReady] = useState(false);
   const [destination, setDestination] = useState<{ id: string; focus?: string } | null>(null);
@@ -1112,6 +1119,7 @@ export default function Home() {
   const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
   const gameSectionRef = useRef<HTMLDivElement | null>(null);
   const vowelPracticeRef = useRef<VowelPracticeHandle | null>(null);
+  const consonantContrastRef = useRef<ConsonantContrastLabHandle | null>(null);
   const dailyReviewRef = useRef<DailyReviewHandle | null>(null);
   const batchimLessonRef = useRef<BatchimLessonHandle | null>(null);
   const phraseSectionRef = useRef<HTMLElement | null>(null);
@@ -1299,6 +1307,7 @@ export default function Home() {
     vowelPracticeRef.current?.stop();
     dailyReviewRef.current?.stop();
     batchimLessonRef.current?.stop();
+    consonantContrastRef.current?.stop();
     const shouldStopOtherAudio = audioActivityRef.current !== "game";
     setKeyboardZone("games");
     setPhraseAutoAdvanceCancelled(true);
@@ -1316,6 +1325,7 @@ export default function Home() {
     vowelPracticeRef.current?.stop();
     dailyReviewRef.current?.stop();
     batchimLessonRef.current?.stop();
+    consonantContrastRef.current?.stop();
     resetKoreanInput();
     const shouldStopOtherAudio = !audioActivityRef.current.startsWith("phrase-");
     setKeyboardZone("phrases");
@@ -2173,6 +2183,7 @@ export default function Home() {
       vowelPracticeRef.current?.stop();
       dailyReviewRef.current?.stop();
       batchimLessonRef.current?.stop();
+      consonantContrastRef.current?.stop();
       setGameAutoAdvanceCancelled(true);
       setPhraseAutoAdvanceCancelled(true);
       listenQuestionTokenRef.current += 1;
@@ -2243,6 +2254,7 @@ export default function Home() {
     vowelPracticeRef.current?.stop();
     dailyReviewRef.current?.stop();
     batchimLessonRef.current?.stop();
+    consonantContrastRef.current?.stop();
     sealOwnProgressLedger();
     clearMatchResetTimer();
     if (noticeTimerRef.current !== null) window.clearTimeout(noticeTimerRef.current);
@@ -2785,6 +2797,10 @@ export default function Home() {
       vowelHistory: vowelHistory.refresh(),
       preferences: { autoAdvanceMs, audioSpeed, showRomanization, keyboardMode: keyboardInputMode, beginnerBlendCompleted, fullReviewCompleted },
     };
+    const rawDay = readStoredValue(MY_DAY_KEY);
+    if (rawDay !== null) {
+      try { backup.myDay = readBook(rawDay); } catch { /* Do not export an unrecognised future notebook. */ }
+    }
     return parsePortableBackup(JSON.stringify(backup), backupValidation);
   }
 
@@ -2808,6 +2824,16 @@ export default function Home() {
       if (!dailyReview.restore(backup.reviews)) failed.push("每日复习");
       try { writeVowelHistory(window.localStorage, backup.vowelHistory); vowelHistory.refresh(); } catch { failed.push("盲听记录"); }
       if (!await persistTypingBestRecords(mergeTypingBestRecords(typingBestRecordsRef.current, backup.typing), false)) failed.push("打字最佳");
+      if (backup.myDay) {
+        try {
+          const existingRaw = window.localStorage.getItem(MY_DAY_KEY);
+          const mergedDay = mergeNotebooks(readBook(existingRaw), backup.myDay);
+          const serializedDay = JSON.stringify(mergedDay);
+          window.localStorage.setItem(MY_DAY_KEY, serializedDay);
+          if (window.localStorage.getItem(MY_DAY_KEY) !== serializedDay) throw new Error("write failed");
+          window.dispatchEvent(new Event("hangul-my-day-imported"));
+        } catch { failed.push("韩语日课"); }
+      }
       const p = backup.preferences;
       try {
         const beginnerCompleted = beginnerBlendCompleted || p.beginnerBlendCompleted || window.localStorage.getItem(BEGINNER_BLEND_KEY) === "true";
@@ -3642,6 +3668,7 @@ export default function Home() {
     vowelPracticeRef.current?.stop();
     dailyReviewRef.current?.stop();
     batchimLessonRef.current?.stop();
+    consonantContrastRef.current?.stop();
     keyboardReturnRef.current ??= { opener: document.activeElement instanceof HTMLElement ? document.activeElement : null };
     pauseTypingRun("快捷键帮助已打开，本次行程已暂停；关闭后可继续。");
     setGameAutoAdvanceCancelled(true);
@@ -4576,11 +4603,21 @@ export default function Home() {
             <span>我的字母练习簿</span>
             <div className="study-glyphs" lang="ko" aria-hidden="true">{coreVowelChars.map(char => <i key={char} className={masteredLetterSet.has(char) ? "known" : undefined}>{char}</i>)}</div>
             <div className="study-home-progress"><strong>{mastered.length}<small> / 40</small></strong><span>字母已标记</span></div>
+            {daySkills.some(item => item.practiced > 0) && (
+              <div className="study-home-day-skills" aria-label="我的韩语日课分项进度">
+                <small>日课实练进度</small>
+                <div className="study-home-day-pills">
+                  {daySkills.map(({ skill, practiced, total }) => (
+                    <span key={skill}>{{ read: "看字读", listen: "听音认", keys: "按键打" }[skill]} <b>{practiced}</b>/{total}</span>
+                  ))}
+                </div>
+              </div>
+            )}
             <p className="header-progress xp-pill"><span>{gameStats.dailyXp}</span>&nbsp;XP 今日</p>
           </div>
         </section>
         <section id="my-day" data-scene="my-day" hidden={scene !== "my-day"} aria-label="我的韩语日课">
-          <MyDay visible={scene === "my-day"} active={scene === "my-day" && pageVisible && !showKeyboardHelp} day={localToday} legacy={mastered} onBadge={setDayBadge} onHome={goHome} onStop={stopDayClip} onPlay={playDayClip}/>
+          <MyDay visible={scene === "my-day"} active={scene === "my-day" && pageVisible && !showKeyboardHelp} day={localToday} legacy={mastered} onBadge={setDayBadge} onSkills={setDaySkills} onHome={goHome} onStop={stopDayClip} onPlay={playDayClip}/>
         </section>
         <section id="builder" data-scene="builder" hidden={scene !== "builder"} className="scene-builder" aria-labelledby="builder-title">
 
@@ -4826,7 +4863,8 @@ export default function Home() {
                             }}
                             onKeyUp={(event) => { if (event.key === "Enter") typingImeEnterRef.current = false; }}
                             onBlur={() => { typingCompositionRef.current = false; typingImeEnterRef.current = false; }} />
-                          <p id="typing-input-help">请切换 Mac 韩语输入法（두벌식）。Enter 先完成输入法组合，再按一次确认答案；组合完成后按 Shift + Enter 重播，不需要功能键。</p>
+                          <p id="typing-input-help">请开启设备的韩语双拼输入法（두벌식，支持 Windows / Mac / 手机）。Enter 先完成输入法组合，再按一次确认答案；组合完成后按 Shift + Enter 重播。</p>
+                          <ImeSetupGuide />
                           <button type="submit" disabled={typingAudioBusy}>{typingAudioBusy ? "请先听完发音" : "确认到站"} <kbd>Enter</kbd></button>
                         </form>
                       </div>
@@ -4892,11 +4930,12 @@ export default function Home() {
                   const blockWords = phraseBlockWordsById.get(item.id) ?? [];
                   const readingLevel = phraseReadingLevels.get(item.id) ?? "new";
                   const readingLabel = readingLevel === "ready" ? "现在可直读" : readingLevel === "batchim" ? "收音下一关" : "含新字母";
+                  const studyNote = PHRASE_STUDY_NOTES[item.id];
                   return <article className={`${revealed ? "revealed" : ""} ${masteredPhrase ? "mastered" : ""}`} key={item.id}>
-                    <button className="phrase-audio" type="button" onClick={() => void playPhraseItemWithNotice(item)}><span>{item.group} · 完整合成音频</span><strong lang="ko">{item.korean}</strong><small>{showRomanization ? item.roman : "罗马字已隐藏 · 先直接读韩文"}</small><i aria-hidden="true">▶</i></button>
-                    <button id={`phrase-block-toggle-${item.id}`} className={`phrase-block-toggle ${readingLevel}`} type="button" aria-expanded={expanded} aria-controls={`phrase-blocks-${item.id}`} onClick={() => togglePhraseBreakdown(item.id)}><span>{readingLabel}</span><strong>{expanded ? "收起拆字" : "拆字透视"} <i aria-hidden="true">{expanded ? "−" : "+"}</i></strong></button>
-                    <div id={`phrase-blocks-${item.id}`} className="phrase-block-breakdown" hidden={!expanded} aria-labelledby={`phrase-block-toggle-${item.id}`}>{expanded && <><div role="region" aria-label={`${item.korean} 音节拆解，可横向滚动`} tabIndex={0}>{blockWords.map((word, wordIndex) => <div className="phrase-block-word" key={`${item.id}-word-${wordIndex}`}>{word.map(({ syllable, initial: blockInitial, vowel: blockVowel, final }, blockIndex) => { const initialKnown = masteredLetterSet.has(blockInitial); const vowelKnown = masteredLetterSet.has(blockVowel); return <div className="phrase-block-syllable" key={`${item.id}-${wordIndex}-${blockIndex}`}><strong lang="ko">{syllable}</strong><span className={initialKnown ? "known" : ""} aria-label={`初声 ${blockInitial}，${initialKnown ? "已学" : "未学"}${blockInitial === "ㅇ" ? "，此处静音" : ""}`}><small>初</small><b lang="ko">{blockInitial}</b><em>{initialKnown ? "已学" : "未学"}{blockInitial === "ㅇ" ? " · 静音" : ""}</em></span><span className={vowelKnown ? "known" : ""} aria-label={`中声 ${blockVowel}，${vowelKnown ? "已学" : "未学"}`}><small>中</small><b lang="ko">{blockVowel}</b><em>{vowelKnown ? "已学" : "未学"}</em></span>{final && <span className="final" aria-label={`收音 ${final}，下一关`}><small>收</small><b lang="ko">{final}</b><em>下一关</em></span>}</div>; })}</div>)}</div><p>空隙保留原句分词；这里只拆字形。请听上方整条音频，收音不会被单独拼接；前有收音再接初声 ㅇ 时，也以整词连读为准。</p></>}</div>
-                    {expanded && blockWords.some((word) => word.some((block) => block.final !== null)) && <a className="phrase-batchim-link" href="#batchim-lesson" onClick={(event) => { event.preventDefault(); openBatchimLesson(item.id); }}>收音入门：先练 ㄹ／ㅁ／ㅇ ↗</a>}
+                    <button className="phrase-audio" type="button" onClick={() => void playPhraseItemWithNotice(item)}><span>{item.group} · 完整合成音频{studyNote && <em className={`phrase-origin-pill ${studyNote.originKind}`}>{studyNote.originBadge}</em>}</span><strong lang="ko">{item.korean}</strong><small>{showRomanization ? item.roman : "罗马字已隐藏 · 先直接读韩文"}</small><i aria-hidden="true">▶</i></button>
+                    <button id={`phrase-block-toggle-${item.id}`} className={`phrase-block-toggle ${readingLevel}`} type="button" aria-expanded={expanded} aria-controls={`phrase-blocks-${item.id}`} onClick={() => togglePhraseBreakdown(item.id)}><span>{readingLabel}{studyNote?.actualReading ? ` · 读 [${studyNote.actualReading}]` : ""}</span><strong>{expanded ? "收起拆字" : "拆字透视"} <i aria-hidden="true">{expanded ? "−" : "+"}</i></strong></button>
+                    <div id={`phrase-blocks-${item.id}`} className="phrase-block-breakdown" hidden={!expanded} aria-labelledby={`phrase-block-toggle-${item.id}`}>{expanded && <><div role="region" aria-label={`${item.korean} 音节拆解，可横向滚动`} tabIndex={0}>{blockWords.map((word, wordIndex) => <div className="phrase-block-word" key={`${item.id}-word-${wordIndex}`}>{word.map(({ syllable, initial: blockInitial, vowel: blockVowel, final }, blockIndex) => { const initialKnown = masteredLetterSet.has(blockInitial); const vowelKnown = masteredLetterSet.has(blockVowel); return <div className="phrase-block-syllable" key={`${item.id}-${wordIndex}-${blockIndex}`}><strong lang="ko">{syllable}</strong><span className={initialKnown ? "known" : ""} aria-label={`初声 ${blockInitial}，${initialKnown ? "已学" : "未学"}${blockInitial === "ㅇ" ? "，此处静音" : ""}`}><small>初</small><b lang="ko">{blockInitial}</b><em>{initialKnown ? "已学" : "未学"}{blockInitial === "ㅇ" ? " · 静音" : ""}</em></span><span className={vowelKnown ? "known" : ""} aria-label={`中声 ${blockVowel}，${vowelKnown ? "已学" : "未学"}`}><small>中</small><b lang="ko">{blockVowel}</b><em>{vowelKnown ? "已学" : "未学"}</em></span>{final && <span className="final" aria-label={`收音 ${final}，下一关`}><small>收</small><b lang="ko">{final}</b><em>下一关</em></span>}</div>; })}</div>)}</div>{studyNote && <section className="phrase-study-notes" aria-label={`${item.korean} 读音与词源解析`}>{studyNote.actualReading && <p className="phrase-actual-reading">实际连读／变音：<strong lang="ko">[{studyNote.actualReading}]</strong></p>}<p className="phrase-note-line"><b>发音要点：</b>{studyNote.soundNote}</p><p className="phrase-note-line"><b>词源记忆：</b>{studyNote.originNote}</p>{studyNote.chunks && <ul className="phrase-chunk-list" aria-label="韩语语序与成分拆解">{studyNote.chunks.map((chunk, chunkIndex) => <li key={`${item.id}-chunk-${chunkIndex}`}><strong lang="ko">{chunk.ko}</strong><span>{chunk.gloss}</span>{chunk.role && <small>{chunk.role}</small>}</li>)}</ul>}{studyNote.grammarNote && <p className="phrase-note-line"><b>句式骨架：</b>{studyNote.grammarNote}</p>}</section>}<p>空隙保留原句分词；这里只拆字形。请听上方整条音频，收音不会被单独拼接；前有收音再接初声 ㅇ 时，也以整词连读为准。</p></>}</div>
+                    {expanded && blockWords.some((word) => word.some((block) => block.final !== null)) && <a className="phrase-batchim-link" href="#batchim-lesson" onClick={(event) => { event.preventDefault(); openBatchimLesson(item.id); }}>收音与连读小课：听整词规则 ↗</a>}
                     <div className="phrase-meaning"><p>{revealed ? item.chinese : "先回忆中文意思"}</p><button type="button" onClick={() => togglePhraseReveal(item.id)}>{revealed ? "收起中文" : "翻开答案"}</button><button id={`phrase-master-${item.id}`} type="button" aria-pressed={masteredPhrase} onClick={() => togglePhraseMastered(item.id)}>{masteredPhrase ? "✓ 已背熟" : "标记背熟"}</button></div>
                   </article>;
                 })}
@@ -4937,6 +4976,7 @@ export default function Home() {
             <button id="letter-tab-consonants" type="button" role="tab" aria-controls="letter-panel" aria-selected={activeSet === "consonants"} tabIndex={activeSet === "consonants" ? 0 : -1} onKeyDown={handleLetterTabKeyDown} onClick={() => changeActiveSet("consonants")}><span>辅音</span><strong>19</strong><small>名称 / 音节</small></button>
             <button id="letter-tab-vowels" type="button" role="tab" aria-controls="letter-panel" aria-selected={activeSet === "vowels"} tabIndex={activeSet === "vowels" ? 0 : -1} onKeyDown={handleLetterTabKeyDown} onClick={() => changeActiveSet("vowels")}><span>元音</span><strong>21</strong><small>看口型和舌位</small></button>
           </div>
+          <HangulMnemonics activeSet={activeSet} onPlaySample={(sample) => void playSoundWithNotice(sample)} />
           {activeSet === "consonants" && (
             <section className="onset-lab" aria-labelledby="onset-lab-title" aria-busy={comparisonBusy}>
               <div className="onset-lab-copy"><span>进阶试听</span><h3 id="onset-lab-title">真人起音 ↔ 完整音节对照器</h3><p>左边只播一次真人非圆唇起音（避开 씨、귀、코 等颚化或圆唇变体）；右边播带元音的完整 AI 音节（可选中性元音 ㅡ 或 ㅏ 听清松音、紧音、送气音差别）。只有明确选择「顺序播放」才会自动接着播下一段。</p><a href="#compare">对比同一元音：가 / 까 / 카</a></div>
@@ -4988,8 +5028,11 @@ export default function Home() {
         </div>
 
         <section className="compare-section" id="compare" data-scene="compare" hidden={scene !== "compare"} aria-labelledby="compare-title">
-          <div className="compare-intro"><span className="section-kicker">易混音擂台</span><h2 id="compare-title">固定同一元音，<br />比较开头差别。</h2><p>这里固定元音 ㅏ，点哪个就单独播放哪个 AI 音节，不自动连播。请先按原速分辨，再模仿。素材用于练习松音、紧音和送气音的相对差别；录音时长本身不作为答题线索。可把薄纸放在嘴前辅助观察气流。</p><div className="air-legend"><div><span className="dot plain" /><strong>松音</strong><small>轻、自然</small></div><div><span className="dot tense" /><strong>紧音</strong><small>喉咙绷紧</small></div><div><span className="dot air" /><strong>送气音</strong><small>通常最明显</small></div></div></div>
-          <div className="compare-list">{compareGroups.map((group, groupIndex) => <article className="compare-row" key={group.title}><div><h3 lang="ko">{group.title}</h3><p>{group.cue}</p></div><div className="compare-buttons">{group.items.map((item, index) => <button id={groupIndex === 0 && index === 0 ? "compare-first-sound" : undefined} type="button" key={item.text} className={`tone-${index}`} onClick={() => void playSoundWithNotice(item.text)}><strong lang="ko">{item.text}</strong><span>{item.label}</span><i aria-hidden="true">▶</i></button>)}</div></article>)}</div>
+          <div className="compare-intro"><span className="section-kicker">易混音擂台</span><h2 id="compare-title">固定同一元音，<br />比较开头差别。</h2><p>这里固定元音 ㅏ，点哪个就单独播放哪个 AI 音节，不自动连播。请先按原速分辨，再模仿。素材用于练习松音、紧音和送气音的相对差别；录音时长本身不作为答题线索。可把薄纸放在嘴前辅助观察气流。</p><div className="compare-pitch-tip"><strong>中国学习者听辨诀窍：</strong>在词首，松音（가·다·바·자·사）其实也带轻微气流，真正与送气音拉开距离的是<b>音高</b>——松音词首<b>明显低平</b>（类似中文第三声前半段的低音区），而紧音与送气音词首<b>明显高平</b>（类似中文第一声高音）。</div><div className="air-legend"><div><span className="dot plain" /><strong>松音</strong><small>低音 · 放松</small></div><div><span className="dot tense" /><strong>紧音</strong><small>高音 · 喉部绷紧</small></div><div><span className="dot air" /><strong>送气音</strong><small>高音 · 强送气</small></div></div></div>
+          <div className="compare-right-col">
+            <div className="compare-list">{compareGroups.map((group, groupIndex) => <article className="compare-row" key={group.title}><div><h3 lang="ko">{group.title}</h3><p>{group.cue}</p></div><div className="compare-buttons">{group.items.map((item, index) => <button id={groupIndex === 0 && index === 0 ? "compare-first-sound" : undefined} type="button" key={item.text} className={`tone-${index}`} onClick={() => void playSoundWithNotice(item.text)}><strong lang="ko">{item.text}</strong><span>{item.label}</span><i aria-hidden="true">▶</i></button>)}</div></article>)}</div>
+            <ConsonantContrastLab ref={consonantContrastRef} visible={scene === "compare"} onPrepare={prepareReferenceActivity} playSample={playSound} speed={audioSpeed} onSpeedChange={changeAudioSpeed} autoAdvanceMs={autoAdvanceMs} />
+          </div>
         </section>
       </main>
 

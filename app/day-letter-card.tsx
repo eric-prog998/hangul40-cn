@@ -5,12 +5,14 @@ import { COMPOUND_VOWELS, imeOwnsPanelKey, koreanKeyInput, koreanKeyLabel } from
 import { dayAudioPath, dayHearingOptions, type DayCard } from "./day-letters";
 import { decomposeHangulSyllable } from "./learning-logic";
 import type { DayAction, DayAnswer, DayAttempt } from "./my-day-state";
+import KoreanKeyboard from "./korean-keyboard";
+import { JAMO_HINTS } from "./hangul-mnemonics";
 
-type Props = { card: DayCard; attempt?: DayAttempt; onEvidence: (action:DayAction) => void;
+type Props = { card: DayCard; attempt?: DayAttempt; firstTime?: boolean; onEvidence: (action:DayAction) => void;
   onGrade: (result: "again"|"good") => boolean;
   onPlay: (path:string)=>Promise<boolean>; onStop:()=>void; active:boolean };
 
-export default function DayLetterCard({card,attempt,onEvidence,onGrade,onPlay,onStop,active}: Props) {
+export default function DayLetterCard({card,attempt,firstTime = false,onEvidence,onGrade,onPlay,onStop,active}: Props) {
   const panel = useRef<HTMLDivElement>(null);
   const token = useRef(0);
   const inFlight = useRef<number | null>(null);
@@ -21,6 +23,8 @@ export default function DayLetterCard({card,attempt,onEvidence,onGrade,onPlay,on
   const [playing,setPlaying] = useState<number | null>(null);
   const [failed,setFailed] = useState(false);
   const [draft,setDraft] = useState("");
+  const [activeKey,setActiveKey] = useState("");
+  const [shifted,setShifted] = useState(false);
   const [message,setMessage] = useState("");
   const {char,skill,example} = card;
   const options = skill === "listen" ? dayHearingOptions(card) : [];
@@ -86,19 +90,30 @@ export default function DayLetterCard({card,attempt,onEvidence,onGrade,onPlay,on
       reveal(); return;
     }
     if (!revealed && skill === "keys") {
-      if (event.key === "Backspace") { event.preventDefault(); setDraft(""); setMessage(""); return; }
+      if (event.key === "Backspace") { event.preventDefault(); setActiveKey(""); setDraft(""); setMessage(""); return; }
       const input = koreanKeyInput(event.key,event.code,event.shiftKey);
       if (input) {
-        event.preventDefault(); setDraft(previous => COMPOUND_VOWELS[previous + input.char] ?? input.char); setMessage("");
+        event.preventDefault(); setActiveKey(input.physical); setDraft(previous => COMPOUND_VOWELS[previous + input.char] ?? input.char); setMessage("");
       }
     }
   }
   const { initial,vowel } = decomposeHangulSyllable(example)!;
+  const targetHint = JAMO_HINTS[char];
   return <div ref={panel} tabIndex={-1} inert={!active} className="day-letter-card" data-testid="day-letter-card" data-skill={skill} onKeyDown={onKey} aria-label="日课字母练习">
-    <p className="day-letter-note">{skill === "read" ? "看字能读 · 先自己读，不用输入" : skill === "listen" ? "听音能认 · 不显示罗马字提示" : "键盘能打 · Mac 韩文双拼键位"}</p>
-    <h3>{skill === "read" ? "这个音节，你会怎么读？" : skill === "listen" ? "听一个音节，选出它的写法。" : "在键盘上输入这个字母。"}</h3>
+    <p className="day-letter-note">{skill === "read" ? (firstTime ? "首次认读 · 先看发音要领，试读后再听示范" : "看字能读 · 先自己读，不用输入") : skill === "listen" ? "听音能认 · 不显示罗马字提示" : "键盘能打 · 双拼键位或触屏键盘"}</p>
+    <h3>{skill === "read" ? (firstTime ? "新见字母：先看拼合与口型，再读出声。" : "这个音节，你会怎么读？") : skill === "listen" ? "听一个音节，选出它的写法。" : "在键盘上输入这个字母。"}</h3>
     <div className="day-letter-prompt" data-testid="day-letter-prompt">{skill === "listen" ? (revealed ? <strong lang="ko">{example}</strong> : "先听，再选") : <strong lang="ko">{skill === "read" ? example : char}</strong>}</div>
-    {skill === "read" && !revealed && <p>先读出声。准备好后按空格听示范，或按 Enter 看拆解。</p>}
+    {skill === "read" && !revealed && (
+      firstTime && targetHint ? (
+        <div className="day-first-guide">
+          <strong>首次见 <span lang="ko">{char}</span>（{targetHint.group}）</strong>
+          <p>字块由 <b lang="ko">{initial}</b>{initial === "ㅇ" ? "（开头静音占位）" : ""} + <b lang="ko">{vowel}</b> 拼成。{targetHint.cue}</p>
+          <small>字形记忆：{targetHint.shapeTip}。先试读一声，再按空格听示范或按 Enter 核对；隔日再见时会隐藏提示考回忆。</small>
+        </div>
+      ) : (
+        <p>先读出声。准备好后按空格听示范，或按 Enter 看拆解。</p>
+      )
+    )}
     {skill === "keys" && !revealed && <div>
       <label>你的输入 <input data-testid="day-letter-input" autoComplete="off" spellCheck={false} lang="ko" value={draft}
         onChange={event => setDraft(event.target.value.slice(0,24))} onCompositionStart={() => { composing.current = true; }}
@@ -114,12 +129,30 @@ export default function DayLetterCard({card,attempt,onEvidence,onGrade,onPlay,on
             const input = koreanKeyInput(event.key, event.code, event.shiftKey);
             if (input) {
               event.preventDefault(); event.stopPropagation();
+              setActiveKey(input.physical);
               setDraft(previous => COMPOUND_VOWELS[previous + input.char] ?? input.char);
               setMessage("");
             }
           }
         }} /></label>
-      <p>直接按双拼键位，或按 Tab 使用韩文输入法。Enter 核对；留空按 Enter 看键位，这张记「再练」。</p>
+      <p>电脑可直接按英文双拼键位；手机或未装韩语输入法可展开下方键位表点按。Enter 核对，留空按 Enter 看键位。</p>
+      <KoreanKeyboard
+        activeKey={activeKey}
+        shifted={shifted}
+        onKey={(picked, physical) => {
+          setShifted(false);
+          setActiveKey(physical);
+          setDraft(previous => COMPOUND_VOWELS[previous + picked] ?? picked);
+          setMessage("");
+        }}
+        onShift={() => setShifted(value => !value)}
+        onClear={() => {
+          setShifted(false);
+          setActiveKey("");
+          setDraft("");
+          setMessage("");
+        }}
+      />
     </div>}
     {skill === "listen" && !revealed && <div className="day-letter-actions" role="group" aria-label="选择听到的音节">
       {options.map((value,i) => <button type="button" key={value} disabled={!heard} onClick={()=>reveal(value)}><kbd>{i+1}</kbd> <span lang="ko">{value}</span></button>)}
@@ -132,7 +165,7 @@ export default function DayLetterCard({card,attempt,onEvidence,onGrade,onPlay,on
     {revealed && <div className="day-letter-feedback" data-testid="day-letter-feedback">
       {skill === "keys" ? <p>{canGradeGood ? "键位输入正确。" : answer === "incorrect" ? "这次输入与目标不同。" : "这次先看键位。"} <span lang="ko">{char}</span> 的双拼键位：<kbd>{koreanKeyLabel(char)}</kbd>（示范音节：<span lang="ko">{initial} + {vowel} = {example}</span>）。</p> :
        <p>{skill === "listen" ? (canGradeGood ? "听辨正确。" : "这次先核对，留到以后再听。") : "核对你的读音："}
-        <strong lang="ko">{initial} + {vowel} = {example}</strong>。{initial === "ㅇ" ? "这里的 ㅇ 作初声不发音；你听到的是元音。" : "示范是整个音节，不是辅音名称或单独起音。"}
+        <strong lang="ko">{initial} + {vowel} = {example}</strong>。{initial === "ㅇ" ? "这里的 ㅇ 作初声不发音；你听到的是元音。" : "示范是整个音节，不是辅音名称或单独起音。"}{targetHint ? ` ${targetHint.cue}` : ""}
        </p>}
       <div className="day-letter-actions">
         <button type="button" data-testid="day-letter-again" onClick={()=>grade("again")}><kbd>1</kbd> 再练</button>

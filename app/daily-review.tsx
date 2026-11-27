@@ -4,6 +4,8 @@ import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo,
 import { isImeConfirmation, keyboardShortcutKey } from "./keyboard-logic";
 import { createDailyReviewQueue, type ReviewRating, type ReviewRecords } from "./review-logic";
 import { compareRecall } from "./recall-logic";
+import { PHRASE_STUDY_NOTES } from "./phrase-study-notes";
+import ImeSetupGuide from "./ime-setup-guide";
 import "./daily-review.css";
 
 export type DailyReviewHandle = { stop: () => void };
@@ -237,12 +239,17 @@ const DailyReview = memo(forwardRef<DailyReviewHandle, DailyReviewProps>(functio
           {typing ? <div className="daily-review-input-box">
             <label htmlFor="daily-review-input">输入你想起的韩文</label>
             <input id="daily-review-input" ref={inputRef} lang="ko" value={draft.key === currentKey ? draft.text : ""} maxLength={200} autoComplete="off" autoCapitalize="off" spellCheck={false} aria-describedby="daily-review-input-help" onChange={event => setDraft({ key: currentKey, text: event.target.value })} onCompositionStart={() => { composing.current = true; }} onCompositionEnd={() => { composing.current = false; }} onBlur={() => { composing.current = false; heldRatingCode.current = null; }} onKeyDown={handleInputKey} onKeyUp={event => { if (event.code === heldRatingCode.current) heldRatingCode.current = null; }} />
-            <p id="daily-review-input-help">请切换系统韩文输入法。Enter 对照参考答案；输入法正在组字时，Enter 只确认组字。Esc 返回本区快捷键。输入只留在本页，不保存或上传。</p>
+            <p id="daily-review-input-help">请切换系统韩语输入法（두벌식）。Enter 对照参考答案；输入法正在组字时，Enter 只确认组字。Esc 返回本区快捷键。输入只留在本页，不保存或上传。</p>
+            <ImeSetupGuide />
             <button type="button" className="daily-review-check" onClick={checkDraft}>对照参考答案 <kbd>Enter</kbd></button>
           </div> : <button type="button" className="daily-review-type" onClick={startTyping}>用键盘试着输入 <kbd>T</kbd></button>}
           <button type="button" className="daily-review-reveal" onClick={reveal}>显示韩语答案 <kbd>Enter</kbd></button></div> : <div className="daily-review-answer">
           {checked?.key === currentKey && <div className="daily-review-comparison" role="status"><p>你输入的：<strong lang="ko">{checked.text}</strong></p><p>{checked.kind === "match" ? "与本卡参考写法一致。仍请自己评价是否真正想起来了。" : checked.kind === "format" ? "文字相同，空格或句末标点不同，请对照参考写法。" : "与本卡参考写法不同，不代表你的韩语表达一定错误；这里不判断其他译法，请对照后自行评价。"}</p></div>}
           <p className="daily-review-korean" lang="ko">{current.korean}</p>
+          {PHRASE_STUDY_NOTES[current.id] && <div className="daily-review-study-tip">
+            {PHRASE_STUDY_NOTES[current.id].actualReading && <p><strong>实际读音：</strong><span lang="ko">[{PHRASE_STUDY_NOTES[current.id].actualReading}]</span> · {PHRASE_STUDY_NOTES[current.id].soundNote}</p>}
+            <p><strong>{PHRASE_STUDY_NOTES[current.id].originBadge}：</strong>{PHRASE_STUDY_NOTES[current.id].grammarNote ?? PHRASE_STUDY_NOTES[current.id].originNote}</p>
+          </div>}
           <button type="button" className="daily-review-listen" onClick={() => void listen()} aria-label={`播放复习示范：${current.korean}`}>{playing ? "正在播放 · 再听一次" : "▶ 听完整词句"}<span><kbd>空格</kbd> / <kbd>F8</kbd></span></button>
           <button type="button" className="daily-review-retry" onClick={retryWriting}>遮住答案，再写一次 <kbd>R</kbd></button>
           <div className="daily-review-rating" role="group" aria-label="这次是否想起韩语"><button type="button" onClick={() => rate("again")}><kbd>1</kbd><span><strong>忘了</strong><small>明天再见，不用着急</small></span></button><button type="button" onClick={() => rate("remembered")}><kbd>2</kbd><span><strong>想起来了</strong><small>按记忆排期再次复习</small></span></button></div>

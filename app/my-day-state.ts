@@ -117,3 +117,37 @@ export function gradeDialogue(b: Notebook, result: Rating): Notebook {
     : { ...m, day: s.day, result, ...(step === "recall" ? { lastRecall: s.day } : {}) });
   return { ...b, conversations, session: step === "recall" ? { ...s, recalled: result } : step === "extra" ? { ...s, extra: null } : { ...s, done: result } };
 }
+
+function sessionProgressWeight(s: Session) {
+  return s.marks.length + (s.recalled !== null ? 10 : 0) + (s.done !== null ? 20 : 0);
+}
+
+export function mergeNotebooks(current: Notebook, incoming: Notebook): Notebook {
+  const history: DayHistory = { ...current.history };
+  for (const [key, entry] of Object.entries(incoming.history)) {
+    const existing = history[key];
+    if (!existing || entry.stage > existing.stage || (entry.stage === existing.stage && entry.day > existing.day)) {
+      history[key] = entry;
+    }
+  }
+  const conversations = current.conversations.map((left, index) => {
+    const right = incoming.conversations[index];
+    if (!left) return right;
+    if (!right) return left;
+    const newer = right.day > left.day || (right.day === left.day && right.result === "good" && left.result !== "good") ? right : left;
+    const latestRecall = [left.lastRecall, right.lastRecall]
+      .filter((d): d is string => typeof d === "string" && d <= newer.day)
+      .sort()
+      .at(-1);
+    return latestRecall ? { day: newer.day, result: newer.result, lastRecall: latestRecall } : { day: newer.day, result: newer.result };
+  });
+  let session = current.session;
+  if (!session) session = incoming.session;
+  else if (incoming.session) {
+    if (incoming.session.day > session.day
+      || (incoming.session.day === session.day && sessionProgressWeight(incoming.session) > sessionProgressWeight(session))) {
+      session = incoming.session;
+    }
+  }
+  return readBook(JSON.stringify({ version: 1, history, conversations, session }));
+}

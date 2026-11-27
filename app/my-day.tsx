@@ -8,7 +8,9 @@ import { beginDay, currentStep, dayAttemptKey, emptyBook, gradeDialogue, gradeLe
 import "./my-day.css";
 
 export type DayBadge = "new" | "started" | "finished";
+export type DaySkillSummary = ReturnType<typeof daySkillTotals>;
 type Props = { visible: boolean; active: boolean; day: string; legacy: readonly string[]; onBadge: (b: DayBadge) => void;
+  onSkills?: (totals: DaySkillSummary) => void;
   onHome: () => void; onPlay: (path: string) => Promise<boolean>; onStop: () => void };
 const phases = ["温故", "读音", "接话", "收尾"] as const;
 type DaySnapshot = { book: Notebook | null; message: string };
@@ -40,6 +42,9 @@ function createDayStore() {
   }
   function sync(e: StorageEvent) {
     if ((e.key === MY_DAY_KEY || e.key === null) && e.storageArea === localStorage) refresh();
+  }
+  function syncImported() {
+    refresh();
   }
   function save(previous: Notebook, next: Notebook): boolean {
     if (snapshot.book !== previous || previous === next) return false;
@@ -74,17 +79,23 @@ function createDayStore() {
     getSnapshot: () => snapshot,
     subscribe(notify: () => void) {
       listeners.add(notify);
-      if (listeners.size === 1) window.addEventListener("storage", sync);
+      if (listeners.size === 1) {
+        window.addEventListener("storage", sync);
+        window.addEventListener("hangul-my-day-imported", syncImported);
+      }
       refresh();
       return () => {
         listeners.delete(notify);
-        if (!listeners.size) window.removeEventListener("storage", sync);
+        if (!listeners.size) {
+          window.removeEventListener("storage", sync);
+          window.removeEventListener("hangul-my-day-imported", syncImported);
+        }
       };
     },
   };
 }
 
-export default memo(function MyDay({visible, active, day, legacy, onBadge, onHome, onPlay, onStop}: Props) {
+export default memo(function MyDay({visible, active, day, legacy, onBadge, onSkills, onHome, onPlay, onStop}: Props) {
   const [store] = useState(createDayStore);
   const { book, message } = useSyncExternalStore(store.subscribe, store.getSnapshot, serverSnapshot);
   const skillTotals = useMemo(() => book ? daySkillTotals(book.history) : [], [book]);
@@ -96,6 +107,7 @@ export default memo(function MyDay({visible, active, day, legacy, onBadge, onHom
   const s = book?.session;
   const step = s ? currentStep(s) : null;
   useEffect(() => { onBadge(s && s.day === day ? (s.done ? "finished" : "started") : "new"); }, [s, day, onBadge]);
+  useEffect(() => { if (book && onSkills) onSkills(skillTotals); }, [book, onSkills, skillTotals]);
   useEffect(() => { if (visible && active && step === "finish") finish.current?.focus({preventScroll:true}); }, [visible, active, step]);
   if (!visible) return null;
   if (s && day && day < s.day) return <div className="my-day-layout" data-testid="day-clock-guard">
@@ -111,6 +123,8 @@ export default memo(function MyDay({visible, active, day, legacy, onBadge, onHom
   const sceneIndex = step === "extra" ? s.extra! : step === "recall" ? s.recall! : s.scene;
   const reads = s.cards.filter((card, i) => card.skill === "read" && s.marks[i]?.result === "good" && !s.marks[i].replayed).map(c => c.char);
   const saveIfCurrent = (next: () => Notebook) => { if (active) store.save(book, next()); };
+  const currentCard = step === "letters" ? s.cards[index] : null;
+  const isFirstTimeCard = currentCard ? !book.history[`${currentCard.char}:${currentCard.skill}`] && !legacy.includes(currentCard.char) : false;
   return <div className="my-day-layout">
     <div className="my-day-main">
       <header className="my-day-heading"><div className="study-kicker"><span aria-hidden="true"/>我的韩语日课 <small>{s.day.slice(5).replace("-", " / ")}</small></div>
@@ -119,7 +133,7 @@ export default memo(function MyDay({visible, active, day, legacy, onBadge, onHom
       {message && <p role="status" className="day-notice">{message}</p>}
       <div className="day-surface">
         <div className="day-eyebrow">{step === "letters" ? (index === 0 ? "01 · 热身与温故" : "02 · 40 音分项练习") : step === "recall" ? "03 · 已学场景 / 先用中文提示回忆" : step === "finish" ? "04 · 今日学习小结" : "03 · 生活接话"}<span>{step === "letters" ? (index+1)+" / "+s.cards.length : step === "finish" ? "已完成" : SCENE_TITLES[sceneIndex]}</span></div>
-        {step === "letters" && cardKey ? <DayLetterCard key={cardKey} card={s.cards[index]} attempt={s.attempt} active={active} onPlay={onPlay} onStop={onStop}
+        {step === "letters" && cardKey && currentCard ? <DayLetterCard key={cardKey} card={currentCard} attempt={s.attempt} firstTime={isFirstTimeCard} active={active} onPlay={onPlay} onStop={onStop}
           onEvidence={action => { if (active) store.changeCard(cardKey, b => noteDayAttempt(b,cardKey,action)); }}
           onGrade={result => active && store.changeCard(cardKey,b => b.session?.attempt?.answer ? gradeLetter(b,result,false) : b)}/>
         : step !== "finish" ? <DayDialogue key={s.day+":"+step+":"+sceneIndex} sceneIndex={sceneIndex} recall={step === "recall"} active={active} onPlay={onPlay} onStop={onStop} onDone={result => saveIfCurrent(() => gradeDialogue(book,result))}/>
